@@ -23,7 +23,7 @@ export default async function AccountsPage() {
     const role = u.roleId as unknown as { _id: unknown; key: string; name: string } | null
     return {
       id: String(u._id),
-      fullname: u.fullname,
+      fullname: u.fullname || u.email,
       email: u.email,
       roleId: role ? String(role._id) : '',
       roleName: role?.name ?? 'Unknown',
@@ -35,7 +35,7 @@ export default async function AccountsPage() {
     const role = u.roleId as unknown as { key: string; name: string } | null
     return {
       id: String(u._id),
-      fullname: u.fullname,
+      fullname: u.fullname || u.email,
       email: u.email,
       roleName: role?.name ?? 'Unknown',
       requestedAt: new Date(u.createdAt as Date).toISOString(),

@@ -30,8 +30,8 @@ export function timeAgo(date: Date | string) {
   return 'just now'
 }
 
-export function initialsFor(name: string) {
-  const parts = name.trim().split(/\s+/)
+export function initialsFor(name: string | null | undefined) {
+  const parts = (name ?? '').trim().split(/\s+/)
   return parts
     .slice(0, 2)
     .map((p) => p[0]?.toUpperCase())
