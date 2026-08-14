@@ -6,6 +6,8 @@ import { TicketsTable } from '@/components/tickets/TicketsTable'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { listTickets, countTicketsByStatus } from '@/server/services/ticket.service'
 import { TicketPriorityModel } from '@/server/db/models/ticket-priority.model'
+import { TicketStatusModel } from '@/server/db/models/ticket-status.model'
+import { UserModel } from '@/server/db/models/user.model'
 import { dbConnect } from '@/server/db/connect'
 import { toTicketListItem } from '@/lib/ticket-view'
 import { cn } from '@/lib/utils'
@@ -21,7 +23,9 @@ export default async function TicketsPage({
   const sp = await searchParams
   const get = (key: string) => (Array.isArray(sp[key]) ? sp[key][0] : sp[key])
 
-  const { forcedAssigneeId } = await requireTicketScope()
+  const { ability, forcedAssigneeId } = await requireTicketScope()
+  const canUpdate = ability.can('update', 'ticket')
+  const canAssign = ability.can('assign', 'ticket')
 
   const page = Number(get('page') ?? '1') || 1
   const params = {
@@ -40,10 +44,14 @@ export default async function TicketsPage({
   }
 
   await dbConnect()
-  const [{ items, total }, statusCounts, priorities] = await Promise.all([
+  const [{ items, total }, statusCounts, priorities, statuses, users] = await Promise.all([
     listTickets(params),
     countTicketsByStatus(forcedAssigneeId),
     TicketPriorityModel.find().sort({ order: 1 }).lean(),
+    TicketStatusModel.find().sort({ order: 1 }).lean(),
+    canAssign
+      ? UserModel.find({ isActive: true, deletedAt: null }).select('fullname email').lean()
+      : Promise.resolve([]),
   ])
 
   const tickets = items.map(toTicketListItem)
@@ -76,7 +84,16 @@ export default async function TicketsPage({
         />
 
         <Card>
-          <TicketsTable tickets={tickets} />
+          <TicketsTable
+            tickets={tickets}
+            statuses={statuses.map((s) => ({ id: String(s._id), name: s.name, color: s.color }))}
+            users={users.map((u) => ({
+              id: String(u._id),
+              name: u.fullname || u.email || 'Unknown',
+            }))}
+            canUpdate={canUpdate}
+            canAssign={canAssign}
+          />
 
           <div className="flex items-center justify-between border-t border-border px-5 py-3.5">
             <p className="text-xs text-muted">

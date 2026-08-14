@@ -7,6 +7,7 @@ export type TicketListItemView = {
   preview: string
   priority: { name: string; slug: string; color: string } | null
   status: { name: string; slug: string; color: string; isResolved: boolean } | null
+  statusId: string | null
   type: { name: string; slug: string } | null
   assignee: PersonView
   owner: PersonView
@@ -135,6 +136,7 @@ export function toTicketListItem(t: any): TicketListItemView {
           isResolved: !!t.statusId.isResolved,
         }
       : null,
+    statusId: t.statusId ? String(t.statusId._id) : null,
     type: t.typeId ? { name: t.typeId.name, slug: t.typeId.slug } : null,
     assignee: toPerson(t.assigneeId),
     owner: toPerson(t.ownerId),
