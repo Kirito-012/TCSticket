@@ -61,10 +61,14 @@ export function TicketsTable({
       <table className="w-full min-w-[900px] border-collapse text-sm">
         <thead>
           <tr className="border-b border-border text-left text-xs text-muted">
-            {table.getHeaderGroups()[0].headers.map((header) => (
+            {table.getHeaderGroups()[0].headers.map((header, i) => (
               <th
                 key={header.id}
-                className={cn('px-2 py-3 font-medium', header.id === 'updatedAt' && 'text-right')}
+                className={cn(
+                  'py-3 font-medium',
+                  i === 0 ? 'pl-5 pr-2' : 'px-2',
+                  header.id === 'updatedAt' && 'pr-5 text-right',
+                )}
               >
                 {flexRender(header.column.columnDef.header, header.getContext())}
               </th>
@@ -74,7 +78,7 @@ export function TicketsTable({
         <tbody className="divide-y divide-border">
           {tickets.map((t) => (
             <tr key={t.id} className="group transition-colors hover:bg-white/[0.025]">
-              <td className="px-2 py-3.5 font-mono text-xs text-muted">#{t.number}</td>
+              <td className="py-3.5 pl-5 pr-2 font-mono text-xs text-muted">#{t.number}</td>
               <td className="px-2 py-3.5">
                 <Link href={`/tickets/${t.number}`} className="block max-w-md">
                   <p className="truncate text-sm font-medium text-foreground transition-colors group-hover:text-accent-strong">
@@ -112,7 +116,9 @@ export function TicketsTable({
                   disabled={!canAssign}
                 />
               </td>
-              <td className="px-2 py-3.5 text-right text-xs text-muted">{timeAgo(t.updatedAt)}</td>
+              <td className="py-3.5 pl-2 pr-5 text-right text-xs text-muted">
+                {timeAgo(t.updatedAt)}
+              </td>
             </tr>
           ))}
         </tbody>
