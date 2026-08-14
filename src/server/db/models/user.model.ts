@@ -9,6 +9,12 @@ const userSchema = new Schema(
     avatarUrl: { type: String },
     roleId: { type: Schema.Types.ObjectId, ref: 'Role', required: true },
     isActive: { type: Boolean, default: true },
+    // Self-registered accounts start 'pending' and can't log in until an Admin approves them
+    // (see user.service.ts registerPendingUser/approveUser/rejectUser). Accounts created
+    // directly via the Accounts page default to 'active' — no approval step for those.
+    // Existing documents predating this field have no `status` at all; every check treats a
+    // missing status as 'active' for backward compatibility (see auth.ts, session helpers).
+    status: { type: String, enum: ['pending', 'active', 'rejected'], default: 'active' },
     lastLoginAt: { type: Date },
     deletedAt: { type: Date, default: null },
   },

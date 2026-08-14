@@ -35,6 +35,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const valid = await bcrypt.compare(parsed.data.password, user.passwordHash)
         if (!valid) return null
 
+        // The authoritative block on pending/rejected self-registrations — the friendlier
+        // "awaiting approval" message is a separate pre-check in the login Server Action
+        // (src/server/actions/auth.actions.ts); this is what actually stops the sign-in
+        // regardless of how the credentials endpoint is reached. Missing `status` (accounts
+        // created before this field existed) is treated as 'active'.
+        if (user.status && user.status !== 'active') return null
+
         const role = await RoleModel.findById(user.roleId).lean()
         await UserModel.updateOne({ _id: user._id }, { lastLoginAt: new Date() })
 

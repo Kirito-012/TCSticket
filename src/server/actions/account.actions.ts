@@ -45,3 +45,15 @@ export async function setUserActiveAction(userId: string, isActive: boolean) {
   await userService.setUserActive(userId, isActive)
   revalidatePath('/accounts')
 }
+
+export async function approveUserAction(userId: string) {
+  await requireAbility({ action: 'update', subject: 'account' })
+  await userService.approveUser(userId)
+  revalidatePath('/accounts')
+}
+
+export async function rejectUserAction(userId: string) {
+  await requireAbility({ action: 'update', subject: 'account' })
+  await userService.rejectUser(userId)
+  revalidatePath('/accounts')
+}

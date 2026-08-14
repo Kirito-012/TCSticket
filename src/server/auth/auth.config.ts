@@ -14,7 +14,7 @@ export const authConfig = {
     authorized({ auth, request }) {
       const isLoggedIn = !!auth?.user
       const { pathname } = request.nextUrl
-      const isAuthPage = pathname === '/login'
+      const isAuthPage = pathname === '/login' || pathname === '/register'
 
       if (isAuthPage) {
         if (isLoggedIn) return Response.redirect(new URL('/dashboard', request.url))

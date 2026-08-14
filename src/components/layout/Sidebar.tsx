@@ -24,7 +24,7 @@ type SidebarUser = {
   roleName: string
 }
 
-function buildNav(ticketCount: number) {
+function buildNav(ticketCount: number, pendingAccountsCount: number) {
   return [
     {
       section: 'Workspace',
@@ -37,19 +37,33 @@ function buildNav(ticketCount: number) {
     {
       section: 'Organization',
       items: [
-        { label: 'Accounts', href: '/accounts', icon: Users },
+        {
+          label: 'Accounts',
+          href: '/accounts',
+          icon: Users,
+          badge: pendingAccountsCount > 0 ? String(pendingAccountsCount) : undefined,
+          badgeWarning: pendingAccountsCount > 0,
+        },
         { label: 'Groups & Teams', href: '/groups', icon: Building2 },
       ],
     },
   ]
 }
 
-export function Sidebar({ user, ticketCount }: { user: SidebarUser; ticketCount: number }) {
+export function Sidebar({
+  user,
+  ticketCount,
+  pendingAccountsCount = 0,
+}: {
+  user: SidebarUser
+  ticketCount: number
+  pendingAccountsCount?: number
+}) {
   const pathname = usePathname()
   const { open, setOpen } = useSidebar()
   const displayName = user.name || user.email || 'Account'
   const person = { name: displayName, initials: initialsFor(displayName), color: '#10b981' }
-  const nav = buildNav(ticketCount)
+  const nav = buildNav(ticketCount, pendingAccountsCount)
 
   return (
     <>
@@ -117,9 +131,11 @@ export function Sidebar({ user, ticketCount }: { user: SidebarUser; ticketCount:
                         <span
                           className={cn(
                             'rounded-md px-1.5 py-0.5 text-[10px] font-semibold',
-                            isActive
-                              ? 'bg-accent/20 text-accent-strong'
-                              : 'bg-white/[0.06] text-muted',
+                            'badgeWarning' in item && item.badgeWarning
+                              ? 'bg-warning/20 text-warning'
+                              : isActive
+                                ? 'bg-accent/20 text-accent-strong'
+                                : 'bg-white/[0.06] text-muted',
                           )}
                         >
                           {item.badge}
