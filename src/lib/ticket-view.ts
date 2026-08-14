@@ -46,6 +46,7 @@ export type TicketDetailView = {
   statusId: string | null
   typeId: string | null
   assigneeId: string | null
+  assignee: PersonView
   owner: PersonView
   tags: { id: string; name: string; color: string }[]
   dueDate: string | null
@@ -64,6 +65,7 @@ export function toTicketDetailView(t: any): TicketDetailView {
     statusId: t.statusId ? String(t.statusId._id) : null,
     typeId: t.typeId ? String(t.typeId._id) : null,
     assigneeId: t.assigneeId ? String(t.assigneeId._id) : null,
+    assignee: toPerson(t.assigneeId),
     owner: toPerson(t.ownerId),
     tags: (t.tagIds ?? []).map((tag: { _id: unknown; name: string; color: string }) => ({
       id: String(tag._id),

@@ -3,16 +3,20 @@
 import { useState, useTransition } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Select } from '@/components/ui/Select'
+import { StatusSelect } from '@/components/tickets/StatusSelect'
+import { AssigneeDropdown } from '@/components/tickets/AssigneeDropdown'
 import { updateTicketFieldAction } from '@/server/actions/ticket.actions'
 import { timeAgo } from '@/lib/utils'
 
 type Option = { id: string; name: string }
+type ColoredOption = { id: string; name: string; color: string }
 type UserOption = { id: string; name: string }
+type PersonView = { id: string; name: string; initials: string } | null
 
 export function TicketDetailSidebar({
   ticketNumber,
   statusId,
-  assigneeId,
+  assignee,
   priorityId,
   typeId,
   dueDate,
@@ -25,18 +29,18 @@ export function TicketDetailSidebar({
 }: {
   ticketNumber: number
   statusId: string | null
-  assigneeId: string | null
+  assignee: PersonView
   priorityId: string | null
   typeId: string | null
   dueDate: string | null
-  statuses: Option[]
-  priorities: Option[]
+  statuses: ColoredOption[]
+  priorities: ColoredOption[]
   types: Option[]
   users: UserOption[]
   canUpdate: boolean
   canAssign: boolean
 }) {
-  const [values, setValues] = useState({ statusId, assigneeId, priorityId, typeId, dueDate })
+  const [values, setValues] = useState({ priorityId, typeId, dueDate })
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
@@ -62,25 +66,20 @@ export function TicketDetailSidebar({
       )}
 
       <Field label="Status">
-        <Select
-          value={values.statusId ?? ''}
+        <StatusSelect
+          ticketNumber={ticketNumber}
+          statusId={statusId}
+          statuses={statuses}
           disabled={!canUpdate}
-          onChange={(v) => update('statusId', v)}
-          size="sm"
-          options={statuses.map((s) => ({ value: s.id, label: s.name }))}
         />
       </Field>
 
       <Field label="Assignee">
-        <Select
-          value={values.assigneeId ?? ''}
+        <AssigneeDropdown
+          ticketNumber={ticketNumber}
+          assignee={assignee}
+          users={users}
           disabled={!canAssign}
-          onChange={(v) => update('assigneeId', v || null)}
-          size="sm"
-          options={[
-            { value: '', label: 'Unassigned' },
-            ...users.map((u) => ({ value: u.id, label: u.name })),
-          ]}
         />
       </Field>
 
@@ -89,8 +88,9 @@ export function TicketDetailSidebar({
           value={values.priorityId ?? ''}
           disabled={!canUpdate}
           onChange={(v) => update('priorityId', v)}
+          variant="pill"
           size="sm"
-          options={priorities.map((p) => ({ value: p.id, label: p.name }))}
+          options={priorities.map((p) => ({ value: p.id, label: p.name, color: p.color }))}
         />
       </Field>
 

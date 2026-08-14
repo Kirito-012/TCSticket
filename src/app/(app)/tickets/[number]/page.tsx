@@ -104,12 +104,20 @@ export default async function TicketDetailPage({
               <TicketDetailSidebar
                 ticketNumber={ticket.number}
                 statusId={ticket.statusId}
-                assigneeId={ticket.assigneeId}
+                assignee={ticket.assignee}
                 priorityId={ticket.priorityId}
                 typeId={ticket.typeId}
                 dueDate={ticket.dueDate}
-                statuses={statuses.map((s) => ({ id: String(s._id), name: s.name }))}
-                priorities={priorities.map((p) => ({ id: String(p._id), name: p.name }))}
+                statuses={statuses.map((s) => ({
+                  id: String(s._id),
+                  name: s.name,
+                  color: s.color,
+                }))}
+                priorities={priorities.map((p) => ({
+                  id: String(p._id),
+                  name: p.name,
+                  color: p.color,
+                }))}
                 types={types.map((t) => ({ id: String(t._id), name: t.name }))}
                 users={users.map((u) => ({ id: String(u._id), name: u.fullname }))}
                 canUpdate={canUpdate}
