@@ -3,6 +3,7 @@
 import { useMemo, useState, useActionState } from 'react'
 import { AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { Select } from '@/components/ui/Select'
 import { RichTextEditor } from '@/components/editor/RichTextEditor'
 import { createTicketAction, type ActionState } from '@/server/actions/ticket.actions'
 
@@ -81,19 +82,12 @@ export function NewTicketForm({
           <label htmlFor="typeId" className="mb-1.5 block text-xs font-medium text-muted-strong">
             Type
           </label>
-          <select
-            id="typeId"
+          <Select
             name="typeId"
             value={typeId}
-            onChange={(e) => handleTypeChange(e.target.value)}
-            className="h-10 w-full cursor-pointer rounded-lg border border-border-strong bg-white/[0.03] px-3 text-sm text-foreground outline-none transition-colors focus:border-accent/50 focus:bg-white/[0.05]"
-          >
-            {types.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </select>
+            onChange={handleTypeChange}
+            options={types.map((t) => ({ value: t.id, label: t.name }))}
+          />
         </div>
 
         <div>
@@ -103,19 +97,12 @@ export function NewTicketForm({
           >
             Priority
           </label>
-          <select
-            id="priorityId"
+          <Select
             name="priorityId"
             value={priorityId}
-            onChange={(e) => setPriorityId(e.target.value)}
-            className="h-10 w-full cursor-pointer rounded-lg border border-border-strong bg-white/[0.03] px-3 text-sm text-foreground outline-none transition-colors focus:border-accent/50 focus:bg-white/[0.05]"
-          >
-            {allowedPriorities.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
+            onChange={setPriorityId}
+            options={allowedPriorities.map((p) => ({ value: p.id, label: p.name }))}
+          />
         </div>
       </div>
 

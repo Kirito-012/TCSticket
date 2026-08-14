@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { Loader2 } from 'lucide-react'
+import { Select } from '@/components/ui/Select'
 import { updateTicketFieldAction } from '@/server/actions/ticket.actions'
 import { timeAgo } from '@/lib/utils'
 
@@ -61,64 +62,46 @@ export function TicketDetailSidebar({
       )}
 
       <Field label="Status">
-        <select
+        <Select
           value={values.statusId ?? ''}
           disabled={!canUpdate}
-          onChange={(e) => update('statusId', e.target.value)}
-          className="h-9 w-full cursor-pointer rounded-lg border border-border-strong bg-white/[0.03] px-2.5 text-sm text-foreground outline-none disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {statuses.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name}
-            </option>
-          ))}
-        </select>
+          onChange={(v) => update('statusId', v)}
+          size="sm"
+          options={statuses.map((s) => ({ value: s.id, label: s.name }))}
+        />
       </Field>
 
       <Field label="Assignee">
-        <select
+        <Select
           value={values.assigneeId ?? ''}
           disabled={!canAssign}
-          onChange={(e) => update('assigneeId', e.target.value || null)}
-          className="h-9 w-full cursor-pointer rounded-lg border border-border-strong bg-white/[0.03] px-2.5 text-sm text-foreground outline-none disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <option value="">Unassigned</option>
-          {users.map((u) => (
-            <option key={u.id} value={u.id}>
-              {u.name}
-            </option>
-          ))}
-        </select>
+          onChange={(v) => update('assigneeId', v || null)}
+          size="sm"
+          options={[
+            { value: '', label: 'Unassigned' },
+            ...users.map((u) => ({ value: u.id, label: u.name })),
+          ]}
+        />
       </Field>
 
       <Field label="Priority">
-        <select
+        <Select
           value={values.priorityId ?? ''}
           disabled={!canUpdate}
-          onChange={(e) => update('priorityId', e.target.value)}
-          className="h-9 w-full cursor-pointer rounded-lg border border-border-strong bg-white/[0.03] px-2.5 text-sm text-foreground outline-none disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {priorities.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
+          onChange={(v) => update('priorityId', v)}
+          size="sm"
+          options={priorities.map((p) => ({ value: p.id, label: p.name }))}
+        />
       </Field>
 
       <Field label="Type">
-        <select
+        <Select
           value={values.typeId ?? ''}
           disabled={!canUpdate}
-          onChange={(e) => update('typeId', e.target.value)}
-          className="h-9 w-full cursor-pointer rounded-lg border border-border-strong bg-white/[0.03] px-2.5 text-sm text-foreground outline-none disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {types.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.name}
-            </option>
-          ))}
-        </select>
+          onChange={(v) => update('typeId', v)}
+          size="sm"
+          options={types.map((t) => ({ value: t.id, label: t.name }))}
+        />
       </Field>
 
       <Field label="Due date">

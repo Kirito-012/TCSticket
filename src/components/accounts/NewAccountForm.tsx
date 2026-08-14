@@ -1,8 +1,9 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { Select } from '@/components/ui/Select'
 import { createAccountAction, type ActionState } from '@/server/actions/account.actions'
 
 type RoleOption = { id: string; name: string }
@@ -12,6 +13,7 @@ export function NewAccountForm({ roles }: { roles: RoleOption[] }) {
     createAccountAction,
     undefined,
   )
+  const [roleId, setRoleId] = useState(roles[0]?.id ?? '')
 
   return (
     <form action={formAction} className="space-y-5">
@@ -69,18 +71,12 @@ export function NewAccountForm({ roles }: { roles: RoleOption[] }) {
         <label htmlFor="roleId" className="mb-1.5 block text-xs font-medium text-muted-strong">
           Role
         </label>
-        <select
-          id="roleId"
+        <Select
           name="roleId"
-          defaultValue={roles[0]?.id ?? ''}
-          className="h-10 w-full cursor-pointer rounded-lg border border-border-strong bg-white/[0.03] px-3 text-sm text-foreground outline-none transition-colors focus:border-accent/50 focus:bg-white/[0.05]"
-        >
-          {roles.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.name}
-            </option>
-          ))}
-        </select>
+          value={roleId}
+          onChange={setRoleId}
+          options={roles.map((r) => ({ value: r.id, label: r.name }))}
+        />
       </div>
 
       <div className="flex items-center justify-end gap-3 border-t border-border pt-5">

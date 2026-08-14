@@ -4,6 +4,7 @@ import { useTransition } from 'react'
 import { updateUserRoleAction, setUserActiveAction } from '@/server/actions/account.actions'
 import { cn, initialsFor, timeAgo } from '@/lib/utils'
 import { Avatar } from '@/components/ui/Avatar'
+import { Select } from '@/components/ui/Select'
 
 export type AccountRow = {
   id: string
@@ -83,18 +84,15 @@ export function AccountsTable({
               </td>
               <td className="px-3 py-3.5">
                 {canEdit ? (
-                  <select
-                    value={u.roleId}
-                    disabled={pending}
-                    onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                    className="h-8 cursor-pointer rounded-lg border border-border-strong bg-white/[0.03] px-2 text-xs text-foreground outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {roles.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.name}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="w-32">
+                    <Select
+                      value={u.roleId}
+                      disabled={pending}
+                      onChange={(roleId) => handleRoleChange(u.id, roleId)}
+                      size="sm"
+                      options={roles.map((r) => ({ value: r.id, label: r.name }))}
+                    />
+                  </div>
                 ) : (
                   <span
                     className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium"

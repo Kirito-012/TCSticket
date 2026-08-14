@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
-import { Search, ChevronDown } from 'lucide-react'
+import { Search } from 'lucide-react'
+import { Select } from '@/components/ui/Select'
 import { cn } from '@/lib/utils'
 
 type StatusCount = { slug: string; name: string; count: number }
@@ -108,37 +109,34 @@ export function TicketsToolbar({
           />
         </form>
 
-        <div className="relative">
-          <select
+        <div className="w-40">
+          <Select
+            variant="ghost"
             value={activePriority}
-            onChange={(e) => pushParams({ priority: e.target.value || null })}
-            className="h-9 cursor-pointer appearance-none rounded-lg border border-border bg-white/[0.02] pl-3 pr-8 text-sm font-medium text-muted-strong outline-none transition-colors hover:bg-white/[0.06] hover:text-foreground focus:border-accent/40"
-          >
-            <option value="">All priorities</option>
-            {priorities.map((p) => (
-              <option key={p.slug} value={p.slug}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
+            onChange={(v) => pushParams({ priority: v || null })}
+            placeholder="All priorities"
+            options={[
+              { value: '', label: 'All priorities' },
+              ...priorities.map((p) => ({ value: p.slug, label: p.name })),
+            ]}
+          />
         </div>
 
-        <div className="relative">
-          <select
+        <div className="w-56">
+          <Select
+            variant="ghost"
             value={`${activeSort}:${activeDir}`}
-            onChange={(e) => {
-              const [sort, dir] = e.target.value.split(':')
+            onChange={(v) => {
+              const [sort, dir] = v.split(':')
               pushParams({ sort, dir })
             }}
-            className="h-9 cursor-pointer appearance-none rounded-lg border border-border bg-white/[0.02] pl-3 pr-8 text-sm font-medium text-muted-strong outline-none transition-colors hover:bg-white/[0.06] hover:text-foreground focus:border-accent/40"
-          >
-            <option value="lastActivityAt:desc">Sort: Last updated</option>
-            <option value="createdAt:desc">Sort: Newest</option>
-            <option value="createdAt:asc">Sort: Oldest</option>
-            <option value="number:desc">Sort: Ticket # (high–low)</option>
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
+            options={[
+              { value: 'lastActivityAt:desc', label: 'Sort: Last updated' },
+              { value: 'createdAt:desc', label: 'Sort: Newest' },
+              { value: 'createdAt:asc', label: 'Sort: Oldest' },
+              { value: 'number:desc', label: 'Sort: Ticket # (high–low)' },
+            ]}
+          />
         </div>
       </div>
     </div>

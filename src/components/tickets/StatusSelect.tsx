@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { Select } from '@/components/ui/Select'
 import { updateTicketFieldAction } from '@/server/actions/ticket.actions'
 
 type StatusOption = { id: string; name: string; color: string }
@@ -48,22 +49,13 @@ export function StatusSelect({
   }
 
   return (
-    <select
+    <Select
       value={value ?? ''}
+      onChange={onChange}
       disabled={pending}
-      onClick={(e) => e.stopPropagation()}
-      onChange={(e) => onChange(e.target.value)}
-      className="h-7 cursor-pointer rounded-full border-0 py-0 pl-2 pr-6 text-xs font-medium outline-none ring-1 ring-inset ring-white/10 disabled:cursor-wait disabled:opacity-60"
-      style={{
-        backgroundColor: current ? `${current.color}22` : undefined,
-        color: current?.color,
-      }}
-    >
-      {statuses.map((s) => (
-        <option key={s.id} value={s.id} className="bg-background-elevated text-foreground">
-          {s.name}
-        </option>
-      ))}
-    </select>
+      variant="pill"
+      size="sm"
+      options={statuses.map((s) => ({ value: s.id, label: s.name, color: s.color }))}
+    />
   )
 }
