@@ -2,11 +2,15 @@ import { Topbar } from '@/components/layout/Topbar'
 import { Card } from '@/components/ui/Card'
 import { AccountsTable } from '@/components/accounts/AccountsTable'
 import { PendingApprovals } from '@/components/accounts/PendingApprovals'
+import { CurrentUserCard } from '@/components/accounts/CurrentUserCard'
 import { requireAbility } from '@/server/auth/session'
 import * as userService from '@/server/services/user.service'
 
 export default async function AccountsPage() {
-  const { ability } = await requireAbility({ action: 'read', subject: 'account' })
+  const { user: sessionUser, ability } = await requireAbility({
+    action: 'read',
+    subject: 'account',
+  })
   const canEdit = ability.can('update', 'account')
 
   const [usersRaw, pendingRaw, rolesRaw] = await Promise.all([
@@ -39,6 +43,9 @@ export default async function AccountsPage() {
   })
   const roles = rolesRaw.map((r) => ({ id: String(r._id), name: r.name }))
 
+  const currentUser = users.find((u) => u.id === sessionUser.id)
+  const otherUsers = users.filter((u) => u.id !== sessionUser.id)
+
   return (
     <>
       <Topbar
@@ -48,10 +55,20 @@ export default async function AccountsPage() {
       />
 
       <main className="flex-1 px-8 py-6 animate-fade-in">
+        {currentUser && (
+          <CurrentUserCard
+            fullname={currentUser.fullname}
+            email={currentUser.email}
+            roleName={currentUser.roleName}
+            isActive={currentUser.isActive}
+            createdAt={currentUser.createdAt}
+          />
+        )}
+
         {canEdit && <PendingApprovals users={pending} />}
 
         <Card>
-          <AccountsTable users={users} roles={roles} canEdit={canEdit} />
+          <AccountsTable users={otherUsers} roles={roles} canEdit={canEdit} />
         </Card>
       </main>
     </>

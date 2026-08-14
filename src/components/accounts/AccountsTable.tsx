@@ -18,7 +18,7 @@ export type AccountRow = {
 
 export type RoleOption = { id: string; name: string }
 
-const ROLE_COLOR: Record<string, string> = {
+export const ROLE_COLOR: Record<string, string> = {
   Admin: '#818cf8',
   Manager: '#f59e0b',
   Agent: '#10b981',
