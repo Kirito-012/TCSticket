@@ -5,7 +5,7 @@ import { DynamicBadge, Tag } from '@/components/ui/Badge'
 import { CommentThread } from '@/components/tickets/CommentThread'
 import { ActivityTimeline } from '@/components/tickets/ActivityTimeline'
 import { TicketDetailSidebar } from '@/components/tickets/TicketDetailSidebar'
-import { requireAbility } from '@/server/auth/session'
+import { requireTicketScope } from '@/server/auth/session'
 import { dbConnect } from '@/server/db/connect'
 import * as ticketService from '@/server/services/ticket.service'
 import { TicketStatusModel } from '@/server/db/models/ticket-status.model'
@@ -23,11 +23,19 @@ export default async function TicketDetailPage({
   const number = Number(numberParam)
   if (!Number.isInteger(number)) notFound()
 
-  const { ability } = await requireAbility()
+  const { user, ability, forcedAssigneeId } = await requireTicketScope()
 
   await dbConnect()
   const ticketDoc = await ticketService.getTicketByNumber(number)
   if (!ticketDoc) notFound()
+
+  // Agent-scoped: a ticket not assigned to them doesn't exist as far as they're concerned —
+  // same as it not existing, not a "you're not allowed" page (avoids confirming it exists).
+  if (forcedAssigneeId) {
+    const assignee = (ticketDoc as { assigneeId?: { _id?: unknown } | null }).assigneeId
+    const assigneeId = assignee?._id ? String(assignee._id) : null
+    if (assigneeId !== user.id) notFound()
+  }
 
   const [commentsRaw, eventsRaw, statuses, priorities, types, users] = await Promise.all([
     ticketService.listComments(String(ticketDoc._id)),

@@ -1,9 +1,9 @@
 'use client'
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
-import { priorityBreakdown } from '@/lib/mock-data'
+export type PriorityBreakdownEntry = { name: string; slug: string; color: string; value: number }
 
-export function PriorityBreakdown() {
+export function PriorityBreakdown({ data: priorityBreakdown }: { data: PriorityBreakdownEntry[] }) {
   const total = priorityBreakdown.reduce((sum, d) => sum + d.value, 0)
 
   return (

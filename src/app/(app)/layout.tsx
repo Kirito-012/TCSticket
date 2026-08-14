@@ -1,10 +1,11 @@
 import { Sidebar } from '@/components/layout/Sidebar'
 import { SidebarProvider } from '@/components/layout/SidebarContext'
-import { requireUser } from '@/server/auth/session'
+import { requireTicketScope } from '@/server/auth/session'
 import { countTicketsByStatus } from '@/server/services/ticket.service'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const [user, ticketCounts] = await Promise.all([requireUser(), countTicketsByStatus()])
+  const { user, forcedAssigneeId } = await requireTicketScope()
+  const ticketCounts = await countTicketsByStatus(forcedAssigneeId)
 
   return (
     <SidebarProvider>

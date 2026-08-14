@@ -9,6 +9,7 @@ import { TicketPriorityModel } from '@/server/db/models/ticket-priority.model'
 import { dbConnect } from '@/server/db/connect'
 import { toTicketListItem } from '@/lib/ticket-view'
 import { cn } from '@/lib/utils'
+import { requireTicketScope } from '@/server/auth/session'
 
 const PAGE_SIZE = 20
 
@@ -20,12 +21,17 @@ export default async function TicketsPage({
   const sp = await searchParams
   const get = (key: string) => (Array.isArray(sp[key]) ? sp[key][0] : sp[key])
 
+  const { forcedAssigneeId } = await requireTicketScope()
+
   const page = Number(get('page') ?? '1') || 1
   const params = {
     status: get('status'),
     priority: get('priority'),
     type: get('type'),
     q: get('q'),
+    // Agent role: server-forced to their own tickets regardless of any assignee param a client
+    // might send — see requireTicketScope() in src/server/auth/session.ts.
+    assigneeId: forcedAssigneeId,
     sortField:
       (get('sort') as 'lastActivityAt' | 'createdAt' | 'number' | undefined) ?? 'lastActivityAt',
     sortDir: (get('dir') as 'asc' | 'desc' | undefined) ?? 'desc',
@@ -36,7 +42,7 @@ export default async function TicketsPage({
   await dbConnect()
   const [{ items, total }, statusCounts, priorities] = await Promise.all([
     listTickets(params),
-    countTicketsByStatus(),
+    countTicketsByStatus(forcedAssigneeId),
     TicketPriorityModel.find().sort({ order: 1 }).lean(),
   ])
 

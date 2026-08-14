@@ -2,6 +2,7 @@ import { config } from 'dotenv'
 config({ path: '.env.local' })
 
 import bcrypt from 'bcryptjs'
+import { randomBytes } from 'node:crypto'
 import { dbConnect } from '../src/server/db/connect'
 import { RoleModel } from '../src/server/db/models/role.model'
 import { UserModel } from '../src/server/db/models/user.model'
@@ -77,11 +78,13 @@ const ROLES = [
     name: 'Agent',
     rank: 2,
     isSystem: true,
+    // 'own' not 'group' — Groups/Teams/Departments aren't built. An Agent's ticket list and
+    // dashboard are scoped server-side to assigneeId === self (see requireTicketScope() in
+    // src/server/auth/session.ts). ticket:assign is NOT granted — only Admin/Manager assign.
     grants: [
-      'ticket:read:group',
+      'ticket:read:own',
       'ticket:create',
       'ticket:update',
-      'ticket:assign',
       'comment:create',
       'comment:update:own',
       'note:read',
@@ -90,13 +93,6 @@ const ROLES = [
       'account:read',
       'report:view',
     ],
-  },
-  {
-    key: 'customer',
-    name: 'Customer',
-    rank: 3,
-    isSystem: true,
-    grants: ['ticket:read:own', 'ticket:create', 'comment:create', 'attachment:create'],
   },
 ] as const
 
@@ -154,6 +150,8 @@ const TYPES = [
   { name: 'Issue', slug: 'issue' },
   { name: 'Question', slug: 'question' },
   { name: 'Task', slug: 'task' },
+  // Created via POST /api/v1/tickets by the DroneSeva integration — see src/app/api/v1/tickets.
+  { name: 'Garbage Detection', slug: 'garbage-detection' },
 ]
 
 async function seed() {
@@ -225,8 +223,31 @@ async function seed() {
     { upsert: true },
   )
 
-  console.log('\nDone. Seeded 4 roles, 5 statuses, 4 priorities, 3 types, and 1 admin user.')
+  // Service-account "reporter" for tickets auto-created via POST /api/v1/tickets (DroneSeva
+  // integration). Never logs in — password is a random value that's discarded immediately.
+  const botEmail = 'droneseva-bot@thecraftsync.local'
+  console.log(`Seeding integration service account (${botEmail})...`)
+  const botPasswordHash = await bcrypt.hash(randomBytes(32).toString('hex'), 12)
+  const botUser = await UserModel.findOneAndUpdate(
+    { email: botEmail },
+    {
+      $set: {
+        email: botEmail,
+        passwordHash: botPasswordHash,
+        fullname: 'DroneSeva',
+        roleId: roleDocs.agent,
+        isActive: true,
+        deletedAt: null,
+      },
+    },
+    { upsert: true, returnDocument: 'after' },
+  )
+
+  console.log(
+    '\nDone. Seeded 3 roles, 5 statuses, 4 priorities, 4 types, 1 admin user, and 1 service account.',
+  )
   console.log(`Log in with: ${adminEmail} / ${adminPassword}`)
+  console.log(`DroneSeva integration service-account id: ${botUser._id.toString()} (${botEmail})`)
   process.exit(0)
 }
 

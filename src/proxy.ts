@@ -8,6 +8,8 @@ const { auth } = NextAuth(authConfig)
 export default auth
 
 export const config = {
-  // Run on everything except static assets, image optimization, and API auth routes.
-  matcher: ['/((?!api/auth|_next/static|_next/image|favicon.ico).*)'],
+  // Run on everything except static assets, NextAuth's own routes, and api/v1 — the latter is
+  // service-to-service (x-api-key auth in the route handler itself, see api/v1/tickets/route.ts),
+  // not a browser session, so the session-cookie gate here would just redirect it to /login.
+  matcher: ['/((?!api/auth|api/v1|_next/static|_next/image|favicon.ico).*)'],
 }

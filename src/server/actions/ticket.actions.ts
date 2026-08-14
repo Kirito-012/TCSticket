@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { requireAbility } from '@/server/auth/session'
+import { requireAbility, requireTicketScope } from '@/server/auth/session'
 import { sanitizeHtml } from '@/lib/sanitize-html'
 import { createTicketSchema, updateTicketSchema, addCommentSchema } from '@/lib/schemas/ticket'
 import * as ticketService from '@/server/services/ticket.service'
@@ -39,7 +39,7 @@ export async function updateTicketFieldAction(
   number: number,
   patch: Record<string, string | null>,
 ) {
-  const { user, ability } = await requireAbility()
+  const { user, ability, forcedAssigneeId } = await requireTicketScope()
 
   const parsed = updateTicketSchema.safeParse(patch)
   if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? 'Invalid input')
@@ -47,6 +47,16 @@ export async function updateTicketFieldAction(
   const requiredAction = 'assigneeId' in parsed.data ? 'assign' : 'update'
   if (!ability.can(requiredAction, 'ticket')) {
     throw new Error('You do not have permission to do that.')
+  }
+
+  // Agent-scoped: block updates to tickets not assigned to them, even via a direct action call
+  // that bypasses the page's own visibility check (see tickets/[number]/page.tsx).
+  if (forcedAssigneeId) {
+    const ticket = await ticketService.getTicketByNumber(number)
+    const assignee = (ticket as { assigneeId?: { _id?: unknown } | null } | null)?.assigneeId
+    if (String(assignee?._id ?? '') !== forcedAssigneeId) {
+      throw new Error('You do not have permission to do that.')
+    }
   }
 
   await ticketService.updateTicketFields(number, parsed.data, user.id)
@@ -62,10 +72,18 @@ export async function addCommentAction(
   const number = Number(formData.get('ticketNumber'))
   const isInternal = formData.get('isInternal') === 'true'
 
-  const { user } = await requireAbility({
-    action: 'create',
-    subject: isInternal ? 'note' : 'comment',
-  })
+  const { user, ability, forcedAssigneeId } = await requireTicketScope()
+  if (!ability.can('create', isInternal ? 'note' : 'comment')) {
+    return { error: 'You do not have permission to do that.' }
+  }
+
+  if (forcedAssigneeId) {
+    const ticket = await ticketService.getTicketByNumber(number)
+    const assignee = (ticket as { assigneeId?: { _id?: unknown } | null } | null)?.assigneeId
+    if (String(assignee?._id ?? '') !== forcedAssigneeId) {
+      return { error: 'You do not have permission to do that.' }
+    }
+  }
 
   const parsed = addCommentSchema.safeParse({
     body: formData.get('body'),

@@ -3,22 +3,16 @@ import { Card, CardHeader } from '@/components/ui/Card'
 import { StatCard } from '@/components/dashboard/StatCard'
 import { VolumeChart } from '@/components/dashboard/VolumeChart'
 import { PriorityBreakdown } from '@/components/dashboard/PriorityBreakdown'
-import { TopGroups } from '@/components/dashboard/TopGroups'
-import { RecentTickets } from '@/components/dashboard/RecentTickets'
-import { AgentLeaderboard } from '@/components/dashboard/AgentLeaderboard'
-import {
-  Inbox,
-  Clock,
-  CheckCircle2,
-  AlertTriangle,
-  ArrowUpRight,
-  TrendingUp,
-  Users2,
-  Trophy,
-} from 'lucide-react'
-import Link from 'next/link'
+import { WorkloadByAssignee } from '@/components/dashboard/WorkloadByAssignee'
+import { ActivityFeed } from '@/components/dashboard/ActivityFeed'
+import { Inbox, CheckCircle2, UserX, Layers, TrendingUp, AlertTriangle, Users2 } from 'lucide-react'
+import { requireTicketScope } from '@/server/auth/session'
+import { getDashboardData } from '@/server/services/ticket.service'
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const { forcedAssigneeId } = await requireTicketScope()
+  const data = await getDashboardData(forcedAssigneeId)
+
   return (
     <>
       <Topbar
@@ -31,36 +25,29 @@ export default function DashboardPage() {
         {/* Stat cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard
-            label="Open tickets"
-            value="102"
-            delta="+8.2%"
-            trend="up"
+            label={forcedAssigneeId ? 'My open tickets' : 'Open tickets'}
+            value={data.openTicketsCount}
             icon={<Inbox className="h-4 w-4" />}
             accent="accent"
           />
           <StatCard
-            label="Avg. first response"
-            value="18m"
-            delta="-12%"
-            trend="up"
-            icon={<Clock className="h-4 w-4" />}
-            accent="violet"
+            label="Unassigned"
+            value={data.unassignedCount}
+            caption={forcedAssigneeId ? undefined : 'Waiting to be assigned'}
+            icon={<UserX className="h-4 w-4" />}
+            accent="warning"
           />
           <StatCard
             label="Resolved today"
-            value="47"
-            delta="+5.4%"
-            trend="up"
+            value={data.resolvedTodayCount}
             icon={<CheckCircle2 className="h-4 w-4" />}
             accent="accent"
           />
           <StatCard
-            label="SLA at risk"
-            value="6"
-            delta="+2"
-            trend="down"
-            icon={<AlertTriangle className="h-4 w-4" />}
-            accent="danger"
+            label={forcedAssigneeId ? 'My total tickets' : 'Total tickets'}
+            value={data.totalCount}
+            icon={<Layers className="h-4 w-4" />}
+            accent="violet"
           />
         </div>
 
@@ -83,7 +70,7 @@ export default function DashboardPage() {
               }
             />
             <div className="px-3 pb-3 pt-2">
-              <VolumeChart />
+              <VolumeChart data={data.ticketVolume} />
             </div>
           </Card>
 
@@ -95,57 +82,35 @@ export default function DashboardPage() {
               subtitle="Currently open tickets"
             />
             <div className="px-5 pb-5 pt-4">
-              <PriorityBreakdown />
+              <PriorityBreakdown data={data.priorityBreakdown} />
             </div>
           </Card>
         </div>
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-          {/* Recent tickets */}
+          {/* Recent activity */}
           <Card className="xl:col-span-2">
             <CardHeader
               icon={<Inbox className="h-4 w-4" />}
               title="Recent activity"
-              subtitle="Latest updates across all queues"
-              action={
-                <Link
-                  href="/tickets"
-                  className="flex shrink-0 items-center gap-1 pt-1 text-xs font-medium text-accent-strong transition-colors hover:text-accent"
-                >
-                  View all <ArrowUpRight className="h-3 w-3" />
-                </Link>
-              }
+              subtitle="Latest updates"
             />
             <div className="mt-3">
-              <RecentTickets />
+              <ActivityFeed items={data.recentActivity} />
             </div>
           </Card>
 
-          <div className="space-y-6">
-            {/* Top groups */}
-            <Card>
-              <CardHeader
-                icon={<Users2 className="h-4 w-4" />}
-                title="Top groups"
-                subtitle="By ticket volume"
-              />
-              <div className="px-5 pb-5 pt-4">
-                <TopGroups />
-              </div>
-            </Card>
-
-            {/* Agent leaderboard */}
-            <Card>
-              <CardHeader
-                icon={<Trophy className="h-4 w-4" />}
-                title="Top agents"
-                subtitle="Resolved this week"
-              />
-              <div className="px-5 pb-5 pt-4">
-                <AgentLeaderboard />
-              </div>
-            </Card>
-          </div>
+          {/* Workload by assignee */}
+          <Card>
+            <CardHeader
+              icon={<Users2 className="h-4 w-4" />}
+              title="Workload by assignee"
+              subtitle="Open tickets per person"
+            />
+            <div className="px-5 pb-5 pt-4">
+              <WorkloadByAssignee data={data.workloadByAssignee} />
+            </div>
+          </Card>
         </div>
       </main>
     </>

@@ -36,3 +36,19 @@ export async function requireAbility(grant?: { action: string; subject: string }
 
   return { user, ability }
 }
+
+/**
+ * Ticket-list/dashboard visibility scoping. Groups/Teams/Departments don't exist, so this is
+ * deliberately coarse: an Agent (`ticket:read:own`, not `ticket:read:all`) only ever sees
+ * tickets assigned to them — the caller's `assigneeId` filter is force-overridden server-side,
+ * not just hidden in the UI. Admin/Manager (`ticket:read:all`) see everything.
+ *
+ * Returns `forcedAssigneeId: undefined` for anyone with `ticket:read:all` (no restriction).
+ */
+export async function requireTicketScope() {
+  // Every seeded role has *some* ticket:read:* grant, so this is authn-only, not authz-gated —
+  // the scoping below is the actual access control.
+  const { user, ability } = await requireAbility()
+  const forcedAssigneeId = ability.can('read:all', 'ticket') ? undefined : user.id
+  return { user, ability, forcedAssigneeId }
+}
