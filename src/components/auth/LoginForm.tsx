@@ -1,13 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { useActionState } from 'react'
-import { Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react'
+import { useActionState, useState } from 'react'
+import { Mail, Lock, ArrowRight, AlertCircle, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { login } from '@/server/actions/auth.actions'
 
 export function LoginForm() {
   const [state, formAction, pending] = useActionState(login, undefined)
+  const [showPassword, setShowPassword] = useState(false)
 
   return (
     <form action={formAction} className="space-y-4">
@@ -53,12 +54,21 @@ export function LoginForm() {
           <input
             id="password"
             name="password"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             autoComplete="current-password"
             required
             placeholder="••••••••••"
-            className="h-10 w-full rounded-lg border border-border-strong bg-white/[0.03] pl-9 pr-3 text-sm text-foreground placeholder:text-muted/60 outline-none transition-colors focus:border-accent/50 focus:bg-white/[0.05] focus:ring-2 focus:ring-accent/20"
+            className="h-10 w-full rounded-lg border border-border-strong bg-white/[0.03] pl-9 pr-9 text-sm text-foreground placeholder:text-muted/60 outline-none transition-colors focus:border-accent/50 focus:bg-white/[0.05] focus:ring-2 focus:ring-accent/20"
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            tabIndex={-1}
+            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-muted hover:text-foreground"
+          >
+            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
         </div>
       </div>
 

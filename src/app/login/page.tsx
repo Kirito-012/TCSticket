@@ -69,30 +69,9 @@ export default function LoginPage() {
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">Welcome back</h1>
           <p className="mt-1.5 text-sm text-muted">Sign in to your workspace to continue</p>
 
-          <div className="mt-7 grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border-strong bg-white/[0.03] text-sm font-medium text-muted-strong transition-colors hover:bg-white/[0.07] hover:text-foreground"
-            >
-              <GoogleIcon className="h-4 w-4" />
-              Google
-            </button>
-            <button
-              type="button"
-              className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border-strong bg-white/[0.03] text-sm font-medium text-muted-strong transition-colors hover:bg-white/[0.07] hover:text-foreground"
-            >
-              <MicrosoftIcon className="h-4 w-4" />
-              Microsoft
-            </button>
+          <div className="mt-7">
+            <LoginForm />
           </div>
-
-          <div className="my-6 flex items-center gap-3">
-            <span className="h-px flex-1 bg-border" />
-            <span className="text-xs text-muted">or continue with email</span>
-            <span className="h-px flex-1 bg-border" />
-          </div>
-
-          <LoginForm />
 
           <p className="mt-6 text-center text-sm text-muted">
             New to TheCraftSync?{' '}
@@ -103,27 +82,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  )
-}
-
-function GoogleIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden>
-      <path
-        fill="#EA4335"
-        d="M12 10.2v3.9h5.5c-.24 1.4-1.66 4.1-5.5 4.1-3.31 0-6.02-2.74-6.02-6.2S8.19 5.8 11.5 5.8c1.89 0 3.16.8 3.88 1.5l2.65-2.55C16.36 3.06 14.13 2 11.5 2 6.53 2 2.5 6.03 2.5 11s4.03 9 9 9c5.19 0 8.63-3.65 8.63-8.79 0-.59-.06-1.04-.14-1.49H12z"
-      />
-    </svg>
-  )
-}
-
-function MicrosoftIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden>
-      <rect x="2" y="2" width="9" height="9" fill="#F25022" />
-      <rect x="13" y="2" width="9" height="9" fill="#7FBA00" />
-      <rect x="2" y="13" width="9" height="9" fill="#00A4EF" />
-      <rect x="13" y="13" width="9" height="9" fill="#FFB900" />
-    </svg>
   )
 }
