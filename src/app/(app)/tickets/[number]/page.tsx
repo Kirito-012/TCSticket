@@ -119,7 +119,10 @@ export default async function TicketDetailPage({
                   color: p.color,
                 }))}
                 types={types.map((t) => ({ id: String(t._id), name: t.name }))}
-                users={users.map((u) => ({ id: String(u._id), name: u.fullname }))}
+                users={users.map((u) => ({
+                  id: String(u._id),
+                  name: u.fullname || u.email || 'Unknown',
+                }))}
                 canUpdate={canUpdate}
                 canAssign={canAssign}
               />

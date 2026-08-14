@@ -66,7 +66,7 @@ export function AssigneeDropdown({
   }, [open])
 
   const filtered = useMemo(
-    () => users.filter((u) => u.name.toLowerCase().includes(query.trim().toLowerCase())),
+    () => users.filter((u) => (u.name ?? '').toLowerCase().includes(query.trim().toLowerCase())),
     [users, query],
   )
 
