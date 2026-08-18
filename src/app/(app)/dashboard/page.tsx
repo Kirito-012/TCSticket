@@ -5,7 +5,17 @@ import { VolumeChart } from '@/components/dashboard/VolumeChart'
 import { PriorityBreakdown } from '@/components/dashboard/PriorityBreakdown'
 import { WorkloadByAssignee } from '@/components/dashboard/WorkloadByAssignee'
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed'
-import { Inbox, CheckCircle2, UserX, Layers, TrendingUp, AlertTriangle, Users2 } from 'lucide-react'
+import { GarbageHeatmap } from '@/components/dashboard/GarbageHeatmap'
+import {
+  Inbox,
+  CheckCircle2,
+  UserX,
+  Layers,
+  TrendingUp,
+  AlertTriangle,
+  Users2,
+  Flame,
+} from 'lucide-react'
 import { requireTicketScope } from '@/server/auth/session'
 import { getDashboardData } from '@/server/services/ticket.service'
 
@@ -112,6 +122,18 @@ export default async function DashboardPage() {
             </div>
           </Card>
         </div>
+
+        {/* Garbage hotspots heatmap */}
+        <Card>
+          <CardHeader
+            icon={<Flame className="h-4 w-4" />}
+            title="Garbage hotspots"
+            subtitle="Detection density across all surveyed sectors"
+          />
+          <div className="pt-4">
+            <GarbageHeatmap />
+          </div>
+        </Card>
       </main>
     </>
   )
