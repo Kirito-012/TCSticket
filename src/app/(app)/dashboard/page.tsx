@@ -97,6 +97,18 @@ export default async function DashboardPage() {
           </Card>
         </div>
 
+        {/* Garbage hotspots heatmap */}
+        <Card>
+          <CardHeader
+            icon={<Flame className="h-4 w-4" />}
+            title="Garbage hotspots"
+            subtitle="Detection density across all surveyed sectors"
+          />
+          <div className="pt-4">
+            <GarbageHeatmap />
+          </div>
+        </Card>
+
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
           {/* Recent activity */}
           <Card className="xl:col-span-2">
@@ -122,18 +134,6 @@ export default async function DashboardPage() {
             </div>
           </Card>
         </div>
-
-        {/* Garbage hotspots heatmap */}
-        <Card>
-          <CardHeader
-            icon={<Flame className="h-4 w-4" />}
-            title="Garbage hotspots"
-            subtitle="Detection density across all surveyed sectors"
-          />
-          <div className="pt-4">
-            <GarbageHeatmap />
-          </div>
-        </Card>
       </main>
     </>
   )
