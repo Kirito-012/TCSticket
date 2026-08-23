@@ -2,17 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import {
-  LayoutDashboard,
-  Ticket,
-  Users,
-  Building2,
-  BarChart3,
-  Settings,
-  Sparkles,
-  LogOut,
-  X,
-} from 'lucide-react'
+import { LayoutDashboard, Ticket, Users, Sparkles, LogOut, X } from 'lucide-react'
 import { cn, initialsFor } from '@/lib/utils'
 import { Avatar } from '@/components/ui/Avatar'
 import { useSidebar } from '@/components/layout/SidebarContext'
@@ -31,7 +21,6 @@ function buildNav(ticketCount: number, pendingAccountsCount: number) {
       items: [
         { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { label: 'Tickets', href: '/tickets', icon: Ticket, badge: String(ticketCount) },
-        { label: 'Reports', href: '/reports', icon: BarChart3 },
       ],
     },
     {
@@ -44,7 +33,6 @@ function buildNav(ticketCount: number, pendingAccountsCount: number) {
           badge: pendingAccountsCount > 0 ? String(pendingAccountsCount) : undefined,
           badgeWarning: pendingAccountsCount > 0,
         },
-        { label: 'Groups & Teams', href: '/groups', icon: Building2 },
       ],
     },
   ]
@@ -150,19 +138,6 @@ export function Sidebar({
         </nav>
 
         <div className="space-y-3 border-t border-border p-3">
-          <Link
-            href="/settings"
-            className={cn(
-              'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors duration-150',
-              pathname?.startsWith('/settings')
-                ? 'bg-accent-soft text-accent-strong'
-                : 'text-muted-strong hover:bg-white/[0.05] hover:text-foreground',
-            )}
-          >
-            <Settings className="h-4 w-4" strokeWidth={2} />
-            Settings
-          </Link>
-
           <div className="flex items-center gap-2.5 rounded-lg border border-border bg-white/[0.02] px-2.5 py-2">
             <Avatar person={person} size="sm" />
             <div className="min-w-0 flex-1">

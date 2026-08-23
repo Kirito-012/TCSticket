@@ -16,6 +16,14 @@ const userSchema = new Schema(
     // missing status as 'active' for backward compatibility (see auth.ts, session helpers).
     status: { type: String, enum: ['pending', 'active', 'rejected'], default: 'active' },
     lastLoginAt: { type: Date },
+    // Cursor for the notification bell — items created after this are "unread". Null (including
+    // for every pre-existing user) falls back to their createdAt in notification.service.ts, so
+    // nobody is flooded with a backlog of "unread" history from before this field existed.
+    notificationsReadAt: { type: Date, default: null },
+    // Individually-read notifications newer than notificationsReadAt (e.g. clicked one item
+    // without hitting "mark all as read"). Cleared whenever notificationsReadAt advances, since
+    // the cursor then covers them — keeps this from growing unbounded.
+    readNotificationIds: { type: [String], default: [] },
     deletedAt: { type: Date, default: null },
   },
   { timestamps: true },

@@ -127,6 +127,16 @@ export async function getDashboardData(assigneeId?: string) {
   const sevenDaysAgo = new Date(startOfToday)
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6) // today + 6 previous days = 7
 
+  // Bucket by the server's local calendar day, not UTC — otherwise createdAt timestamps from
+  // today (local) that fall before UTC midnight get grouped into "yesterday" and today's bar
+  // never shows up.
+  const tzOffsetMinutes = -new Date().getTimezoneOffset()
+  const tzSign = tzOffsetMinutes >= 0 ? '+' : '-'
+  const tzAbs = Math.abs(tzOffsetMinutes)
+  const dateToStringTimezone = `${tzSign}${String(Math.floor(tzAbs / 60)).padStart(2, '0')}:${String(tzAbs % 60).padStart(2, '0')}`
+  const toLocalISODate = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
   const [resolvedTodayCount, priorityRows, volumeRows, resolvedStatusIds] = await Promise.all([
     TicketModel.countDocuments({
       ...baseMatch,
@@ -146,7 +156,13 @@ export async function getDashboardData(assigneeId?: string) {
             { $match: { ...baseMatch, createdAt: { $gte: sevenDaysAgo } } },
             {
               $group: {
-                _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+                _id: {
+                  $dateToString: {
+                    format: '%Y-%m-%d',
+                    date: '$createdAt',
+                    timezone: dateToStringTimezone,
+                  },
+                },
                 n: { $sum: 1 },
               },
             },
@@ -155,7 +171,13 @@ export async function getDashboardData(assigneeId?: string) {
             { $match: { ...baseMatch, resolvedAt: { $gte: sevenDaysAgo } } },
             {
               $group: {
-                _id: { $dateToString: { format: '%Y-%m-%d', date: '$resolvedAt' } },
+                _id: {
+                  $dateToString: {
+                    format: '%Y-%m-%d',
+                    date: '$resolvedAt',
+                    timezone: dateToStringTimezone,
+                  },
+                },
                 n: { $sum: 1 },
               },
             },
@@ -179,7 +201,7 @@ export async function getDashboardData(assigneeId?: string) {
   for (let i = 0; i < 7; i++) {
     const d = new Date(sevenDaysAgo)
     d.setDate(d.getDate() + i)
-    days.push(d.toISOString().slice(0, 10))
+    days.push(toLocalISODate(d))
   }
   const dayLabel = new Intl.DateTimeFormat('en-US', { weekday: 'short' })
   const createdByDay = new Map<string, number>(

@@ -12,6 +12,10 @@ export default async function AccountsPage() {
     subject: 'account',
   })
   const canEdit = ability.can('update', 'account')
+  // Anyone with account:update can deactivate/reactivate and approve accounts, but reassigning
+  // roles is a step above that — reserved for Admins so a Manager can't promote themselves (or
+  // anyone else) to Admin.
+  const canEditRole = sessionUser.roleKey === 'admin'
 
   const [usersRaw, pendingRaw, rolesRaw] = await Promise.all([
     userService.listUsers(),
@@ -68,7 +72,12 @@ export default async function AccountsPage() {
         {canEdit && <PendingApprovals users={pending} />}
 
         <Card>
-          <AccountsTable users={otherUsers} roles={roles} canEdit={canEdit} />
+          <AccountsTable
+            users={otherUsers}
+            roles={roles}
+            canEdit={canEdit}
+            canEditRole={canEditRole}
+          />
         </Card>
       </main>
     </>

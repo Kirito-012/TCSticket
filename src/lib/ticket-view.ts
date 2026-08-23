@@ -1,3 +1,5 @@
+import { extractDroneSevaLink } from '@/lib/droneseva-link'
+
 export type PersonView = { id: string; name: string; initials: string } | null
 
 export type TicketListItemView = {
@@ -42,6 +44,7 @@ export type TicketDetailView = {
   number: number
   subject: string
   issueHtml: string
+  droneSevaUrl: string | null
   priorityId: string | null
   statusId: string | null
   typeId: string | null
@@ -56,11 +59,13 @@ export type TicketDetailView = {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function toTicketDetailView(t: any): TicketDetailView {
+  const { html: issueHtml, droneSevaUrl } = extractDroneSevaLink(t.issue ?? '')
   return {
     id: String(t._id),
     number: t.number,
     subject: t.subject,
-    issueHtml: t.issue ?? '',
+    issueHtml,
+    droneSevaUrl,
     priorityId: t.priorityId ? String(t.priorityId._id) : null,
     statusId: t.statusId ? String(t.statusId._id) : null,
     typeId: t.typeId ? String(t.typeId._id) : null,

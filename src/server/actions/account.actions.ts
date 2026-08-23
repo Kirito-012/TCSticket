@@ -35,7 +35,10 @@ export async function createAccountAction(
 }
 
 export async function updateUserRoleAction(userId: string, roleId: string) {
-  await requireAbility({ action: 'update', subject: 'account' })
+  const { user } = await requireAbility({ action: 'update', subject: 'account' })
+  // account:update also covers deactivating/approving accounts, which Managers can do too —
+  // reassigning roles is Admin-only so a Manager can't promote themselves or anyone else.
+  if (user.roleKey !== 'admin') redirect('/accounts')
   await userService.updateUserRole(userId, roleId)
   revalidatePath('/accounts')
 }

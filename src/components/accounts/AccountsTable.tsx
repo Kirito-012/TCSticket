@@ -28,10 +28,12 @@ export function AccountsTable({
   users,
   roles,
   canEdit,
+  canEditRole,
 }: {
   users: AccountRow[]
   roles: RoleOption[]
   canEdit: boolean
+  canEditRole: boolean
 }) {
   const [pending, startTransition] = useTransition()
 
@@ -83,7 +85,7 @@ export function AccountsTable({
                 </div>
               </td>
               <td className="px-3 py-3.5">
-                {canEdit ? (
+                {canEditRole ? (
                   <div className="w-32">
                     <Select
                       value={u.roleId}

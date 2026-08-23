@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation'
+import { ExternalLink } from 'lucide-react'
 import { Topbar } from '@/components/layout/Topbar'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 import { DynamicBadge, Tag } from '@/components/ui/Badge'
 import { CommentThread } from '@/components/tickets/CommentThread'
 import { ActivityTimeline } from '@/components/tickets/ActivityTimeline'
@@ -13,6 +15,7 @@ import { TicketPriorityModel } from '@/server/db/models/ticket-priority.model'
 import { TicketTypeModel } from '@/server/db/models/ticket-type.model'
 import { UserModel } from '@/server/db/models/user.model'
 import { toTicketDetailView, toCommentView, toEventView } from '@/lib/ticket-view'
+import { cn } from '@/lib/utils'
 
 export default async function TicketDetailPage({
   params,
@@ -83,6 +86,20 @@ export default async function TicketDetailPage({
                 className="mt-3 text-sm text-muted-strong [&_p]:my-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
                 dangerouslySetInnerHTML={{ __html: ticket.issueHtml }}
               />
+              {ticket.droneSevaUrl && (
+                <a
+                  href={ticket.droneSevaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    buttonVariants({ variant: 'secondary', size: 'sm' }),
+                    'mt-4 border-accent/30 bg-accent-soft text-accent-strong hover:bg-accent-soft/80',
+                  )}
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  View in DroneSeva
+                </a>
+              )}
             </Card>
 
             <Card className="p-6">

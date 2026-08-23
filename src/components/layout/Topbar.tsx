@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { Search, Bell, Plus, Menu } from 'lucide-react'
+import { Search, Plus, Menu } from 'lucide-react'
 import { Button, buttonVariants } from '@/components/ui/Button'
 import { useSidebar } from '@/components/layout/SidebarContext'
+import { NotificationBell } from '@/components/layout/NotificationBell'
 import { cn } from '@/lib/utils'
 
 export function Topbar({
@@ -45,14 +46,7 @@ export function Topbar({
         </kbd>
       </label>
 
-      <button
-        type="button"
-        aria-label="Notifications"
-        className="relative inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-border text-muted-strong transition-colors hover:bg-white/[0.06] hover:text-foreground"
-      >
-        <Bell className="h-4 w-4" />
-        <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_6px_1px_rgba(16,185,129,0.8)]" />
-      </button>
+      <NotificationBell />
 
       {primaryAction &&
         (primaryAction.href ? (
