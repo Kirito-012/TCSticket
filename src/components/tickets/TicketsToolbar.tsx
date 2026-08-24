@@ -8,15 +8,20 @@ import { cn } from '@/lib/utils'
 
 type StatusCount = { slug: string; name: string; count: number }
 type PriorityOption = { slug: string; name: string }
+type SectorOption = { sectorNo: number; name: string | null }
 
 export function TicketsToolbar({
   statusCounts,
   total,
   priorities,
+  classGroups,
+  sectors,
 }: {
   statusCounts: StatusCount[]
   total: number
   priorities: PriorityOption[]
+  classGroups: string[]
+  sectors: SectorOption[]
 }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -26,6 +31,8 @@ export function TicketsToolbar({
 
   const activeStatus = searchParams.get('status') ?? ''
   const activePriority = searchParams.get('priority') ?? ''
+  const activeClass = searchParams.get('class') ?? ''
+  const activeSector = searchParams.get('sector') ?? ''
   const activeSort = searchParams.get('sort') ?? 'lastActivityAt'
   const activeDir = searchParams.get('dir') ?? 'desc'
 
@@ -121,6 +128,39 @@ export function TicketsToolbar({
             ]}
           />
         </div>
+
+        {classGroups.length > 0 && (
+          <div className="w-56">
+            <Select
+              variant="field"
+              value={activeClass}
+              onChange={(v) => pushParams({ class: v || null })}
+              placeholder="All classes"
+              options={[
+                { value: '', label: 'All classes' },
+                ...classGroups.map((c) => ({ value: c, label: c })),
+              ]}
+            />
+          </div>
+        )}
+
+        {sectors.length > 0 && (
+          <div className="w-64">
+            <Select
+              variant="field"
+              value={activeSector}
+              onChange={(v) => pushParams({ sector: v || null })}
+              placeholder="All sectors"
+              options={[
+                { value: '', label: 'All sectors' },
+                ...sectors.map((s) => ({
+                  value: String(s.sectorNo),
+                  label: s.name ? `${s.sectorNo}. ${s.name}` : `Sector ${s.sectorNo}`,
+                })),
+              ]}
+            />
+          </div>
+        )}
 
         <div className="w-56">
           <Select

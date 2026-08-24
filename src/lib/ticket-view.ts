@@ -16,6 +16,7 @@ export type TicketListItemView = {
   tags: { id: string; name: string; color: string }[]
   updatedAt: string
   comments: number
+  location: { classGroup: string; sectorNo: number | null } | null
 }
 
 function stripHtml(html: string) {
@@ -55,6 +56,13 @@ export type TicketDetailView = {
   dueDate: string | null
   createdAt: string
   resolvedAt: string | null
+  location: {
+    sectorPlanId: number
+    sectorNo: number | null
+    classGroup: string
+    lng: number
+    lat: number
+  } | null
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,6 +88,15 @@ export function toTicketDetailView(t: any): TicketDetailView {
     dueDate: t.dueDate ? new Date(t.dueDate).toISOString() : null,
     createdAt: new Date(t.createdAt).toISOString(),
     resolvedAt: t.resolvedAt ? new Date(t.resolvedAt).toISOString() : null,
+    location: t.location
+      ? {
+          sectorPlanId: t.location.sectorPlanId,
+          sectorNo: t.location.sectorNo ?? null,
+          classGroup: t.location.classGroup,
+          lng: t.location.lng,
+          lat: t.location.lat,
+        }
+      : null,
   }
 }
 
@@ -154,5 +171,8 @@ export function toTicketListItem(t: any): TicketListItemView {
     })),
     updatedAt: new Date(t.lastActivityAt).toISOString(),
     comments: t.counts?.comments ?? 0,
+    location: t.location
+      ? { classGroup: t.location.classGroup, sectorNo: t.location.sectorNo ?? null }
+      : null,
   }
 }

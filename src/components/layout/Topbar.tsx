@@ -1,9 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { Search, Plus, Menu } from 'lucide-react'
+import { Search, Plus } from 'lucide-react'
 import { Button, buttonVariants } from '@/components/ui/Button'
-import { useSidebar } from '@/components/layout/SidebarContext'
 import { NotificationBell } from '@/components/layout/NotificationBell'
 import { cn } from '@/lib/utils'
 
@@ -16,19 +15,8 @@ export function Topbar({
   description?: string
   primaryAction?: { label: string; icon?: React.ReactNode; href?: string }
 }) {
-  const { setOpen } = useSidebar()
-
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-md sm:gap-4 sm:px-8">
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label="Open menu"
-        className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-border text-muted-strong transition-colors hover:bg-white/[0.06] hover:text-foreground lg:hidden"
-      >
-        <Menu className="h-4 w-4" />
-      </button>
-
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 pl-16 backdrop-blur-md sm:gap-4 sm:px-8 sm:pl-16 lg:px-8">
       <div className="min-w-0 flex-1">
         <h1 className="truncate text-[15px] font-semibold text-foreground">{title}</h1>
         {description && <p className="truncate text-xs text-muted">{description}</p>}

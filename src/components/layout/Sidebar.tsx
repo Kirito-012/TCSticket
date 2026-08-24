@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Ticket, Users, Sparkles, LogOut, X } from 'lucide-react'
+import { LayoutDashboard, Map, Ticket, Users, Sparkles, LogOut, X } from 'lucide-react'
 import { cn, initialsFor } from '@/lib/utils'
 import { Avatar } from '@/components/ui/Avatar'
 import { useSidebar } from '@/components/layout/SidebarContext'
@@ -19,6 +19,7 @@ function buildNav(ticketCount: number, pendingAccountsCount: number) {
     {
       section: 'Workspace',
       items: [
+        { label: 'Map', href: '/', icon: Map },
         { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { label: 'Tickets', href: '/tickets', icon: Ticket, badge: String(ticketCount) },
       ],
@@ -42,32 +43,40 @@ export function Sidebar({
   user,
   ticketCount,
   pendingAccountsCount = 0,
+  variant = 'overlay',
 }: {
   user: SidebarUser
   ticketCount: number
   pendingAccountsCount?: number
+  /** 'pinned' stays permanently visible on desktop (only slides on mobile), like the classic
+   *  app pages. 'overlay' always starts closed and slides in on top of content, on every
+   *  screen size — used by the full-bleed map page. */
+  variant?: 'pinned' | 'overlay'
 }) {
   const pathname = usePathname()
   const { open, setOpen } = useSidebar()
   const displayName = user.name || user.email || 'Account'
   const person = { name: displayName, initials: initialsFor(displayName), color: '#10b981' }
   const nav = buildNav(ticketCount, pendingAccountsCount)
+  const pinned = variant === 'pinned'
 
   return (
     <>
-      {/* Mobile backdrop */}
+      {/* Backdrop */}
       <div
         onClick={() => setOpen(false)}
         aria-hidden
         className={cn(
-          'fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-200 lg:hidden',
+          'fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-200',
+          pinned && 'lg:hidden',
           open ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
         )}
       />
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border bg-background-elevated transition-transform duration-200 lg:z-40 lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border bg-background-elevated transition-transform duration-200',
+          pinned && 'lg:z-40 lg:translate-x-0',
           open ? 'translate-x-0' : '-translate-x-full',
         )}
       >
@@ -82,7 +91,10 @@ export function Sidebar({
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Close menu"
-            className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-muted-strong hover:bg-white/[0.06] lg:hidden"
+            className={cn(
+              'inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-muted-strong hover:bg-white/[0.06]',
+              pinned && 'lg:hidden',
+            )}
           >
             <X className="h-4 w-4" />
           </button>
@@ -96,7 +108,8 @@ export function Sidebar({
               </p>
               <div className="space-y-0.5">
                 {group.items.map((item) => {
-                  const isActive = pathname?.startsWith(item.href)
+                  const isActive =
+                    item.href === '/' ? pathname === '/' : pathname?.startsWith(item.href)
                   const Icon = item.icon
                   return (
                     <Link

@@ -24,6 +24,25 @@ const ticketSchema = new Schema(
 
     source: { type: String, enum: ['web', 'email', 'api', 'public'], default: 'web' },
 
+    // Set only for tickets bulk-imported from a kumbh.sector_plan parcel (see
+    // scripts/import-map-tickets.ts) — a denormalized snapshot, not a live reference, so the
+    // ticket renders its location without a cross-DB join back to Postgres.
+    location: {
+      type: {
+        sectorPlanId: { type: Number, required: true },
+        sectorNo: { type: Number, default: null },
+        classGroup: { type: String, required: true },
+        subclass: { type: String, default: null },
+        plotNo: { type: String, default: null },
+        block: { type: String, default: null },
+        label: { type: String, default: null },
+        areaHectares: { type: Number, default: null },
+        lng: { type: Number, required: true },
+        lat: { type: Number, required: true },
+      },
+      default: null,
+    },
+
     counts: {
       comments: { type: Number, default: 0 },
       attachments: { type: Number, default: 0 },
@@ -40,6 +59,9 @@ ticketSchema.index({ deletedAt: 1, assigneeId: 1, statusId: 1 })
 ticketSchema.index({ deletedAt: 1, groupId: 1, statusId: 1, createdAt: -1 })
 ticketSchema.index({ deletedAt: 1, slaDueAt: 1 })
 ticketSchema.index({ subject: 'text', issue: 'text' })
+ticketSchema.index({ deletedAt: 1, 'location.classGroup': 1 })
+ticketSchema.index({ deletedAt: 1, 'location.sectorNo': 1 })
+ticketSchema.index({ 'location.sectorPlanId': 1 }, { sparse: true })
 
 export type Ticket = InferSchemaType<typeof ticketSchema>
 export const TicketModel = models.Ticket ?? model('Ticket', ticketSchema)

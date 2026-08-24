@@ -3,7 +3,7 @@ import { requireTicketScope } from '@/server/auth/session'
 import { countTicketsByStatus } from '@/server/services/ticket.service'
 import { listPendingUsers } from '@/server/services/user.service'
 
-export default async function AppLayout({ children }: { children: React.ReactNode }) {
+export default async function ShellLayout({ children }: { children: React.ReactNode }) {
   const { user, ability, forcedAssigneeId } = await requireTicketScope()
   const canApproveAccounts = ability.can('update', 'account')
   const [ticketCounts, pendingUsers] = await Promise.all([
@@ -16,9 +16,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       user={user}
       ticketCount={ticketCounts.total}
       pendingAccountsCount={pendingUsers.length}
-      variant="pinned"
+      variant="overlay"
     >
-      <div className="flex min-w-0 flex-1 flex-col">{children}</div>
+      {children}
     </AppShell>
   )
 }

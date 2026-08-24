@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import Link from 'next/link'
 import { flexRender, getCoreRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table'
 import { MessageSquare } from 'lucide-react'
-import { DynamicBadge, Tag } from '@/components/ui/Badge'
+import { Tag } from '@/components/ui/Badge'
 import { StatusSelect } from '@/components/tickets/StatusSelect'
 import { AssigneeDropdown } from '@/components/tickets/AssigneeDropdown'
 import { cn, timeAgo } from '@/lib/utils'
@@ -30,7 +30,7 @@ export function TicketsTable({
     () => [
       { id: 'number', header: 'ID', size: 64 },
       { id: 'subject', header: 'Subject' },
-      { id: 'priority', header: 'Priority', size: 112 },
+      { id: 'location', header: 'Class / Sector', size: 160 },
       { id: 'status', header: 'Status', size: 160 },
       { id: 'assignee', header: 'Assignee', size: 140 },
       { id: 'updatedAt', header: 'Updated', size: 80 },
@@ -98,7 +98,16 @@ export function TicketsTable({
                 </Link>
               </td>
               <td className="px-2 py-3.5">
-                {t.priority && <DynamicBadge label={t.priority.name} color={t.priority.color} />}
+                {t.location ? (
+                  <div className="flex flex-col gap-1">
+                    <Tag>{t.location.classGroup}</Tag>
+                    {t.location.sectorNo !== null && (
+                      <span className="text-[11px] text-muted">Sector {t.location.sectorNo}</span>
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-xs text-muted/60">—</span>
+                )}
               </td>
               <td className="px-2 py-3.5">
                 <StatusSelect

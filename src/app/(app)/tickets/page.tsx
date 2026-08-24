@@ -4,7 +4,11 @@ import { Card } from '@/components/ui/Card'
 import { TicketsToolbar } from '@/components/tickets/TicketsToolbar'
 import { TicketsTable } from '@/components/tickets/TicketsTable'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { listTickets, countTicketsByStatus } from '@/server/services/ticket.service'
+import {
+  listTickets,
+  countTicketsByStatus,
+  getLocationFilterOptions,
+} from '@/server/services/ticket.service'
 import { TicketPriorityModel } from '@/server/db/models/ticket-priority.model'
 import { TicketStatusModel } from '@/server/db/models/ticket-status.model'
 import { UserModel } from '@/server/db/models/user.model'
@@ -13,7 +17,7 @@ import { toTicketListItem } from '@/lib/ticket-view'
 import { cn } from '@/lib/utils'
 import { requireTicketScope } from '@/server/auth/session'
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 50
 
 export default async function TicketsPage({
   searchParams,
@@ -28,11 +32,14 @@ export default async function TicketsPage({
   const canAssign = ability.can('assign', 'ticket')
 
   const page = Number(get('page') ?? '1') || 1
+  const sector = get('sector')
   const params = {
     status: get('status'),
     priority: get('priority'),
     type: get('type'),
     q: get('q'),
+    classGroup: get('class'),
+    sectorNo: sector ? Number(sector) : undefined,
     // Agent role: server-forced to their own tickets regardless of any assignee param a client
     // might send — see requireTicketScope() in src/server/auth/session.ts.
     assigneeId: forcedAssigneeId,
@@ -44,15 +51,17 @@ export default async function TicketsPage({
   }
 
   await dbConnect()
-  const [{ items, total }, statusCounts, priorities, statuses, users] = await Promise.all([
-    listTickets(params),
-    countTicketsByStatus(forcedAssigneeId),
-    TicketPriorityModel.find().sort({ order: 1 }).lean(),
-    TicketStatusModel.find().sort({ order: 1 }).lean(),
-    canAssign
-      ? UserModel.find({ isActive: true, deletedAt: null }).select('fullname email').lean()
-      : Promise.resolve([]),
-  ])
+  const [{ items, total }, statusCounts, priorities, statuses, users, locationOptions] =
+    await Promise.all([
+      listTickets(params),
+      countTicketsByStatus(forcedAssigneeId),
+      TicketPriorityModel.find().sort({ order: 1 }).lean(),
+      TicketStatusModel.find().sort({ order: 1 }).lean(),
+      canAssign
+        ? UserModel.find({ isActive: true, deletedAt: null }).select('fullname email').lean()
+        : Promise.resolve([]),
+      getLocationFilterOptions(),
+    ])
 
   const tickets = items.map(toTicketListItem)
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
@@ -81,6 +90,8 @@ export default async function TicketsPage({
           statusCounts={statusCounts.byStatus}
           total={statusCounts.total}
           priorities={priorities.map((p) => ({ slug: p.slug, name: p.name }))}
+          classGroups={locationOptions.classGroups}
+          sectors={locationOptions.sectors}
         />
 
         <Card>

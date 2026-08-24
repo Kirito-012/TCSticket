@@ -152,6 +152,8 @@ const TYPES = [
   { name: 'Task', slug: 'task' },
   // Created via POST /api/v1/tickets by the DroneSeva integration — see src/app/api/v1/tickets.
   { name: 'Garbage Detection', slug: 'garbage-detection' },
+  // Created via scripts/import-map-tickets.ts — one ticket per kumbh.sector_plan parcel.
+  { name: 'Map Parcel', slug: 'map-parcel' },
 ]
 
 async function seed() {
@@ -243,11 +245,32 @@ async function seed() {
     { upsert: true, returnDocument: 'after' },
   )
 
+  // Service-account "reporter" for tickets bulk-created via scripts/import-map-tickets.ts.
+  // Kept separate from the DroneSeva bot above since it represents a different ticket source.
+  const importEmail = 'kumbh-import-bot@thecraftsync.local'
+  console.log(`Seeding map-import service account (${importEmail})...`)
+  const importPasswordHash = await bcrypt.hash(randomBytes(32).toString('hex'), 12)
+  const importBotUser = await UserModel.findOneAndUpdate(
+    { email: importEmail },
+    {
+      $set: {
+        email: importEmail,
+        passwordHash: importPasswordHash,
+        fullname: 'Kumbh Map Import',
+        roleId: roleDocs.agent,
+        isActive: true,
+        deletedAt: null,
+      },
+    },
+    { upsert: true, returnDocument: 'after' },
+  )
+
   console.log(
-    '\nDone. Seeded 3 roles, 5 statuses, 4 priorities, 4 types, 1 admin user, and 1 service account.',
+    '\nDone. Seeded 3 roles, 5 statuses, 4 priorities, 5 types, 1 admin user, and 2 service accounts.',
   )
   console.log(`Log in with: ${adminEmail} / ${adminPassword}`)
   console.log(`DroneSeva integration service-account id: ${botUser._id.toString()} (${botEmail})`)
+  console.log(`Map-import service-account id: ${importBotUser._id.toString()} (${importEmail})`)
   process.exit(0)
 }
 

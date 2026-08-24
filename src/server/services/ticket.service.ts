@@ -30,6 +30,10 @@ export type ListTicketsParams = {
   q?: string
   from?: string
   to?: string
+  /** Matches `location.classGroup` — set on tickets bulk-imported from a map parcel. */
+  classGroup?: string
+  /** Matches `location.sectorNo` — set on tickets bulk-imported from a map parcel. */
+  sectorNo?: number
   page?: number
   pageSize?: number
   sortField?: 'lastActivityAt' | 'createdAt' | 'number'
@@ -57,6 +61,8 @@ export async function listTickets(params: ListTicketsParams) {
   if (tag) filter.tagIds = tag._id
   if (params.assigneeId) filter.assigneeId = params.assigneeId
   if (params.q) filter.$text = { $search: params.q }
+  if (params.classGroup) filter['location.classGroup'] = params.classGroup
+  if (params.sectorNo !== undefined) filter['location.sectorNo'] = params.sectorNo
 
   if (params.from || params.to) {
     filter.createdAt = {}
@@ -78,6 +84,51 @@ export async function listTickets(params: ListTicketsParams) {
   ])
 
   return { items, total, page, pageSize }
+}
+
+/**
+ * Distinct class/sector values across non-deleted tickets that carry a `location` (i.e.
+ * bulk-imported map-parcel tickets) — feeds the Class/Sector filter dropdowns on the Tickets
+ * page. Class comes straight from Mongo's denormalized `location.*` fields. Sector *names*
+ * aren't denormalized onto the ticket (only `sectorNo`), so those come from one small query
+ * against kumbh.sector_boundary (32 static rows, doesn't change per-ticket) via the same
+ * Postgres pool the map already uses — not a per-ticket join, just one lookup for this list.
+ */
+export async function getLocationFilterOptions() {
+  await dbConnect()
+
+  const [classGroups, sectorNos] = await Promise.all([
+    TicketModel.distinct('location.classGroup', {
+      deletedAt: null,
+      'location.classGroup': { $ne: null },
+    }),
+    TicketModel.distinct('location.sectorNo', {
+      deletedAt: null,
+      'location.sectorNo': { $ne: null },
+    }),
+  ])
+
+  const sortedSectorNos = (sectorNos as number[]).sort((a, b) => a - b)
+
+  let sectorNames = new Map<number, string>()
+  try {
+    const { getPool } = await import('@/server/db/postgres')
+    const { rows } = await getPool().query<{ sector_no: number; name: string }>(
+      'SELECT sector_no, name FROM kumbh.sector_boundary ORDER BY sector_no',
+    )
+    sectorNames = new Map(rows.map((r) => [r.sector_no, r.name]))
+  } catch {
+    // Postgres unreachable — fall back to numeric-only sector labels rather than failing the
+    // whole Tickets page over a filter-label nicety.
+  }
+
+  return {
+    classGroups: (classGroups as string[]).sort(),
+    sectors: sortedSectorNos.map((sectorNo) => ({
+      sectorNo,
+      name: sectorNames.get(sectorNo) ?? null,
+    })),
+  }
 }
 
 /**
@@ -304,6 +355,19 @@ export async function createTicket(input: {
   tagIds?: string[]
   /** Defaults to 'web' (schema default) — pass 'api' for integration-created tickets. */
   source?: 'web' | 'email' | 'api' | 'public'
+  /** Set only when this ticket was bulk-imported from a kumbh.sector_plan map parcel. */
+  location?: {
+    sectorPlanId: number
+    sectorNo: number | null
+    classGroup: string
+    subclass: string | null
+    plotNo: string | null
+    block: string | null
+    label: string | null
+    areaHectares: number | null
+    lng: number
+    lat: number
+  }
 }) {
   await dbConnect()
 
@@ -322,6 +386,7 @@ export async function createTicket(input: {
     statusId: status._id,
     tagIds: input.tagIds ?? [],
     source: input.source ?? 'web',
+    location: input.location ?? null,
     lastActivityAt: new Date(),
   })
 

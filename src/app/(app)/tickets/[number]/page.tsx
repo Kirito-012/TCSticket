@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
-import { ExternalLink } from 'lucide-react'
+import Link from 'next/link'
+import { ExternalLink, MapPin } from 'lucide-react'
 import { Topbar } from '@/components/layout/Topbar'
 import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
@@ -7,6 +8,7 @@ import { DynamicBadge, Tag } from '@/components/ui/Badge'
 import { CommentThread } from '@/components/tickets/CommentThread'
 import { ActivityTimeline } from '@/components/tickets/ActivityTimeline'
 import { TicketDetailSidebar } from '@/components/tickets/TicketDetailSidebar'
+import { TicketLocationMap } from '@/components/map/TicketLocationMap'
 import { requireTicketScope } from '@/server/auth/session'
 import { dbConnect } from '@/server/db/connect'
 import * as ticketService from '@/server/services/ticket.service'
@@ -144,6 +146,31 @@ export default async function TicketDetailPage({
                 canAssign={canAssign}
               />
             </Card>
+
+            {ticket.location && (
+              <Card className="p-5">
+                <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted">
+                  Location
+                </h2>
+                <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-muted-strong">
+                  <Tag>{ticket.location.classGroup}</Tag>
+                  {ticket.location.sectorNo !== null && (
+                    <span className="text-xs text-muted">Sector {ticket.location.sectorNo}</span>
+                  )}
+                </div>
+                <TicketLocationMap lng={ticket.location.lng} lat={ticket.location.lat} />
+                <Link
+                  href={`/?parcel=${ticket.location.sectorPlanId}&lng=${ticket.location.lng}&lat=${ticket.location.lat}&sector=${ticket.location.sectorNo ?? ''}`}
+                  className={cn(
+                    buttonVariants({ variant: 'secondary', size: 'sm' }),
+                    'mt-3 w-full',
+                  )}
+                >
+                  <MapPin className="h-3.5 w-3.5" />
+                  View on map
+                </Link>
+              </Card>
+            )}
 
             <Card className="p-5">
               <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted">

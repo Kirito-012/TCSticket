@@ -38,7 +38,8 @@ export function VolumeChart({ data }: { data: VolumePoint[] }) {
             axisLine={false}
             tickLine={false}
             tick={{ fill: '#9aa1ac', fontSize: 12 }}
-            width={34}
+            width={48}
+            allowDecimals={false}
           />
           <Tooltip
             cursor={{ stroke: 'rgba(255,255,255,0.12)', strokeWidth: 1 }}
