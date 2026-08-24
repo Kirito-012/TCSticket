@@ -346,6 +346,18 @@ export async function getTicketByNumber(number: number) {
   return TicketModel.findOne({ number, deletedAt: null }).populate(POPULATE).lean()
 }
 
+/** Finds the ticket bulk-imported for a given kumbh.sector_plan parcel — feeds the map's
+ *  click popup (see src/app/api/tickets/by-parcel/[sectorPlanId]/route.ts). */
+export async function getTicketByParcelId(sectorPlanId: number) {
+  await dbConnect()
+  return TicketModel.findOne({ 'location.sectorPlanId': sectorPlanId, deletedAt: null })
+    .populate([
+      { path: 'statusId', select: 'name slug color' },
+      { path: 'priorityId', select: 'name slug color' },
+    ])
+    .lean()
+}
+
 export async function createTicket(input: {
   subject: string
   issue: string

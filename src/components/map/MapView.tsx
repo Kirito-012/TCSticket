@@ -72,6 +72,9 @@ export default function MapView({
   const mapRef = useRef<MLMap | null>(null)
   const popupRef = useRef<Popup | null>(null)
   const hoveredSectorRef = useRef<number | null>(null)
+  /** sectorPlanId of the parcel the currently-open popup belongs to — lets the async ticket
+   *  lookup discard its result if the user has since clicked a different parcel (or closed it). */
+  const popupParcelIdRef = useRef<number | null>(null)
 
   const [sectors, setSectors] = useState<Sector[]>([])
   const [selectedSector, setSelectedSector] = useState<number | 'all'>(
@@ -94,8 +97,7 @@ export default function MapView({
       .catch(() => {})
   }, [])
 
-  function showPopup(map: MLMap, feature: MapGEOJSONFeatureCompat, lngLat: LngLat) {
-    popupRef.current?.remove()
+  function propertyRowsHtml(feature: MapGEOJSONFeatureCompat) {
     const p = feature.properties ?? {}
     const rows: [string, unknown][] =
       feature.layer.id === 'road-line'
@@ -121,19 +123,67 @@ export default function MapView({
               ['Area (ha)', typeof p.area === 'number' ? p.area.toFixed(3) : p.area],
             ]
 
-    const html = `<div style="font:13px system-ui;min-width:180px;color:#111827">
-      ${rows
-        .filter(([, v]) => v !== undefined)
-        .map(
-          ([k, v]) =>
-            `<div style="display:flex;justify-content:space-between;gap:8px;padding:2px 0;color:#111827"><b>${k}</b><span>${
-              v === null || v === '' ? '—' : v
-            }</span></div>`,
-        )
-        .join('')}
-    </div>`
+    return rows
+      .filter(([, v]) => v !== undefined)
+      .map(
+        ([k, v]) =>
+          `<div style="display:flex;justify-content:space-between;gap:8px;padding:2px 0;color:#111827"><b>${k}</b><span>${
+            v === null || v === '' ? '—' : v
+          }</span></div>`,
+      )
+      .join('')
+  }
 
-    popupRef.current = new Popup({ closeButton: true }).setLngLat(lngLat).setHTML(html).addTo(map)
+  function ticketRowsHtml(ticket: {
+    number: number
+    subject: string
+    status: { name: string; color: string } | null
+    priority: { name: string; color: string } | null
+  }) {
+    return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid #e5e7eb">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap">
+        ${
+          ticket.status
+            ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:${ticket.status.color}"><span style="height:6px;width:6px;border-radius:999px;background:${ticket.status.color}"></span>${ticket.status.name}</span>`
+            : ''
+        }
+        ${
+          ticket.priority
+            ? `<span style="font-size:11px;font-weight:600;color:${ticket.priority.color}">${ticket.priority.name}</span>`
+            : ''
+        }
+      </div>
+      <p style="margin:0 0 6px;font-size:12.5px;color:#374151">${ticket.subject}</p>
+      <a href="/tickets/${ticket.number}" style="color:#2563eb;font-weight:600;text-decoration:none;font-size:12.5px">Show the Ticket →</a>
+    </div>`
+  }
+
+  function showPopup(map: MLMap, feature: MapGEOJSONFeatureCompat, lngLat: LngLat) {
+    popupRef.current?.remove()
+    popupParcelIdRef.current = null
+
+    const html = `<div style="font:13px system-ui;min-width:180px;color:#111827">${propertyRowsHtml(feature)}</div>`
+    const popup = new Popup({ closeButton: true }).setLngLat(lngLat).setHTML(html).addTo(map)
+    popupRef.current = popup
+
+    // Only parcels (sector-plan-fill) are ticket-backed — roads/boundaries never have one.
+    const rawId =
+      feature.layer.id === 'sector-plan-fill' ? (feature.id ?? feature.properties?.id) : undefined
+    const sectorPlanId = typeof rawId === 'number' ? rawId : Number(rawId)
+    if (!Number.isInteger(sectorPlanId)) return
+
+    popupParcelIdRef.current = sectorPlanId
+    fetch(`/api/tickets/by-parcel/${sectorPlanId}`)
+      .then((r) => r.json())
+      .then((data: { ticket: null | Parameters<typeof ticketRowsHtml>[0] }) => {
+        // Discard if the user clicked elsewhere (or closed the popup) while this was in flight.
+        if (popupRef.current !== popup || popupParcelIdRef.current !== sectorPlanId) return
+        if (!data.ticket) return
+        popup.setHTML(
+          `<div style="font:13px system-ui;min-width:180px;color:#111827">${propertyRowsHtml(feature)}${ticketRowsHtml(data.ticket)}</div>`,
+        )
+      })
+      .catch(() => {})
   }
 
   useEffect(() => {
@@ -329,6 +379,7 @@ export default function MapView({
         if (hits.length === 0) {
           setSelectedSector('all')
           popupRef.current?.remove()
+          popupParcelIdRef.current = null
           return
         }
         const detail =
