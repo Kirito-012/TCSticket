@@ -165,6 +165,13 @@ body {
   background: transparent;
 }
 
+/* Pushes MapLibre's built-in zoom control below the "Stats" toggle/panel, which shares the
+   same top-right corner (see MapView.tsx) — scoped to the full map so it doesn't affect the
+   non-interactive TicketLocationMap thumbnail (which has no controls anyway). */
+.kumbh-map .maplibregl-ctrl-top-right {
+  top: 56px;
+}
+
 input[type='range'].kumbh-range {
   accent-color: #2563eb;
 }

@@ -492,7 +492,7 @@ export default function MapView({
   ]
 
   return (
-    <div className="relative h-screen w-full">
+    <div className="kumbh-map relative h-screen w-full">
       <div ref={mapContainer} className="h-full w-full" />
 
       <Panel
@@ -654,7 +654,7 @@ export default function MapView({
         <button
           onClick={() => setShowStats(true)}
           aria-label="Show stats panel"
-          className="absolute top-3 right-3 z-10 flex items-center gap-1.5 rounded-xl border border-slate-900/8 bg-white/92 px-3 py-2 text-[12.5px] font-medium text-slate-700 shadow-[0_8px_30px_rgba(15,23,42,0.14)] backdrop-blur-md transition-colors hover:bg-white cursor-pointer"
+          className="absolute top-3 right-3 z-20 flex items-center gap-1.5 rounded-xl border border-slate-900/8 bg-white/92 px-3 py-2 text-[12.5px] font-medium text-slate-700 shadow-[0_8px_30px_rgba(15,23,42,0.14)] backdrop-blur-md transition-colors hover:bg-white cursor-pointer"
         >
           <ChartBarIcon className="h-4 w-4" />
           Stats

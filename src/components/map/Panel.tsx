@@ -67,7 +67,7 @@ export default function Panel({
   return (
     <div
       style={resizable ? { width } : undefined}
-      className={`absolute ${side === 'left' ? 'top-16 left-3 max-h-[calc(100vh-76px)]' : 'top-3 right-3 max-h-[calc(100vh-24px)]'} z-10
+      className={`absolute ${side === 'left' ? 'top-16 left-3 max-h-[calc(100vh-76px)]' : 'top-3 right-3 max-h-[calc(100vh-24px)]'} z-20
         ${resizable ? '' : 'w-72'} max-w-[calc(100vw-24px)]
         rounded-2xl border border-slate-900/8 bg-white/92 shadow-[0_8px_30px_rgba(15,23,42,0.14)]
         backdrop-blur-md

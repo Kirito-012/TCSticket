@@ -225,6 +225,32 @@ async function seed() {
     { upsert: true },
   )
 
+  // Loginable test accounts for exercising the Manager/Agent roles (not service accounts —
+  // these have a real, fixed password so someone can actually log in as each role).
+  const testAccounts = [
+    { email: 'manager@test.local', fullname: 'Test Manager', roleKey: 'manager' },
+    { email: 'agent@test.local', fullname: 'Test Agent', roleKey: 'agent' },
+  ] as const
+  const testPassword = 'testpass123'
+  const testPasswordHash = await bcrypt.hash(testPassword, 12)
+  for (const account of testAccounts) {
+    console.log(`Seeding test ${account.roleKey} account (${account.email})...`)
+    await UserModel.findOneAndUpdate(
+      { email: account.email },
+      {
+        $set: {
+          email: account.email,
+          passwordHash: testPasswordHash,
+          fullname: account.fullname,
+          roleId: roleDocs[account.roleKey],
+          isActive: true,
+          deletedAt: null,
+        },
+      },
+      { upsert: true },
+    )
+  }
+
   // Service-account "reporter" for tickets auto-created via POST /api/v1/tickets (DroneSeva
   // integration). Never logs in — password is a random value that's discarded immediately.
   const botEmail = 'droneseva-bot@thecraftsync.local'
@@ -266,9 +292,12 @@ async function seed() {
   )
 
   console.log(
-    '\nDone. Seeded 3 roles, 5 statuses, 4 priorities, 5 types, 1 admin user, and 2 service accounts.',
+    '\nDone. Seeded 3 roles, 5 statuses, 4 priorities, 5 types, 1 admin user, 2 test accounts, and 2 service accounts.',
   )
   console.log(`Log in with: ${adminEmail} / ${adminPassword}`)
+  for (const account of testAccounts) {
+    console.log(`Log in with: ${account.email} / ${testPassword}`)
+  }
   console.log(`DroneSeva integration service-account id: ${botUser._id.toString()} (${botEmail})`)
   console.log(`Map-import service-account id: ${importBotUser._id.toString()} (${importEmail})`)
   process.exit(0)
