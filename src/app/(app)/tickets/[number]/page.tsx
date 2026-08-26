@@ -57,6 +57,7 @@ export default async function TicketDetailPage({
   const canAssign = ability.can('assign', 'ticket')
   const canComment = ability.can('create', 'comment')
   const canNote = ability.can('create', 'note')
+  const canDeleteComment = ability.can('delete', 'comment')
 
   const status = statuses.find((s) => String(s._id) === ticket.statusId)
   const priority = priorities.find((p) => String(p._id) === ticket.priorityId)
@@ -109,6 +110,7 @@ export default async function TicketDetailPage({
                 comments={comments}
                 canComment={canComment}
                 canNote={canNote}
+                canDeleteComment={canDeleteComment}
               />
             </Card>
           </div>

@@ -45,7 +45,7 @@ const ROLES = [
   { key: 'admin', name: 'Admin', rank: 0, isSystem: true, grants: ALL_GRANTS },
   {
     key: 'manager',
-    name: 'Manager',
+    name: 'Nodal Manager',
     rank: 1,
     isSystem: true,
     grants: [
@@ -75,7 +75,7 @@ const ROLES = [
   },
   {
     key: 'agent',
-    name: 'Agent',
+    name: 'Surveyor',
     rank: 2,
     isSystem: true,
     // 'own' not 'group' — Groups/Teams/Departments aren't built. An Agent's ticket list and

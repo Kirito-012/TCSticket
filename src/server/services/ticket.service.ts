@@ -417,20 +417,25 @@ export async function addComment(input: {
   authorId: string
   body: string
   isInternal: boolean
+  attachments?: { url: string; publicId: string; width: number; height: number }[]
 }) {
   await dbConnect()
 
   const ticket = await TicketModel.findOne({ number: input.ticketNumber, deletedAt: null })
   if (!ticket) throw new Error('Ticket not found')
 
+  const attachments = input.attachments ?? []
+
   const comment = await TicketCommentModel.create({
     ticketId: ticket._id,
     authorId: input.authorId,
     body: input.body,
     isInternal: input.isInternal,
+    attachments,
   })
 
   ticket.counts.comments += 1
+  ticket.counts.attachments += attachments.length
   ticket.lastActivityAt = new Date()
   if (!ticket.firstResponseAt && !input.isInternal) ticket.firstResponseAt = new Date()
   await ticket.save()
@@ -450,6 +455,37 @@ export async function listComments(ticketId: string) {
     .sort({ createdAt: 1 })
     .populate({ path: 'authorId', select: 'fullname email avatarUrl' })
     .lean()
+}
+
+/** Soft-deletes a comment and decrements the parent ticket's counts. Returns the deleted
+ *  comment (including its attachments, so the caller can clean those up in Cloudinary) or
+ *  null if the comment doesn't exist / was already deleted. */
+export async function softDeleteComment(commentId: string, actorId: string) {
+  await dbConnect()
+
+  const comment = await TicketCommentModel.findOneAndUpdate(
+    { _id: commentId, deletedAt: null },
+    { deletedAt: new Date() },
+  )
+  if (!comment) return null
+
+  await TicketModel.updateOne(
+    { _id: comment.ticketId },
+    {
+      $inc: {
+        'counts.comments': -1,
+        'counts.attachments': -(comment.attachments?.length ?? 0),
+      },
+    },
+  )
+
+  await TicketEventModel.create({
+    ticketId: comment.ticketId,
+    actorId,
+    action: 'comment_deleted',
+  })
+
+  return comment
 }
 
 export async function listEvents(ticketId: string) {

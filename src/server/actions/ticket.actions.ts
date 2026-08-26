@@ -6,6 +6,10 @@ import { requireAbility, requireTicketScope } from '@/server/auth/session'
 import { sanitizeHtml } from '@/lib/sanitize-html'
 import { createTicketSchema, updateTicketSchema, addCommentSchema } from '@/lib/schemas/ticket'
 import * as ticketService from '@/server/services/ticket.service'
+import { uploadCommentImage, deleteCommentImage } from '@/server/cloudinary'
+
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024
+const ALLOWED_IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif'])
 
 export type ActionState = { error?: string } | undefined
 
@@ -65,6 +69,38 @@ export async function updateTicketFieldAction(
   revalidatePath('/tickets')
 }
 
+export type UploadState = { error?: string; image?: UploadedImageResult } | undefined
+type UploadedImageResult = { url: string; publicId: string; width: number; height: number }
+
+/** Uploads a single image to Cloudinary for the comment composer's preview-before-post flow. */
+export async function uploadCommentImageAction(
+  _prevState: UploadState,
+  formData: FormData,
+): Promise<UploadState> {
+  const { ability } = await requireAbility()
+  if (!ability.can('create', 'attachment')) {
+    return { error: 'You do not have permission to upload attachments.' }
+  }
+
+  const file = formData.get('file')
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: 'No file provided' }
+  }
+  if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+    return { error: 'Only PNG, JPEG, WEBP, and GIF images are allowed' }
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    return { error: 'Image must be under 8MB' }
+  }
+
+  try {
+    const image = await uploadCommentImage(file)
+    return { image }
+  } catch {
+    return { error: 'Upload failed. Please try again.' }
+  }
+}
+
 export async function addCommentAction(
   _prevState: ActionState,
   formData: FormData,
@@ -85,9 +121,20 @@ export async function addCommentAction(
     }
   }
 
+  let attachments: UploadedImageResult[] = []
+  const attachmentsRaw = formData.get('attachments')
+  if (typeof attachmentsRaw === 'string' && attachmentsRaw.length > 0) {
+    try {
+      attachments = JSON.parse(attachmentsRaw)
+    } catch {
+      return { error: 'Invalid attachments' }
+    }
+  }
+
   const parsed = addCommentSchema.safeParse({
     body: formData.get('body'),
     isInternal,
+    attachments,
   })
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? 'Invalid input' }
@@ -98,6 +145,7 @@ export async function addCommentAction(
     authorId: user.id,
     body: sanitizeHtml(parsed.data.body),
     isInternal: parsed.data.isInternal,
+    attachments: parsed.data.attachments,
   })
 
   revalidatePath(`/tickets/${number}`)
@@ -108,4 +156,17 @@ export async function deleteTicketAction(number: number) {
   await ticketService.softDeleteTicket(number, user.id)
   revalidatePath('/tickets')
   redirect('/tickets')
+}
+
+export async function deleteCommentAction(ticketNumber: number, commentId: string) {
+  const { user } = await requireAbility({ action: 'delete', subject: 'comment' })
+
+  const comment = await ticketService.softDeleteComment(commentId, user.id)
+  if (!comment) return
+
+  for (const attachment of comment.attachments ?? []) {
+    await deleteCommentImage(attachment.publicId).catch(() => {})
+  }
+
+  revalidatePath(`/tickets/${ticketNumber}`)
 }

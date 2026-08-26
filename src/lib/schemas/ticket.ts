@@ -23,9 +23,22 @@ export const updateTicketSchema = z.object({
 
 export type UpdateTicketInput = z.infer<typeof updateTicketSchema>
 
-export const addCommentSchema = z.object({
-  body: z.string().trim().min(1, 'Comment cannot be empty'),
-  isInternal: z.boolean().default(false),
+const commentAttachment = z.object({
+  url: z.string().url(),
+  publicId: z.string().min(1),
+  width: z.number(),
+  height: z.number(),
 })
+
+export const addCommentSchema = z
+  .object({
+    body: z.string().trim(),
+    isInternal: z.boolean().default(false),
+    attachments: z.array(commentAttachment).max(6, 'At most 6 images per comment').default([]),
+  })
+  .refine((data) => data.body.length > 0 || data.attachments.length > 0, {
+    message: 'Add some text or at least one image',
+    path: ['body'],
+  })
 
 export type AddCommentInput = z.infer<typeof addCommentSchema>

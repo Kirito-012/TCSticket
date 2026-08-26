@@ -102,11 +102,11 @@ export function RegisterForm() {
         <div className="grid grid-cols-2 gap-3">
           <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-border-strong bg-white/[0.03] py-2.5 text-sm font-medium text-muted-strong transition-colors has-[:checked]:border-accent/50 has-[:checked]:bg-accent-soft has-[:checked]:text-accent-strong">
             <input type="radio" name="roleKey" value="manager" required className="sr-only" />
-            Manager
+            Nodal Manager
           </label>
           <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-border-strong bg-white/[0.03] py-2.5 text-sm font-medium text-muted-strong transition-colors has-[:checked]:border-accent/50 has-[:checked]:bg-accent-soft has-[:checked]:text-accent-strong">
             <input type="radio" name="roleKey" value="agent" required className="sr-only" />
-            Agent
+            Surveyor
           </label>
         </div>
       </div>

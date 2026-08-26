@@ -15,6 +15,7 @@ const ACTION_LABELS: Record<string, string> = {
   created: 'created this ticket',
   commented: 'replied',
   note_added: 'added an internal note',
+  comment_deleted: 'deleted a comment',
   deleted: 'deleted this ticket',
   restored: 'restored this ticket',
 }

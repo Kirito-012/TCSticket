@@ -83,11 +83,19 @@ export function toTicketDetailView(t: any): TicketDetailView {
   }
 }
 
+export type CommentAttachmentView = {
+  url: string
+  publicId: string
+  width: number
+  height: number
+}
+
 export type CommentView = {
   id: string
   bodyHtml: string
   isInternal: boolean
   author: PersonView
+  attachments: CommentAttachmentView[]
   createdAt: string
 }
 
@@ -98,6 +106,12 @@ export function toCommentView(c: any): CommentView {
     bodyHtml: c.body,
     isInternal: c.isInternal,
     author: toPerson(c.authorId),
+    attachments: (c.attachments ?? []).map((a: CommentAttachmentView) => ({
+      url: a.url,
+      publicId: a.publicId,
+      width: a.width,
+      height: a.height,
+    })),
     createdAt: new Date(c.createdAt).toISOString(),
   }
 }

@@ -20,8 +20,8 @@ export default function RegisterPage() {
 
         <div className="relative max-w-md space-y-6">
           <p className="text-2xl font-medium leading-snug tracking-tight text-foreground">
-            Request access as a Manager or Agent — an admin reviews every request before you can
-            sign in.
+            Request access as a Nodal Manager or Surveyor — an admin reviews every request before
+            you can sign in.
           </p>
 
           <div className="grid grid-cols-3 gap-4 border-t border-border pt-6">
