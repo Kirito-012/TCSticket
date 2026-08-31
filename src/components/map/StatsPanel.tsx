@@ -1,8 +1,27 @@
 'use client'
 
 import { type ReactNode, useEffect, useState } from 'react'
-import { CLASS_GROUP_COLORS } from '@/lib/classColors'
+import {
+  CLASS_GROUP_COLORS,
+  POINT_LAYER_COLORS,
+  POINT_LAYER_LABELS,
+  LINE_LAYER_COLORS,
+  LINE_LAYER_LABELS,
+  POLYGON_LAYER_COLORS,
+  POLYGON_LAYER_LABELS,
+} from '@/lib/classColors'
 import Panel from '@/components/map/Panel'
+
+const POI_COLORS: Record<string, string> = {
+  ...POINT_LAYER_COLORS,
+  ...LINE_LAYER_COLORS,
+  ...POLYGON_LAYER_COLORS,
+}
+const POI_LABELS: Record<string, string> = {
+  ...POINT_LAYER_LABELS,
+  ...LINE_LAYER_LABELS,
+  ...POLYGON_LAYER_LABELS,
+}
 
 type Stats = {
   byClass: { class_group: string; features: number; hectares: string }[]
@@ -14,6 +33,7 @@ type Stats = {
     plan_features: number
     plan_hectares: string
   }[]
+  poiByLayer: { layer: string; features: number }[]
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -197,6 +217,28 @@ export default function StatsPanel({
                   row.segments,
                   (Number(row.metres) / 1000).toFixed(1),
                 ])}
+              />
+            )}
+          </Section>
+
+          <Section title={filtered ? 'Points of interest (this sector)' : 'Points of interest'}>
+            {stats.poiByLayer.every((row) => row.features === 0) ? (
+              <p className="text-[12px] text-slate-400">No POI features in this sector.</p>
+            ) : (
+              <Table
+                columns={[{ header: 'Layer' }, { header: 'Features', align: 'right' }]}
+                rows={stats.poiByLayer
+                  .filter((row) => row.features > 0)
+                  .map((row) => [
+                    <span key="l" className="flex items-center gap-1.5">
+                      <span
+                        className="h-2 w-2 shrink-0 rounded-full"
+                        style={{ background: POI_COLORS[row.layer] ?? '#cbd5e1' }}
+                      />
+                      <span className="truncate">{POI_LABELS[row.layer] ?? row.layer}</span>
+                    </span>,
+                    row.features,
+                  ])}
               />
             )}
           </Section>

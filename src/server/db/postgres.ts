@@ -11,7 +11,7 @@ export function getPool(): Pool {
   if (!global._pgPool) {
     global._pgPool = new Pool({
       connectionString: process.env.POSTGRES_URL,
-      max: 5,
+      max: 15,
       idleTimeoutMillis: 10_000,
       connectionTimeoutMillis: 10_000,
     })

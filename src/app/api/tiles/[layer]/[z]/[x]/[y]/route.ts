@@ -18,6 +18,70 @@ const LAYERS: Record<string, { table: string; columns: string }> = {
     table: 'kumbh.sector_plan',
     columns: 'id, class, class_group, subclass, plot_no, block, sector_no, label, area',
   },
+  amenities: {
+    table: 'kumbh.amenities',
+    columns: 'id, class, subclass, sector, remark',
+  },
+  ashram: {
+    table: 'kumbh.ashram',
+    columns: 'id, name, sub_class, land_use, plu_2025, rd_rly_nam',
+  },
+  bridge: {
+    table: 'kumbh.bridge',
+    columns: 'id, remark, type, mode',
+  },
+  bus_stop: {
+    table: 'kumbh.bus_stop',
+    columns: 'id, name, remark',
+  },
+  bus_terminal: {
+    table: 'kumbh.bus_terminal',
+    columns: 'id, name',
+  },
+  core_parking: {
+    table: 'kumbh.core_parking',
+    columns: 'id, name, kumbh_land, sector, purpose, type, area',
+  },
+  dustbins: {
+    table: 'kumbh.dustbins',
+    columns: 'id, type, sector',
+  },
+  fh_location: {
+    table: 'kumbh.fh_location',
+    columns: 'id, fh_name, type',
+  },
+  ghat_area: {
+    table: 'kumbh.ghat_area',
+    columns: 'id, name',
+  },
+  kumbh_mela_2027_ghat: {
+    table: 'kumbh.kumbh_mela_2027_ghat',
+    columns: 'id, name, remark, number',
+  },
+  kumbh_land: {
+    table: 'kumbh.kumbh_land',
+    columns: 'id, name, kumbh_land, sector, purpose, type, area',
+  },
+  public_service_facilities: {
+    table: 'kumbh.public_service_facilities',
+    columns: 'id, name, type, subclass, services, category, bed',
+  },
+  river: {
+    table: 'kumbh.river',
+    columns: 'id, name, type',
+  },
+  sanitation: {
+    table: 'kumbh.sanitation',
+    columns: 'id, name, class, subclass, sector, remark',
+  },
+  transformer: {
+    table: 'kumbh.transformer',
+    columns: 'id, name, sector, remark',
+  },
+  trench_line: {
+    table: 'kumbh.trench_line',
+    columns: 'id, name, remark',
+  },
 }
 
 export async function GET(
@@ -58,7 +122,7 @@ export async function GET(
     status: 200,
     headers: {
       'Content-Type': 'application/vnd.mapbox-vector-tile',
-      'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate',
+      'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400',
     },
   })
 }

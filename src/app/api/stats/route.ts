@@ -3,6 +3,29 @@ import { getPool } from '@/server/db/postgres'
 
 export const runtime = 'nodejs'
 
+// POI layers loaded from the Aug 2026 JSON drop (scripts/load_kumbh_json_layers.py).
+// Most don't carry a reliable numeric sector_no, so per-sector counts are
+// computed spatially (ST_Intersects against sector_boundary) rather than by
+// joining on an attribute column.
+const POI_TABLES = [
+  'amenities',
+  'ashram',
+  'bridge',
+  'bus_stop',
+  'bus_terminal',
+  'core_parking',
+  'dustbins',
+  'fh_location',
+  'ghat_area',
+  'kumbh_mela_2027_ghat',
+  'kumbh_land',
+  'public_service_facilities',
+  'river',
+  'sanitation',
+  'transformer',
+  'trench_line',
+] as const
+
 export async function GET(req: NextRequest) {
   const sectorParam = req.nextUrl.searchParams.get('sector')
   const sectorNo =
@@ -10,7 +33,15 @@ export async function GET(req: NextRequest) {
 
   const pool = getPool()
 
-  const [byClass, roadByType, perSector] = await Promise.all([
+  const poiByLayerSql = POI_TABLES.map(
+    (t) => `SELECT '${t}' AS layer, count(*) AS features FROM kumbh.${t}
+      WHERE $1::int IS NULL OR EXISTS (
+        SELECT 1 FROM kumbh.sector_boundary b
+        WHERE b.sector_no = $1 AND ST_Intersects(b.geom, kumbh.${t}.geom)
+      )`,
+  ).join('\n      UNION ALL\n      ')
+
+  const [byClass, roadByType, perSector, poiByLayer] = await Promise.all([
     pool.query(
       `
       SELECT class_group, count(*) AS features,
@@ -47,11 +78,19 @@ export async function GET(req: NextRequest) {
       `,
       [sectorNo],
     ),
+    pool.query(
+      `
+      ${poiByLayerSql}
+      ORDER BY features DESC;
+      `,
+      [sectorNo],
+    ),
   ])
 
   return Response.json({
     byClass: byClass.rows,
     roadByType: roadByType.rows,
     perSector: perSector.rows,
+    poiByLayer: poiByLayer.rows,
   })
 }
