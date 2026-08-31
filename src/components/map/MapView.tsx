@@ -25,10 +25,26 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 // version (they must stay in the same directory — the worker imports the
 // shared module by relative path).
 setWorkerUrl('/maplibre-gl-worker.mjs')
-import { CLASS_GROUP_COLORS, ROAD_TYPE_COLORS } from '@/lib/classColors'
+import {
+  CLASS_GROUP_COLORS,
+  ROAD_TYPE_COLORS,
+  POINT_LAYER_COLORS,
+  POINT_LAYER_LABELS,
+  LINE_LAYER_COLORS,
+  LINE_LAYER_LABELS,
+  POLYGON_LAYER_COLORS,
+  POLYGON_LAYER_LABELS,
+} from '@/lib/classColors'
 import StatsPanel from '@/components/map/StatsPanel'
 import Panel from '@/components/map/Panel'
-import { ChartBarIcon, CompassIcon, LayersIcon, SearchIcon, TagIcon } from '@/components/map/icons'
+import {
+  ChartBarIcon,
+  ChevronDownIcon,
+  CompassIcon,
+  LayersIcon,
+  SearchIcon,
+  TagIcon,
+} from '@/components/map/icons'
 
 type Sector = {
   sector_no: number
@@ -52,6 +68,46 @@ function matchExpr(
 ): ExpressionSpecification {
   const pairs = Object.entries(colors).flat()
   return ['match', ['get', field], ...pairs, fallback] as unknown as ExpressionSpecification
+}
+
+type PoiGeomType = 'point' | 'line' | 'polygon'
+
+type PoiLayerDef = {
+  key: string
+  label: string
+  color: string
+  geomType: PoiGeomType
+}
+
+// Single source of truth for the 16 POI layers: drives sources/layers on the
+// map, the LAYERS panel toggles, and stays in sync with StatsPanel's legend
+// since all three read the same POINT_/LINE_/POLYGON_LAYER_* maps.
+const POI_LAYER_DEFS: PoiLayerDef[] = [
+  ...Object.keys(POINT_LAYER_COLORS).map((key) => ({
+    key,
+    label: POINT_LAYER_LABELS[key] ?? key,
+    color: POINT_LAYER_COLORS[key],
+    geomType: 'point' as const,
+  })),
+  ...Object.keys(LINE_LAYER_COLORS).map((key) => ({
+    key,
+    label: LINE_LAYER_LABELS[key] ?? key,
+    color: LINE_LAYER_COLORS[key],
+    geomType: 'line' as const,
+  })),
+  ...Object.keys(POLYGON_LAYER_COLORS).map((key) => ({
+    key,
+    label: POLYGON_LAYER_LABELS[key] ?? key,
+    color: POLYGON_LAYER_COLORS[key],
+    geomType: 'polygon' as const,
+  })),
+]
+
+// Short signage codes shown as an on-map text label for a few POI point
+// layers, per user request -- not every layer needs one.
+const POI_SIGNAGE_CODES: Record<string, string> = {
+  bus_stop: 'BS',
+  kumbh_mela_2027_ghat: 'G',
 }
 
 type InitialParcel = {
@@ -80,15 +136,26 @@ export default function MapView({
   const [selectedSector, setSelectedSector] = useState<number | 'all'>(
     initialParcel?.sectorNo ?? 'all',
   )
-  const [visibility, setVisibility] = useState({
+  const [visibility, setVisibility] = useState<Record<string, boolean>>(() => ({
     sector_plan: true,
     road: true,
     sector_boundary: true,
-  })
-  const [opacity, setOpacity] = useState({ sector_plan: 0.75, road: 1, sector_boundary: 1 })
+    ...Object.fromEntries(POI_LAYER_DEFS.map((d) => [d.key, true])),
+  }))
   const [classFilter, setClassFilter] = useState<string | 'all'>('all')
   const [search, setSearch] = useState('')
   const [showStats, setShowStats] = useState(true)
+  const [classDropdownOpen, setClassDropdownOpen] = useState(false)
+  const classDropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!classDropdownOpen) return
+    function onPointerDown(e: PointerEvent) {
+      if (!classDropdownRef.current?.contains(e.target as Node)) setClassDropdownOpen(false)
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    return () => document.removeEventListener('pointerdown', onPointerDown)
+  }, [classDropdownOpen])
 
   useEffect(() => {
     fetch('/api/sectors')
@@ -193,6 +260,11 @@ export default function MapView({
       container: mapContainer.current,
       style: {
         version: 8,
+        // Needed for any 'symbol'/text-field layer (the P/BS/G signage
+        // labels below) -- MapLibre renders text from server-supplied SDF
+        // glyph PBFs, not local system fonts. Public, no-key demo endpoint,
+        // same tier of dependency as the OSM raster tiles below.
+        glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
         sources: {
           osm: {
             type: 'raster',
@@ -233,6 +305,31 @@ export default function MapView({
         promoteId: 'id',
       })
 
+      // River sits beneath everything else on the map (it's the base
+      // waterway the sector plan is drawn over), so it's added first, before
+      // sector_plan -- POI layers all get their own vector source below, but
+      // river's source/layer are created here instead so it can be placed at
+      // the very bottom of the paint order.
+      const riverDef = POI_LAYER_DEFS.find((d) => d.key === 'river')
+      if (riverDef) {
+        map.addSource(riverDef.key, {
+          type: 'vector',
+          tiles: [`${location.origin}/api/tiles/${riverDef.key}/{z}/{x}/{y}`],
+          promoteId: 'id',
+        })
+        map.addLayer({
+          id: `poi-${riverDef.key}`,
+          type: 'fill',
+          source: riverDef.key,
+          'source-layer': riverDef.key,
+          paint: {
+            'fill-color': riverDef.color,
+            'fill-opacity': 0.25,
+            'fill-outline-color': riverDef.color,
+          },
+        })
+      }
+
       // Render order: sector_plan fill (bottom) -> roads -> boundaries (top)
       map.addLayer({
         id: 'sector-plan-fill',
@@ -256,6 +353,25 @@ export default function MapView({
           'line-color': '#f97316',
           'line-width': 1.5,
           'line-dasharray': [2, 1.5],
+        },
+      })
+      // Signage: a centered "P" on every Parking parcel in the sector plan.
+      map.addLayer({
+        id: 'sector-plan-parking-label',
+        type: 'symbol',
+        source: 'sector_plan',
+        'source-layer': 'sector_plan',
+        filter: ['==', ['get', 'class_group'], 'Parking'],
+        layout: {
+          'text-field': 'P',
+          'text-font': ['Noto Sans Bold'],
+          'text-size': ['interpolate', ['linear'], ['zoom'], 12, 10, 18, 20],
+          'text-allow-overlap': false,
+        },
+        paint: {
+          'text-color': '#1f2937',
+          'text-halo-color': '#ffffff',
+          'text-halo-width': 1.2,
         },
       })
       map.addLayer({
@@ -286,6 +402,89 @@ export default function MapView({
           'line-width': 2,
         },
       })
+
+      // Remaining POI layers (Aug 2026 JSON drop) -- one vector source + one
+      // visual layer per entry in POI_LAYER_DEFS (river excluded -- it was
+      // already added above, beneath sector_plan), rendered on top of the
+      // sector plan/roads/boundaries above. Sources are created up front so
+      // add-layer order below (which controls paint/z-order) doesn't have to
+      // match POI_LAYER_DEFS's array order.
+      const remainingPoiDefs = POI_LAYER_DEFS.filter((d) => d.key !== 'river')
+      for (const def of remainingPoiDefs) {
+        map.addSource(def.key, {
+          type: 'vector',
+          tiles: [`${location.origin}/api/tiles/${def.key}/{z}/{x}/{y}`],
+          promoteId: 'id',
+        })
+      }
+
+      // Paint polygons first (bottom), then lines, then points (top) --
+      // otherwise area layers like kumbh_land/ashram would cover the point
+      // markers (dustbins, sanitation, etc.) drawn before them.
+      const byGeomType = (t: PoiGeomType) => remainingPoiDefs.filter((d) => d.geomType === t)
+
+      for (const def of byGeomType('polygon')) {
+        map.addLayer({
+          id: `poi-${def.key}`,
+          type: 'fill',
+          source: def.key,
+          'source-layer': def.key,
+          paint: {
+            'fill-color': def.color,
+            'fill-opacity': 0.25,
+            'fill-outline-color': def.color,
+          },
+        })
+      }
+      for (const def of byGeomType('line')) {
+        map.addLayer({
+          id: `poi-${def.key}`,
+          type: 'line',
+          source: def.key,
+          'source-layer': def.key,
+          paint: {
+            'line-color': def.color,
+            'line-width': 2,
+          },
+        })
+      }
+      for (const def of byGeomType('point')) {
+        map.addLayer({
+          id: `poi-${def.key}`,
+          type: 'circle',
+          source: def.key,
+          'source-layer': def.key,
+          paint: {
+            'circle-color': def.color,
+            'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 2.5, 16, 6],
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 1,
+          },
+        })
+
+        const signageCode = POI_SIGNAGE_CODES[def.key]
+        if (signageCode) {
+          map.addLayer({
+            id: `poi-${def.key}-label`,
+            type: 'symbol',
+            source: def.key,
+            'source-layer': def.key,
+            layout: {
+              'text-field': signageCode,
+              'text-font': ['Noto Sans Bold'],
+              'text-size': ['interpolate', ['linear'], ['zoom'], 12, 9, 18, 14],
+              'text-offset': [0, 1.1],
+              'text-anchor': 'top',
+              'text-allow-overlap': false,
+            },
+            paint: {
+              'text-color': def.color,
+              'text-halo-color': '#ffffff',
+              'text-halo-width': 1.2,
+            },
+          })
+        }
+      }
 
       // Invisible hit-target covering each sector's full boundary polygon
       // (near-zero, not exactly-zero, opacity so it still paints and stays
@@ -319,17 +518,7 @@ export default function MapView({
         source: 'sector_boundary',
         'source-layer': 'sector_boundary',
         filter: NO_MATCH,
-        paint: { 'line-color': '#f59e0b', 'line-width': 2.5, 'line-opacity': 0.95 },
-      })
-      // That sector's roads pick up the same accent on hover, without
-      // filtering/hiding the rest of the road network.
-      map.addLayer({
-        id: 'road-hover-highlight',
-        type: 'line',
-        source: 'road',
-        'source-layer': 'road',
-        filter: NO_MATCH,
-        paint: { 'line-color': '#f59e0b', 'line-width': 4, 'line-opacity': 0.85 },
+        paint: { 'line-color': '#f59e0b', 'line-width': 4, 'line-opacity': 0.95 },
       })
       // Selected-sector outline (blue) -- sector-plan-fill/road-line are
       // already filtered down to just this sector elsewhere; this outline
@@ -348,7 +537,6 @@ export default function MapView({
           sectorNo === null ? NO_MATCH : ['==', ['get', 'sector_no'], sectorNo]
         map.setFilter('sector-hover-fill', filter)
         map.setFilter('sector-hover-outline', filter)
-        map.setFilter('road-hover-highlight', filter)
       }
 
       map.on('mousemove', 'sector-hit-target', (e: MapLayerMouseEvent) => {
@@ -407,12 +595,19 @@ export default function MapView({
       [
         ['sector-plan-fill', visibility.sector_plan],
         ['sector-plan-peripheral-outline', visibility.sector_plan],
+        ['sector-plan-parking-label', visibility.sector_plan],
         ['road-line', visibility.road],
-        ['road-hover-highlight', visibility.road],
         ['sector-boundary-line', visibility.sector_boundary],
         ['sector-hover-fill', visibility.sector_boundary],
         ['sector-hover-outline', visibility.sector_boundary],
         ['sector-selected-outline', visibility.sector_boundary],
+        ...POI_LAYER_DEFS.flatMap(
+          (d) =>
+            [
+              [`poi-${d.key}`, visibility[d.key]],
+              [`poi-${d.key}-label`, visibility[d.key]],
+            ] as [string, boolean][],
+        ),
       ] as const
     ).forEach(([id, visible]) => {
       if (map.getLayer(id)) {
@@ -420,15 +615,6 @@ export default function MapView({
       }
     })
   }, [visibility])
-
-  // Opacity
-  useEffect(() => {
-    const map = mapRef.current
-    if (!map || !map.getLayer('sector-plan-fill')) return
-    map.setPaintProperty('sector-plan-fill', 'fill-opacity', opacity.sector_plan)
-    map.setPaintProperty('road-line', 'line-opacity', opacity.road)
-    map.setPaintProperty('sector-boundary-line', 'line-opacity', opacity.sector_boundary)
-  }, [opacity])
 
   // Sector filter (also drives fly-to when a single sector is chosen)
   useEffect(() => {
@@ -482,13 +668,11 @@ export default function MapView({
     }
   }
 
-  const layerRows: Array<{
-    key: 'sector_plan' | 'road' | 'sector_boundary'
-    label: string
-  }> = [
+  const layerRows: Array<{ key: string; label: string; color?: string }> = [
     { key: 'sector_plan', label: 'Sector plan' },
     { key: 'road', label: 'Roads' },
     { key: 'sector_boundary', label: 'Boundaries' },
+    ...POI_LAYER_DEFS.map((d) => ({ key: d.key, label: d.label, color: d.color })),
   ]
 
   return (
@@ -546,64 +730,119 @@ export default function MapView({
               </select>
             </div>
 
-            <div>
+            <div ref={classDropdownRef} className="relative">
               <label className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                 <TagIcon className="h-3.5 w-3.5" />
                 Class
               </label>
-              <select
-                value={classFilter}
-                onChange={(e) => setClassFilter(e.target.value)}
-                className="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[13px] text-slate-900 outline-none transition-shadow focus:border-blue-500 focus:ring-2 focus:ring-blue-500/25"
+              <button
+                type="button"
+                onClick={() => setClassDropdownOpen((v) => !v)}
+                aria-haspopup="listbox"
+                aria-expanded={classDropdownOpen}
+                className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-left text-[13px] text-slate-900 outline-none transition-shadow focus:border-blue-500 focus:ring-2 focus:ring-blue-500/25"
               >
-                <option value="all">All classes</option>
-                {classGroups.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+                <span className="flex min-w-0 items-center gap-2">
+                  {classFilter !== 'all' && (
+                    <span
+                      className="h-2.5 w-2.5 shrink-0 rounded-full"
+                      style={{ background: CLASS_GROUP_COLORS[classFilter] }}
+                    />
+                  )}
+                  <span className="truncate">
+                    {classFilter === 'all' ? 'All classes' : classFilter}
+                  </span>
+                </span>
+                <ChevronDownIcon
+                  className={`h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform ${classDropdownOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+              {classDropdownOpen && (
+                <ul
+                  role="listbox"
+                  className="absolute z-10 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+                >
+                  <li role="option" aria-selected={classFilter === 'all'}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setClassFilter('all')
+                        setClassDropdownOpen(false)
+                      }}
+                      className={`w-full cursor-pointer px-2.5 py-1.5 text-left text-[13px] text-slate-900 hover:bg-slate-50 ${classFilter === 'all' ? 'bg-slate-100' : ''}`}
+                    >
+                      All classes
+                    </button>
+                  </li>
+                  {classGroups.map((c) => (
+                    <li key={c} role="option" aria-selected={classFilter === c}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setClassFilter(c)
+                          setClassDropdownOpen(false)
+                        }}
+                        className={`flex w-full cursor-pointer items-center gap-2 px-2.5 py-1.5 text-left text-[13px] text-slate-900 hover:bg-slate-50 ${classFilter === c ? 'bg-slate-100' : ''}`}
+                      >
+                        <span
+                          className="h-2.5 w-2.5 shrink-0 rounded-full"
+                          style={{ background: CLASS_GROUP_COLORS[c] }}
+                        />
+                        <span className="truncate">{c}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
 
           {/* Layers */}
           <div className="border-t border-slate-100 pt-3">
-            <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-              Layers
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                Layers
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  const nextValue = !layerRows.every(({ key }) => visibility[key])
+                  setVisibility((v) => {
+                    const next = { ...v }
+                    for (const { key } of layerRows) next[key] = nextValue
+                    return next
+                  })
+                }}
+                className="cursor-pointer text-[11px] font-semibold text-blue-600 hover:text-blue-700"
+              >
+                {layerRows.every(({ key }) => visibility[key]) ? 'Deselect all' : 'Select all'}
+              </button>
             </div>
             <div className="flex flex-col gap-2.5">
-              {layerRows.map(({ key, label }) => (
+              {layerRows.map(({ key, label, color }) => (
                 <div
                   key={key}
-                  className="rounded-lg border border-slate-100 bg-slate-50/60 px-2.5 py-2"
+                  className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 bg-slate-50/60 px-2.5 py-2"
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[13px] font-medium text-slate-800">{label}</span>
-                    <label className="relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center">
-                      <input
-                        type="checkbox"
-                        className="peer sr-only"
-                        checked={visibility[key]}
-                        onChange={(e) => setVisibility((v) => ({ ...v, [key]: e.target.checked }))}
+                  <span className="flex min-w-0 items-center gap-2">
+                    {color && (
+                      <span
+                        className="h-2.5 w-2.5 shrink-0 rounded-[3px]"
+                        style={{ background: color }}
                       />
-                      <span className="absolute inset-0 rounded-full bg-slate-300 transition-colors peer-checked:bg-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500/40" />
-                      <span className="absolute left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
-                    </label>
-                  </div>
-                  <div className="mt-1.5 flex items-center gap-2">
+                    )}
+                    <span className="truncate text-[13px] font-medium text-slate-800">{label}</span>
+                  </span>
+                  <label className="relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center">
                     <input
-                      type="range"
-                      min={0}
-                      max={1}
-                      step={0.05}
-                      value={opacity[key]}
-                      onChange={(e) => setOpacity((o) => ({ ...o, [key]: Number(e.target.value) }))}
-                      className="kumbh-range h-1 w-full cursor-pointer"
+                      type="checkbox"
+                      className="peer sr-only"
+                      checked={visibility[key]}
+                      onChange={(e) => setVisibility((v) => ({ ...v, [key]: e.target.checked }))}
                     />
-                    <span className="w-8 shrink-0 text-right text-[11px] tabular-nums text-slate-500">
-                      {Math.round(opacity[key] * 100)}%
-                    </span>
-                  </div>
+                    <span className="absolute inset-0 rounded-full bg-slate-300 transition-colors peer-checked:bg-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500/40" />
+                    <span className="absolute left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                  </label>
                 </div>
               ))}
             </div>
