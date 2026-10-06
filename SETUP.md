@@ -44,6 +44,8 @@ git clone https://github.com/WebODM/WebODM.git
 
 ## 2. WebODM (port 8000)
 
+> WebODM is not part of our repos. It is the open-source project cloned from GitHub (https://github.com/WebODM/WebODM) and runs **locally in Docker** on your machine.
+
 Start Docker Desktop first and wait until it says "running", then:
 
 ```bash
