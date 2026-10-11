@@ -58,7 +58,7 @@ export default async function AccountsPage() {
         primaryAction={canEdit ? { label: 'New account', href: '/accounts/new' } : undefined}
       />
 
-      <main className="flex-1 px-8 py-6 animate-fade-in">
+      <main className="flex-1 px-4 py-6 sm:px-8 animate-fade-in">
         {currentUser && (
           <CurrentUserCard
             fullname={currentUser.fullname}

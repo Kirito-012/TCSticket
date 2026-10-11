@@ -10,6 +10,11 @@ const ticketSchema = new Schema(
     // Customer bucket — optional until Phase 3 builds real Groups.
     groupId: { type: Schema.Types.ObjectId, ref: 'Group', default: null },
     assigneeId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    sectorKey: { type: String, default: null },
+    location: {
+      latitude: { type: Number, default: null },
+      longitude: { type: Number, default: null },
+    },
     typeId: { type: Schema.Types.ObjectId, ref: 'TicketType', required: true },
     statusId: { type: Schema.Types.ObjectId, ref: 'TicketStatus', required: true },
     priorityId: { type: Schema.Types.ObjectId, ref: 'TicketPriority', required: true },
@@ -23,6 +28,38 @@ const ticketSchema = new Schema(
     closedAt: { type: Date, default: null },
 
     source: { type: String, enum: ['web', 'email', 'api', 'public'], default: 'web' },
+
+    // The photo(s) the ticket arrived with — for tickets from DroneSeva, the drone image that
+    // the garbage was found in. Shown to whoever works the ticket.
+    sourcePhotos: {
+      type: [
+        {
+          url: { type: String, required: true },
+          publicId: { type: String, required: true },
+          width: { type: Number, required: true },
+          height: { type: Number, required: true },
+        },
+      ],
+      default: [],
+    },
+
+    // Surveyor-uploaded proof of cleanup. At least one is required before a surveyor can resolve.
+    resolutionPhotos: {
+      type: [
+        {
+          url: { type: String, required: true },
+          publicId: { type: String, required: true },
+          width: { type: Number, required: true },
+          height: { type: Number, required: true },
+          uploadedById: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+          uploadedAt: { type: Date, default: () => new Date() },
+        },
+      ],
+      default: [],
+    },
+
+    // Optional free-text note the surveyor writes when resolving (plain text, max 1000 chars).
+    resolutionNote: { type: String, default: '' },
 
     counts: {
       comments: { type: Number, default: 0 },

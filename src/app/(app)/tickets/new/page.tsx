@@ -16,7 +16,7 @@ export default async function NewTicketPage() {
     <>
       <Topbar title="New ticket" description="Create a ticket for your team to work" />
 
-      <main className="flex-1 px-8 py-6 animate-fade-in">
+      <main className="flex-1 px-4 py-6 sm:px-8 animate-fade-in">
         <Card className="mx-auto max-w-2xl p-6">
           <NewTicketForm
             types={types.map((t) => ({

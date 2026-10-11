@@ -18,6 +18,8 @@ const ACTION_LABELS: Record<string, string> = {
   comment_deleted: 'deleted a comment',
   deleted: 'deleted this ticket',
   restored: 'restored this ticket',
+  photo_added: 'uploaded a resolution photo',
+  photo_removed: 'removed a resolution photo',
 }
 
 function describe(event: EventView) {

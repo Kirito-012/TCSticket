@@ -6,6 +6,7 @@ const userSchema = new Schema(
     passwordHash: { type: String, required: true },
     fullname: { type: String, required: true },
     title: { type: String },
+    sectorKey: { type: String, default: null },
     avatarUrl: { type: String },
     roleId: { type: Schema.Types.ObjectId, ref: 'Role', required: true },
     isActive: { type: Boolean, default: true },

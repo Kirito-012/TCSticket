@@ -9,6 +9,7 @@ import { UserModel } from '../src/server/db/models/user.model'
 import { TicketStatusModel } from '../src/server/db/models/ticket-status.model'
 import { TicketPriorityModel } from '../src/server/db/models/ticket-priority.model'
 import { TicketTypeModel } from '../src/server/db/models/ticket-type.model'
+import { getRealSectors } from '../src/server/sectors'
 
 const ALL_GRANTS = [
   'ticket:read:own',
@@ -75,7 +76,7 @@ const ROLES = [
   },
   {
     key: 'agent',
-    name: 'Surveyor',
+    name: 'Zone Inspector',
     rank: 2,
     isSystem: true,
     // 'own' not 'group' — Groups/Teams/Departments aren't built. An Agent's ticket list and
@@ -90,7 +91,6 @@ const ROLES = [
       'note:read',
       'note:create',
       'attachment:create',
-      'account:read',
       'report:view',
     ],
   },
@@ -156,6 +156,7 @@ const TYPES = [
 
 async function seed() {
   await dbConnect()
+  const sectors = await getRealSectors(false)
 
   console.log('Seeding roles...')
   const roleDocs: Record<string, string> = {}
@@ -243,10 +244,40 @@ async function seed() {
     { upsert: true, returnDocument: 'after' },
   )
 
+  const demoPassword = 'Surveyor123!'
+  for (const sector of sectors) {
+    // e.g. "BAHADRABAD-01" -> bahadrabad-01@droneseva.local
+    const email = `${sector.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')}@droneseva.local`
+    await UserModel.findOneAndUpdate(
+      { sectorKey: sector.key }, // match by sector, so a changed email never creates a duplicate
+      {
+        $set: {
+          email,
+          passwordHash: await bcrypt.hash(demoPassword, 12),
+          fullname: `${sector.name} Zone Inspector`,
+          title: 'Zone Inspector',
+          roleId: roleDocs.agent,
+          sectorKey: sector.key,
+          isActive: true,
+          deletedAt: null,
+        },
+      },
+      { upsert: true },
+    )
+  }
+  await UserModel.updateMany(
+    { sectorKey: { $in: ['haridwar-north', 'haridwar-central', 'haridwar-south'] } },
+    { $set: { sectorKey: null, isActive: false } },
+  )
+
   console.log(
-    '\nDone. Seeded 3 roles, 5 statuses, 4 priorities, 4 types, 1 admin user, and 1 service account.',
+    `\nDone. Seeded 3 roles, 5 statuses, 4 priorities, 4 types, 1 admin user, 1 service account, and ${sectors.length} real sector zone inspectors.`,
   )
   console.log(`Log in with: ${adminEmail} / ${adminPassword}`)
+  console.log(`Demo zone inspector password: ${demoPassword}`)
   console.log(`DroneSeva integration service-account id: ${botUser._id.toString()} (${botEmail})`)
   process.exit(0)
 }

@@ -33,3 +33,23 @@ export function extractDroneSevaLink(issueHtml: string): {
   ).trim()
   return { html, droneSevaUrl: rewriteOrigin(match[1]) }
 }
+
+/** Extracts the GPS coordinate pair appended by DroneSeva, when one is present. */
+export function extractLocation(issueHtml: string): { latitude: number; longitude: number } | null {
+  const match = issueHtml.match(/Location:<\/strong>\s*(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/i)
+  if (!match) return null
+
+  const latitude = Number(match[1])
+  const longitude = Number(match[2])
+  if (
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude) ||
+    latitude < -90 ||
+    latitude > 90 ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    return null
+  }
+  return { latitude, longitude }
+}

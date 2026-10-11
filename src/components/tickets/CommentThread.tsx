@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useActionState, useTransition } from 'reac
 import { AlertCircle, Lock, ImagePlus, X, Loader2, Trash2 } from 'lucide-react'
 import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
+import { ImageLightbox } from '@/components/ui/ImageLightbox'
 import { RichTextEditor } from '@/components/editor/RichTextEditor'
 import { cn, timeAgo } from '@/lib/utils'
 import {
@@ -55,6 +56,9 @@ export function CommentThread({
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set())
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [, startDeleteTransition] = useTransition()
+  const [lightbox, setLightbox] = useState<{ images: { url: string }[]; index: number } | null>(
+    null,
+  )
 
   function handleDelete(commentId: string) {
     setConfirmDeleteId(null)
@@ -137,6 +141,12 @@ export function CommentThread({
 
   return (
     <div className="space-y-5">
+      <ImageLightbox
+        images={lightbox?.images ?? []}
+        index={lightbox?.index ?? null}
+        onChange={(index) => setLightbox((prev) => (prev ? { ...prev, index } : prev))}
+        onClose={() => setLightbox(null)}
+      />
       {visibleComments.length === 0 && (
         <p className="text-sm text-muted">No comments yet — be the first to reply.</p>
       )}
@@ -207,21 +217,21 @@ export function CommentThread({
             )}
             {c.attachments.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-2">
-                {c.attachments.map((a) => (
-                  <a
+                {c.attachments.map((a, i) => (
+                  <button
                     key={a.publicId}
-                    href={a.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block overflow-hidden rounded-lg border border-border-strong"
+                    type="button"
+                    onClick={() => setLightbox({ images: c.attachments, index: i })}
+                    aria-label={`View image ${i + 1} of ${c.attachments.length}`}
+                    className="block cursor-zoom-in overflow-hidden rounded-lg border border-border-strong"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={a.url}
                       alt="Comment attachment"
-                      className="h-28 w-28 object-cover transition-opacity hover:opacity-90"
+                      className="h-24 w-24 object-cover transition-opacity hover:opacity-90 sm:h-28 sm:w-28"
                     />
-                  </a>
+                  </button>
                 ))}
               </div>
             )}

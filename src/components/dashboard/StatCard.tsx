@@ -6,6 +6,7 @@ export function StatCard({
   caption,
   icon,
   accent = 'accent',
+  className,
 }: {
   label: string
   /** null renders "—" — used when a metric is intentionally unavailable in this scope
@@ -14,6 +15,7 @@ export function StatCard({
   caption?: string
   icon: React.ReactNode
   accent?: 'accent' | 'violet' | 'warning' | 'danger'
+  className?: string
 }) {
   const accentMap = {
     accent: 'text-accent-strong bg-accent-soft',
@@ -23,7 +25,12 @@ export function StatCard({
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-surface/60 p-5 backdrop-blur-sm transition-colors hover:bg-surface">
+    <div
+      className={cn(
+        'rounded-2xl border border-border bg-surface/60 p-4 backdrop-blur-sm transition-colors hover:bg-surface sm:p-5',
+        className,
+      )}
+    >
       <div className="flex items-center justify-between">
         <p className="text-xs font-medium text-muted">{label}</p>
         <div
@@ -32,10 +39,10 @@ export function StatCard({
           {icon}
         </div>
       </div>
-      <p className="mt-3 text-[28px] font-semibold leading-none tracking-tight text-foreground">
+      <p className="mt-2 text-2xl font-semibold sm:mt-3 sm:text-[28px] leading-none tracking-tight text-foreground">
         {value ?? '—'}
       </p>
-      {caption && <p className="mt-2.5 text-xs text-muted">{caption}</p>}
+      {caption && <p className="mt-2 hidden text-xs text-muted sm:block">{caption}</p>}
     </div>
   )
 }

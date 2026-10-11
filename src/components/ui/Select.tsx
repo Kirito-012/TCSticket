@@ -8,19 +8,22 @@ import { usePopoverPosition } from '@/lib/use-popover-position'
 
 export type SelectOption = { value: string; label: string; color?: string }
 
-const SIZE_TRIGGER: Record<'sm' | 'md', string> = {
+const SIZE_TRIGGER: Record<'sm' | 'md' | 'lg', string> = {
   sm: 'h-8 px-2.5 text-xs',
   md: 'h-10 px-3 text-sm',
+  lg: 'h-12 px-4 text-base',
 }
 
-const SIZE_OPTION: Record<'sm' | 'md', string> = {
+const SIZE_OPTION: Record<'sm' | 'md' | 'lg', string> = {
   sm: 'px-2 py-1.5 text-xs',
   md: 'px-2.5 py-2 text-sm',
+  lg: 'px-3 py-3 text-base',
 }
 
-const SIZE_PILL: Record<'sm' | 'md', string> = {
+const SIZE_PILL: Record<'sm' | 'md' | 'lg', string> = {
   sm: 'pl-2.5 pr-2 py-1 text-xs',
   md: 'pl-3 pr-2.5 py-1.5 text-sm',
+  lg: 'pl-4 pr-3 py-2.5 text-base',
 }
 
 const PILL_MIN_WIDTH = 96
@@ -53,7 +56,7 @@ export function Select({
   placeholder?: string
   disabled?: boolean
   variant?: 'field' | 'pill' | 'ghost'
-  size?: 'sm' | 'md'
+  size?: 'sm' | 'md' | 'lg'
   className?: string
   menuClassName?: string
   align?: 'left' | 'right'

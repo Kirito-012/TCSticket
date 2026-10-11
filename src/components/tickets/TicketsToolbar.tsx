@@ -93,7 +93,7 @@ export function TicketsToolbar({
 
       <div className="flex flex-wrap items-center gap-2.5">
         <form
-          className="relative min-w-[240px] flex-1"
+          className="relative w-full min-w-0 flex-1 sm:min-w-[240px]"
           onSubmit={(e) => {
             e.preventDefault()
             pushParams({ q: search || null })
@@ -109,7 +109,7 @@ export function TicketsToolbar({
           />
         </form>
 
-        <div className="w-40">
+        <div className="w-full sm:w-40">
           <Select
             variant="ghost"
             value={activePriority}
@@ -122,7 +122,7 @@ export function TicketsToolbar({
           />
         </div>
 
-        <div className="w-56">
+        <div className="w-full sm:w-56">
           <Select
             variant="ghost"
             value={`${activeSort}:${activeDir}`}

@@ -18,11 +18,14 @@ export function AssigneeDropdown({
   assignee,
   users,
   disabled,
+  large = false,
 }: {
   ticketNumber: number
   assignee: PersonView
   users: UserOption[]
   disabled: boolean
+  /** Big, full-width button with plain wording — for the simple Admin/Manager screens. */
+  large?: boolean
 }) {
   const [current, setCurrent] = useState(assignee)
   const [open, setOpen] = useState(false)
@@ -91,24 +94,39 @@ export function AssigneeDropdown({
     return (
       <div className="flex items-center gap-2">
         <Avatar person={person} size="sm" />
-        <span className="truncate text-xs text-muted-strong">{current?.name ?? 'Unassigned'}</span>
+        <span className={cn('truncate text-muted-strong', large ? 'text-base' : 'text-xs')}>
+          {current?.name ?? 'Not assigned'}
+        </span>
       </div>
     )
   }
 
   return (
-    <div className="relative inline-block">
+    <div className={cn('relative', large ? 'block' : 'inline-block')}>
       <button
         ref={triggerRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         disabled={pending}
-        className="flex items-center gap-2 rounded-lg px-1.5 py-1 transition-colors hover:bg-white/[0.06] disabled:cursor-wait disabled:opacity-60"
+        className={cn(
+          'flex items-center gap-2 transition-colors disabled:cursor-wait disabled:opacity-60',
+          large
+            ? 'min-h-12 w-full rounded-xl border-2 border-border-strong px-3 text-left hover:bg-surface-hover'
+            : 'rounded-lg px-1.5 py-1 hover:bg-white/[0.06]',
+        )}
       >
-        <Avatar person={person} size="sm" />
-        <span className="max-w-[120px] truncate text-xs text-muted-strong">
-          {current?.name ?? 'Unassigned'}
+        <Avatar person={person} size={large ? 'md' : 'sm'} />
+        <span
+          className={cn(
+            'truncate',
+            large
+              ? cn('flex-1 text-base font-semibold', current ? 'text-foreground' : 'text-warning')
+              : 'max-w-[120px] text-xs text-muted-strong',
+          )}
+        >
+          {current?.name ?? (large ? 'Choose who does this' : 'Unassigned')}
         </span>
+        {large && <span className="shrink-0 text-sm font-semibold text-accent-strong">Change</span>}
       </button>
 
       {open &&
@@ -126,14 +144,20 @@ export function AssigneeDropdown({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search people…"
-                className="h-8 w-full rounded-md border border-border-strong bg-white/[0.03] pl-8 pr-2 text-xs text-foreground placeholder:text-muted/60 outline-none focus:border-accent/50"
+                className={cn(
+                  large ? 'h-10 text-base' : 'h-8 text-xs',
+                  'w-full rounded-md border border-border-strong bg-white/[0.03] pl-8 pr-2 text-foreground placeholder:text-muted/60 outline-none focus:border-accent/50',
+                )}
               />
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto">
               <button
                 type="button"
                 onClick={() => choose(null)}
-                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs text-muted-strong hover:bg-white/[0.06]"
+                className={cn(
+                  'flex w-full items-center gap-2 rounded-md px-2 text-left text-muted-strong hover:bg-white/[0.06]',
+                  large ? 'py-2.5 text-base' : 'py-1.5 text-xs',
+                )}
               >
                 <Avatar person={UNASSIGNED} size="sm" />
                 Unassigned
@@ -146,7 +170,8 @@ export function AssigneeDropdown({
                   type="button"
                   onClick={() => choose(u)}
                   className={cn(
-                    'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs hover:bg-white/[0.06]',
+                    'flex w-full items-center gap-2 rounded-md px-2 text-left hover:bg-white/[0.06]',
+                    large ? 'py-2.5 text-base' : 'py-1.5 text-xs',
                     current?.id === u.id ? 'text-foreground' : 'text-muted-strong',
                   )}
                 >

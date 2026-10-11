@@ -13,7 +13,7 @@ export type VolumePoint = { day: string; created: number; resolved: number }
 
 export function VolumeChart({ data }: { data: VolumePoint[] }) {
   return (
-    <div className="h-64 w-full">
+    <div className="h-48 w-full sm:h-64">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <defs>
@@ -26,30 +26,31 @@ export function VolumeChart({ data }: { data: VolumePoint[] }) {
               <stop offset="100%" stopColor="#818cf8" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.06)" />
+          <CartesianGrid vertical={false} stroke="var(--border)" />
           <XAxis
             dataKey="day"
             axisLine={false}
             tickLine={false}
-            tick={{ fill: '#9aa1ac', fontSize: 12 }}
+            tick={{ fill: 'var(--muted)', fontSize: 12 }}
             dy={8}
           />
           <YAxis
             axisLine={false}
             tickLine={false}
-            tick={{ fill: '#9aa1ac', fontSize: 12 }}
+            tick={{ fill: 'var(--muted)', fontSize: 12 }}
             width={34}
           />
           <Tooltip
-            cursor={{ stroke: 'rgba(255,255,255,0.12)', strokeWidth: 1 }}
+            cursor={{ stroke: 'var(--border-strong)', strokeWidth: 1 }}
             contentStyle={{
-              background: '#101216',
-              border: '1px solid rgba(255,255,255,0.1)',
+              background: 'var(--surface)',
+              color: 'var(--foreground)',
+              border: '1px solid var(--border-strong)',
               borderRadius: 10,
               fontSize: 12,
-              boxShadow: '0 8px 24px -6px rgba(0,0,0,0.5)',
+              boxShadow: '0 8px 24px -6px rgba(0,0,0,0.25)',
             }}
-            labelStyle={{ color: '#f4f5f7', fontWeight: 600, marginBottom: 4 }}
+            labelStyle={{ color: 'var(--foreground)', fontWeight: 600, marginBottom: 4 }}
           />
           <Area
             type="monotone"

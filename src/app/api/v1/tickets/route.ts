@@ -7,9 +7,19 @@ import { createIntegrationTicketSchema } from '@/lib/schemas/integration'
 import { sanitizeHtml } from '@/lib/sanitize-html'
 import { logger } from '@/lib/logger'
 import * as ticketService from '@/server/services/ticket.service'
+import { findSector } from '@/server/sectors'
 
 const INTEGRATION_TYPE_SLUG = 'garbage-detection'
 const SERVICE_ACCOUNT_EMAIL = 'droneseva-bot@thecraftsync.local'
+
+function coordinatesFromIssue(issue: string) {
+  const match = issue.match(/Location:\s*<\/?[^>]*>\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/i)
+  if (!match) return null
+  const latitude = Number(match[1])
+  const longitude = Number(match[2])
+  if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) return null
+  return { latitude, longitude }
+}
 
 /**
  * POST /api/v1/tickets — service-to-service ticket creation for external integrations
@@ -75,6 +85,14 @@ export async function POST(req: NextRequest) {
       ? `<p><a href="${parsed.data.sourceUrl}" target="_blank" rel="noopener noreferrer">View in DroneSeva</a></p>`
       : '')
   const issueHtml = sanitizeHtml(rawIssueHtml)
+  const location =
+    parsed.data.latitude !== undefined && parsed.data.longitude !== undefined
+      ? { latitude: parsed.data.latitude, longitude: parsed.data.longitude }
+      : coordinatesFromIssue(parsed.data.issue)
+  const sector = location ? await findSector(location.latitude, location.longitude) : null
+  const assignee = sector
+    ? await UserModel.findOne({ sectorKey: sector.key, isActive: true, deletedAt: null }).lean()
+    : null
 
   const ticket = await ticketService.createTicket({
     subject: parsed.data.subject,
@@ -82,6 +100,9 @@ export async function POST(req: NextRequest) {
     typeId: String(type._id),
     priorityId: String(priority._id),
     ownerId: String(reporter._id),
+    assigneeId: assignee ? String(assignee._id) : null,
+    sectorKey: sector?.key ?? null,
+    location,
     source: 'api',
   })
 

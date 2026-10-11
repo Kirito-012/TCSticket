@@ -30,8 +30,9 @@ export function ActivityFeed({ items }: { items: ActivityItem[] }) {
     )
   }
 
+  // Phones show the latest 5 only — the rest is a lot of scrolling for little value.
   return (
-    <div className="divide-y divide-border">
+    <div className="divide-y divide-border max-sm:[&>a:nth-child(n+6)]:hidden">
       {items.map((item) => (
         <Link
           key={item.id}

@@ -26,6 +26,7 @@ export function TicketDetailSidebar({
   users,
   canUpdate,
   canAssign,
+  compact = false,
 }: {
   ticketNumber: number
   statusId: string | null
@@ -39,6 +40,8 @@ export function TicketDetailSidebar({
   users: UserOption[]
   canUpdate: boolean
   canAssign: boolean
+  /** Hide status and assignee — the simple task page already shows them up top. */
+  compact?: boolean
 }) {
   const [values, setValues] = useState({ priorityId, typeId, dueDate })
   const [error, setError] = useState<string | null>(null)
@@ -65,23 +68,27 @@ export function TicketDetailSidebar({
         </p>
       )}
 
-      <Field label="Status">
-        <StatusSelect
-          ticketNumber={ticketNumber}
-          statusId={statusId}
-          statuses={statuses}
-          disabled={!canUpdate}
-        />
-      </Field>
+      {!compact && (
+        <>
+          <Field label="Status">
+            <StatusSelect
+              ticketNumber={ticketNumber}
+              statusId={statusId}
+              statuses={statuses}
+              disabled={!canUpdate}
+            />
+          </Field>
 
-      <Field label="Assignee">
-        <AssigneeDropdown
-          ticketNumber={ticketNumber}
-          assignee={assignee}
-          users={users}
-          disabled={!canAssign}
-        />
-      </Field>
+          <Field label="Assignee">
+            <AssigneeDropdown
+              ticketNumber={ticketNumber}
+              assignee={assignee}
+              users={users}
+              disabled={!canAssign}
+            />
+          </Field>
+        </>
+      )}
 
       <Field label="Priority">
         <Select
@@ -89,7 +96,7 @@ export function TicketDetailSidebar({
           disabled={!canUpdate}
           onChange={(v) => update('priorityId', v)}
           variant="pill"
-          size="sm"
+          size={compact ? 'lg' : 'sm'}
           options={priorities.map((p) => ({ value: p.id, label: p.name, color: p.color }))}
         />
       </Field>
@@ -99,7 +106,7 @@ export function TicketDetailSidebar({
           value={values.typeId ?? ''}
           disabled={!canUpdate}
           onChange={(v) => update('typeId', v)}
-          size="sm"
+          size={compact ? 'lg' : 'sm'}
           options={types.map((t) => ({ value: t.id, label: t.name }))}
         />
       </Field>
@@ -112,7 +119,7 @@ export function TicketDetailSidebar({
           onChange={(e) =>
             update('dueDate', e.target.value ? new Date(e.target.value).toISOString() : null)
           }
-          className="h-9 w-full rounded-lg border border-border-strong bg-white/[0.03] px-2.5 text-sm text-foreground outline-none disabled:cursor-not-allowed disabled:opacity-60"
+          className={`w-full rounded-lg border border-border-strong bg-white/[0.03] px-2.5 text-foreground outline-none disabled:cursor-not-allowed disabled:opacity-60 ${compact ? 'h-12 text-base' : 'h-9 text-sm'}`}
         />
         {values.dueDate && (
           <p className="mt-1 text-[11px] text-muted">Due {timeAgo(values.dueDate)}</p>

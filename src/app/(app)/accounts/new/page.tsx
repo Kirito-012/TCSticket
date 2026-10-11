@@ -14,7 +14,7 @@ export default async function NewAccountPage() {
     <>
       <Topbar title="New account" description="Add someone to your workspace" />
 
-      <main className="flex-1 px-8 py-6 animate-fade-in">
+      <main className="flex-1 px-4 py-6 sm:px-8 animate-fade-in">
         <Card className="mx-auto max-w-xl p-6">
           <NewAccountForm roles={roles} />
         </Card>

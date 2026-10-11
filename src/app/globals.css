@@ -13,6 +13,7 @@
   --muted-strong: #c2c7cf;
 
   --accent: #10b981;
+  --on-accent: #000000; /* text colour that sits on --accent */
   --accent-strong: #34d399;
   --accent-soft: rgba(16, 185, 129, 0.14);
 
@@ -48,6 +49,7 @@
   --color-accent: var(--accent);
   --color-accent-strong: var(--accent-strong);
   --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
 
   --color-violet: var(--violet);
   --color-violet-soft: var(--violet-soft);
@@ -78,6 +80,117 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+.hrda-sector-popup {
+  min-width: 220px;
+  color: #263244;
+  font-size: 12px;
+}
+
+.hrda-sector-popup__heading {
+  display: grid;
+  gap: 2px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 9px;
+}
+
+.hrda-sector-popup__heading strong {
+  font-size: 15px;
+  letter-spacing: 0.02em;
+}
+
+.hrda-sector-popup__eyebrow {
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.hrda-sector-popup__kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 10px 0;
+}
+
+.hrda-sector-popup__kpis div {
+  display: grid;
+  gap: 2px;
+  border-radius: 7px;
+  background: #f1f5f9;
+  padding: 7px 6px;
+}
+
+.hrda-sector-popup__kpis span,
+.hrda-sector-popup__progress-label {
+  color: #64748b;
+  font-size: 10px;
+}
+
+.hrda-sector-popup__kpis strong {
+  color: #334155;
+  font-size: 17px;
+}
+
+.hrda-sector-popup__kpis strong.is-open {
+  color: #d97706;
+}
+.hrda-sector-popup__kpis strong.is-done {
+  color: #059669;
+}
+
+.hrda-sector-popup__progress {
+  display: grid;
+  gap: 5px;
+}
+
+.hrda-sector-popup__progress-label {
+  display: flex;
+  justify-content: space-between;
+}
+
+.hrda-sector-popup__progress-label strong {
+  color: #059669;
+}
+
+.hrda-sector-popup__track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: #e2e8f0;
+}
+
+.hrda-sector-popup__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #34d399, #059669);
+}
+
+.hrda-sector-popup__link {
+  display: block;
+  margin-top: 12px;
+  border-radius: 7px;
+  background: #059669;
+  color: #fff !important;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 10px;
+  text-align: center;
+  text-decoration: none;
+}
+
+.hrda-sector-popup__link:visited,
+.hrda-sector-popup__link:hover,
+.hrda-sector-popup__link:focus-visible {
+  color: #fff !important;
+}
+
+.hrda-sector-popup__note {
+  display: block;
+  margin-top: 11px;
+  color: #64748b;
+  font-size: 10px;
 }
 
 ::selection {
@@ -139,4 +252,64 @@ body {
   background-image:
     radial-gradient(60% 50% at 20% 0%, rgba(16, 185, 129, 0.16), transparent 60%),
     radial-gradient(50% 40% at 100% 20%, rgba(129, 140, 248, 0.14), transparent 60%);
+}
+
+/*
+ * Light theme. Zone Inspectors always get it (via the .simple-ui wrapper); Admins and Managers
+ * can switch to it with the Light/Dark button (html.theme-light, remembered in a cookie).
+ *
+ * "Simple" look for Zone Inspectors: light background, dark text, strong contrast, and colours
+ * that stay readable outdoors in sunlight. Applied by wrapping the app in .simple-ui — every
+ * component reads these same CSS variables, so only the values change.
+ */
+.simple-ui,
+html.theme-light {
+  --on-accent: #ffffff;
+  --background: #f3f4f6;
+  --background-elevated: #ffffff;
+  --surface: #ffffff;
+  --surface-hover: #f3f4f6;
+  --border: rgba(17, 24, 39, 0.14);
+  --border-strong: rgba(17, 24, 39, 0.32);
+
+  --foreground: #111827;
+  --muted: #4b5563;
+  --muted-strong: #1f2937;
+
+  --accent: #047857;
+  --accent-strong: #065f46;
+  --accent-soft: rgba(4, 120, 87, 0.12);
+
+  --violet: #4338ca;
+  --violet-soft: rgba(67, 56, 202, 0.12);
+
+  --danger: #b91c1c;
+  --danger-soft: rgba(185, 28, 28, 0.1);
+
+  --warning: #c2410c;
+  --warning-soft: rgba(234, 88, 12, 0.1);
+
+  --info: #1d4ed8;
+  --info-soft: rgba(29, 78, 216, 0.1);
+
+  color-scheme: light;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/*
+ * Admin/Manager light theme: a few shared components (dropdown menus, inputs, badges) were written
+ * with see-through WHITE tints that only show on a dark page. In light mode flip them to
+ * see-through dark. The selectors match the plain `bg-white/..` token only (start of the class
+ * list or after a space) — never `hover:bg-white/..`, which must stay a hover-only tint.
+ */
+html.theme-light [class^='bg-white/']:not(.simple-ui *),
+html.theme-light [class*=' bg-white/']:not(.simple-ui *) {
+  background-color: rgba(17, 24, 39, 0.05);
+}
+html.theme-light [class*='hover:bg-white/']:not(.simple-ui *):hover {
+  background-color: rgba(17, 24, 39, 0.09);
+}
+html.theme-light [class*='ring-white/']:not(.simple-ui *) {
+  --tw-ring-color: rgba(17, 24, 39, 0.18);
 }

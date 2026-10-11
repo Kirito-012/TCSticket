@@ -29,12 +29,12 @@ export function PendingApprovals({ users }: { users: PendingRow[] }) {
       </div>
       <div className="divide-y divide-warning/10">
         {users.map((u) => (
-          <div key={u.id} className="flex items-center gap-3 px-5 py-3.5">
+          <div key={u.id} className="flex flex-wrap items-center gap-3 px-4 py-3.5 sm:px-5">
             <Avatar
               person={{ name: u.fullname, initials: initialsFor(u.fullname), color: '#f59e0b' }}
               size="sm"
             />
-            <div className="min-w-0 flex-1">
+            <div className="min-w-[180px] flex-1">
               <p className="truncate text-sm font-medium text-foreground">
                 {u.fullname} <span className="font-normal text-muted">requesting {u.roleName}</span>
               </p>
@@ -44,7 +44,7 @@ export function PendingApprovals({ users }: { users: PendingRow[] }) {
               type="button"
               disabled={pending}
               onClick={() => startTransition(() => approveUserAction(u.id))}
-              className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg bg-accent px-3 text-xs font-medium text-black transition-colors hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg bg-accent px-3 text-xs font-medium text-on-accent transition-colors hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Check className="h-3.5 w-3.5" />
               Approve

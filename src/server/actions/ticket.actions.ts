@@ -63,10 +63,106 @@ export async function updateTicketFieldAction(
     }
   }
 
+  // Surveyors must resolve through resolveTicketAction, which enforces the photo requirement.
+  if (forcedAssigneeId && parsed.data.statusId) {
+    const resolvedId = await ticketService.getResolvedStatusId()
+    if (parsed.data.statusId === resolvedId) {
+      throw new Error('Use "Mark as resolved" and upload a photo first.')
+    }
+  }
+
   await ticketService.updateTicketFields(number, parsed.data, user.id)
 
   revalidatePath(`/tickets/${number}`)
   revalidatePath('/tickets')
+}
+
+/** Shared guard for the surveyor actions: caller may update tickets, and a surveyor (agent scope)
+ *  may only touch tickets assigned to them. Returns an error message, or null when allowed. */
+async function checkSurveyorAccess(number: number) {
+  const { user, ability, forcedAssigneeId } = await requireTicketScope()
+  if (!ability.can('update', 'ticket') || !ability.can('create', 'attachment')) {
+    return { user, error: 'You do not have permission to do that.' }
+  }
+  const ticket = await ticketService.getTicketByNumber(number)
+  if (!ticket) return { user, error: 'Ticket not found.' }
+  if (forcedAssigneeId) {
+    const assignee = (ticket as { assigneeId?: { _id?: unknown } | null }).assigneeId
+    if (String(assignee?._id ?? '') !== forcedAssigneeId) {
+      return { user, error: 'You do not have permission to do that.' }
+    }
+  }
+  return { user, error: null }
+}
+
+export type ResolutionPhotoState =
+  { error?: string; ok?: boolean; photo?: UploadedImageResult } | undefined
+
+/** Uploads one proof-of-cleanup photo to Cloudinary and attaches it to the ticket. */
+export async function uploadResolutionPhotoAction(
+  number: number,
+  formData: FormData,
+): Promise<ResolutionPhotoState> {
+  const { user, error } = await checkSurveyorAccess(number)
+  if (error) return { error }
+
+  const file = formData.get('file')
+  if (!(file instanceof File) || file.size === 0) return { error: 'No file provided' }
+  if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+    return { error: 'Only PNG, JPEG, WEBP, and GIF images are allowed' }
+  }
+  if (file.size > MAX_IMAGE_BYTES) return { error: 'Image must be under 8MB' }
+
+  let image: UploadedImageResult
+  try {
+    image = await uploadCommentImage(file, 'tcs-ticket/resolutions')
+    await ticketService.addResolutionPhoto(number, image, user.id)
+  } catch {
+    return { error: 'Upload failed. Please try again.' }
+  }
+
+  revalidatePath(`/tickets/${number}`)
+  return { ok: true, photo: image }
+}
+
+export async function removeResolutionPhotoAction(
+  number: number,
+  publicId: string,
+): Promise<ResolutionPhotoState> {
+  const { user, error } = await checkSurveyorAccess(number)
+  if (error) return { error }
+
+  const removed = await ticketService.removeResolutionPhoto(number, publicId, user.id)
+  if (removed) await deleteCommentImage(removed.publicId).catch(() => {})
+
+  revalidatePath(`/tickets/${number}`)
+  return { ok: true }
+}
+
+const MAX_NOTE_LENGTH = 1000
+
+export async function resolveTicketAction(
+  number: number,
+  note?: string,
+): Promise<ResolutionPhotoState> {
+  const { user, error } = await checkSurveyorAccess(number)
+  if (error) return { error }
+
+  const cleanNote = (note ?? '').trim()
+  if (cleanNote.length > MAX_NOTE_LENGTH) {
+    return { error: `Note must be at most ${MAX_NOTE_LENGTH} characters.` }
+  }
+
+  try {
+    await ticketService.resolveTicketWithProof(number, user.id, cleanNote)
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Could not resolve the ticket.' }
+  }
+
+  revalidatePath(`/tickets/${number}`)
+  revalidatePath('/tickets')
+  revalidatePath('/dashboard')
+  return { ok: true }
 }
 
 export type UploadState = { error?: string; image?: UploadedImageResult } | undefined
@@ -169,4 +265,31 @@ export async function deleteCommentAction(ticketNumber: number, commentId: strin
   }
 
   revalidatePath(`/tickets/${ticketNumber}`)
+}
+
+const MAX_BULK = 100
+
+export type BulkAssignResult = { error?: string; changed?: number }
+
+/** Assigns up to 100 tickets to one person (or nobody) in a single step. */
+export async function bulkAssignTicketsAction(
+  numbers: number[],
+  assigneeId: string | null,
+): Promise<BulkAssignResult> {
+  const { user, ability } = await requireTicketScope()
+  if (!ability.can('assign', 'ticket')) return { error: 'You do not have permission to do that.' }
+
+  if (!Array.isArray(numbers) || numbers.length === 0)
+    return { error: 'Choose some tickets first.' }
+  if (numbers.length > MAX_BULK)
+    return { error: `Please choose at most ${MAX_BULK} tickets at a time.` }
+  if (!numbers.every((n) => Number.isInteger(n) && n > 0)) return { error: 'Invalid tickets.' }
+  if (assigneeId !== null && !/^[0-9a-fA-F]{24}$/.test(assigneeId))
+    return { error: 'Invalid person.' }
+
+  const changed = await ticketService.bulkAssignTickets(numbers, assigneeId, user.id)
+
+  revalidatePath('/tickets')
+  revalidatePath('/dashboard')
+  return { changed }
 }

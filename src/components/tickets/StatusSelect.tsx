@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Select } from '@/components/ui/Select'
 import { updateTicketFieldAction } from '@/server/actions/ticket.actions'
+import { friendlyStatusName } from '@/lib/plain-words'
 
 type StatusOption = { id: string; name: string; color: string }
 
@@ -11,11 +12,14 @@ export function StatusSelect({
   statusId,
   statuses,
   disabled,
+  large = false,
 }: {
   ticketNumber: number
   statusId: string | null
   statuses: StatusOption[]
   disabled: boolean
+  /** Big, full-width selector — for the simple Admin/Manager screens. */
+  large?: boolean
 }) {
   const [value, setValue] = useState(statusId)
   const [pending, startTransition] = useTransition()
@@ -35,7 +39,7 @@ export function StatusSelect({
   if (disabled) {
     return current ? (
       <span
-        className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium"
+        className={`inline-flex items-center gap-1.5 rounded-full font-medium ${large ? 'px-3 py-1 text-base' : 'px-2 py-0.5 text-xs'}`}
         style={{ backgroundColor: `${current.color}22`, color: current.color }}
       >
         <span
@@ -43,19 +47,25 @@ export function StatusSelect({
           style={{ backgroundColor: current.color }}
           aria-hidden
         />
-        {current.name}
+        {friendlyStatusName(current.name)}
       </span>
     ) : null
   }
 
   return (
-    <Select
-      value={value ?? ''}
-      onChange={onChange}
-      disabled={pending}
-      variant="pill"
-      size="sm"
-      options={statuses.map((s) => ({ value: s.id, label: s.name, color: s.color }))}
-    />
+    <div className={large ? 'w-full' : undefined}>
+      <Select
+        value={value ?? ''}
+        onChange={onChange}
+        disabled={pending}
+        variant={large ? undefined : 'pill'}
+        size={large ? 'lg' : 'sm'}
+        options={statuses.map((s) => ({
+          value: s.id,
+          label: friendlyStatusName(s.name),
+          color: s.color,
+        }))}
+      />
+    </div>
   )
 }

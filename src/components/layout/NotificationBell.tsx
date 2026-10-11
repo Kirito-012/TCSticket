@@ -1,11 +1,19 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  useTransition,
+} from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { Bell, CheckCheck, Ticket as TicketIcon, UserPlus } from 'lucide-react'
 import { cn, timeAgo } from '@/lib/utils'
 import { usePopoverPosition } from '@/lib/use-popover-position'
+import { BottomSheet } from '@/components/ui/BottomSheet'
 import {
   getNotificationsAction,
   markAllNotificationsReadAction,
@@ -16,6 +24,16 @@ import type { NotificationItem } from '@/server/services/notification.service'
 const POLL_INTERVAL_MS = 30_000
 const MENU_MIN_WIDTH = 360
 
+// Phones get a bottom sheet instead of a dropdown: a 360px menu cannot fit beside the bell on a
+// 375px screen, and its text and rows are too small to tap.
+const PHONE_QUERY = '(max-width: 639px)'
+function subscribePhone(onChange: () => void) {
+  const query = window.matchMedia(PHONE_QUERY)
+  query.addEventListener('change', onChange)
+  return () => query.removeEventListener('change', onChange)
+}
+const isPhoneNow = () => window.matchMedia(PHONE_QUERY).matches
+
 export function NotificationBell() {
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -25,7 +43,8 @@ export function NotificationBell() {
   const [isPending, startTransition] = useTransition()
   const triggerRef = useRef<HTMLButtonElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
-  const position = usePopoverPosition(triggerRef, open, 'right')
+  const isPhone = useSyncExternalStore(subscribePhone, isPhoneNow, () => false)
+  const position = usePopoverPosition(triggerRef, open && !isPhone, 'right')
 
   const refresh = useCallback(async () => {
     try {
@@ -51,7 +70,7 @@ export function NotificationBell() {
   }, [open, refresh])
 
   useEffect(() => {
-    if (!open) return
+    if (!open || isPhone) return // on phones the bottom sheet handles outside taps and Escape
     function onMouseDown(e: MouseEvent) {
       const target = e.target as Node
       if (
@@ -72,7 +91,7 @@ export function NotificationBell() {
       document.removeEventListener('mousedown', onMouseDown)
       document.removeEventListener('keydown', onKeyDown)
     }
-  }, [open])
+  }, [open, isPhone])
 
   function handleMarkAllRead() {
     setItems((prev) => prev.map((i) => ({ ...i, read: true })))
@@ -103,11 +122,11 @@ export function NotificationBell() {
         aria-haspopup="true"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="relative inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-border text-muted-strong transition-colors hover:bg-white/[0.06] hover:text-foreground"
+        className="relative inline-flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-border text-muted-strong transition-colors hover:bg-white/[0.06] hover:text-foreground sm:h-9 sm:w-9 sm:rounded-lg"
       >
-        <Bell className="h-4 w-4" />
+        <Bell className="h-5 w-5 sm:h-4 sm:w-4" />
         {loaded && unreadCount > 0 && (
-          <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold leading-none text-black shadow-[0_0_6px_1px_rgba(16,185,129,0.8)]">
+          <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold leading-none text-on-accent shadow-[0_0_6px_1px_rgba(16,185,129,0.8)]">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -115,6 +134,7 @@ export function NotificationBell() {
 
       {mounted &&
         open &&
+        !isPhone &&
         position &&
         createPortal(
           <div
@@ -186,6 +206,76 @@ export function NotificationBell() {
           </div>,
           document.body,
         )}
+
+      {isPhone && (
+        <BottomSheet
+          open={open}
+          onClose={() => setOpen(false)}
+          title="Notifications"
+          titleRight={
+            <button
+              type="button"
+              disabled={isPending || unreadCount === 0}
+              onClick={handleMarkAllRead}
+              className="inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-xl border-2 border-border-strong px-3 text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <CheckCheck className="h-4 w-4" />
+              Mark all read
+            </button>
+          }
+        >
+          {items.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 px-5 py-14 text-center">
+              <Bell className="h-8 w-8 text-muted" />
+              <p className="text-lg text-muted">{loaded ? "You're all caught up." : 'Loading…'}</p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-border pb-[max(1rem,env(safe-area-inset-bottom))]">
+              {items.map((item) => (
+                <li key={item.id}>
+                  <Link
+                    href={item.href}
+                    onClick={() => handleItemClick(item)}
+                    className={cn(
+                      'flex min-h-[72px] items-start gap-3 px-5 py-3.5 active:bg-surface-hover',
+                      !item.read && 'bg-accent-soft',
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl',
+                        item.type === 'account'
+                          ? 'bg-warning/15 text-warning'
+                          : 'bg-surface-hover text-muted-strong',
+                      )}
+                    >
+                      {item.type === 'account' ? (
+                        <UserPlus className="h-5 w-5" />
+                      ) : (
+                        <TicketIcon className="h-5 w-5" />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="line-clamp-2 text-base font-semibold text-foreground [overflow-wrap:anywhere]">
+                        {item.title}
+                      </p>
+                      <p className="mt-0.5 line-clamp-2 text-sm text-muted [overflow-wrap:anywhere]">
+                        {item.subtitle}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-2 pt-1">
+                      <span className="text-sm text-muted">{timeAgo(item.createdAt)}</span>
+                      {!item.read && (
+                        <span className="h-2.5 w-2.5 rounded-full bg-accent" aria-label="Unread" />
+                      )}
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </BottomSheet>
+      )}
     </>
   )
 }

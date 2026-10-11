@@ -16,8 +16,11 @@ export type UploadedImage = {
   height: number
 }
 
-/** Uploads one image file to Cloudinary under the ticket-comments folder. */
-export async function uploadCommentImage(file: File): Promise<UploadedImage> {
+/** Uploads one image file to Cloudinary (ticket-comments folder unless another is given). */
+export async function uploadCommentImage(
+  file: File,
+  folder = 'tcs-ticket/comments',
+): Promise<UploadedImage> {
   const buffer = Buffer.from(await file.arrayBuffer())
 
   const result = await new Promise<{
@@ -27,7 +30,7 @@ export async function uploadCommentImage(file: File): Promise<UploadedImage> {
     height: number
   }>((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder: 'tcs-ticket/comments', resource_type: 'image' },
+      { folder, resource_type: 'image' },
       (error, result) => {
         if (error || !result) return reject(error ?? new Error('Cloudinary upload failed'))
         resolve(result)

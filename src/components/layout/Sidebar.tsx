@@ -14,7 +14,7 @@ type SidebarUser = {
   roleName: string
 }
 
-function buildNav(ticketCount: number, pendingAccountsCount: number) {
+function buildNav(ticketCount: number, pendingAccountsCount: number, canReadAccounts: boolean) {
   return [
     {
       section: 'Workspace',
@@ -23,18 +23,22 @@ function buildNav(ticketCount: number, pendingAccountsCount: number) {
         { label: 'Tickets', href: '/tickets', icon: Ticket, badge: String(ticketCount) },
       ],
     },
-    {
-      section: 'Organization',
-      items: [
-        {
-          label: 'Accounts',
-          href: '/accounts',
-          icon: Users,
-          badge: pendingAccountsCount > 0 ? String(pendingAccountsCount) : undefined,
-          badgeWarning: pendingAccountsCount > 0,
-        },
-      ],
-    },
+    ...(canReadAccounts
+      ? [
+          {
+            section: 'Organization',
+            items: [
+              {
+                label: 'Accounts',
+                href: '/accounts',
+                icon: Users,
+                badge: pendingAccountsCount > 0 ? String(pendingAccountsCount) : undefined,
+                badgeWarning: pendingAccountsCount > 0,
+              },
+            ],
+          },
+        ]
+      : []),
   ]
 }
 
@@ -42,16 +46,18 @@ export function Sidebar({
   user,
   ticketCount,
   pendingAccountsCount = 0,
+  canReadAccounts,
 }: {
   user: SidebarUser
   ticketCount: number
   pendingAccountsCount?: number
+  canReadAccounts: boolean
 }) {
   const pathname = usePathname()
   const { open, setOpen } = useSidebar()
   const displayName = user.name || user.email || 'Account'
   const person = { name: displayName, initials: initialsFor(displayName), color: '#10b981' }
-  const nav = buildNav(ticketCount, pendingAccountsCount)
+  const nav = buildNav(ticketCount, pendingAccountsCount, canReadAccounts)
 
   return (
     <>
@@ -73,7 +79,7 @@ export function Sidebar({
       >
         <div className="flex h-16 items-center gap-2.5 px-5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent shadow-[0_0_20px_-4px_rgba(16,185,129,0.7)]">
-            <Sparkles className="h-4.5 w-4.5 text-black" strokeWidth={2.25} />
+            <Sparkles className="h-4.5 w-4.5 text-on-accent" strokeWidth={2.25} />
           </div>
           <span className="flex-1 text-[15px] font-semibold tracking-tight text-foreground">
             TheCraftSync

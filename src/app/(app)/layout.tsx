@@ -1,4 +1,5 @@
-import { Sidebar } from '@/components/layout/Sidebar'
+import { SimpleNav, type NavLink } from '@/components/layout/SimpleNav'
+import { cn } from '@/lib/utils'
 import { SidebarProvider } from '@/components/layout/SidebarContext'
 import { requireTicketScope } from '@/server/auth/session'
 import { countTicketsByStatus } from '@/server/services/ticket.service'
@@ -7,20 +8,45 @@ import { listPendingUsers } from '@/server/services/user.service'
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, ability, forcedAssigneeId } = await requireTicketScope()
   const canApproveAccounts = ability.can('update', 'account')
+  // Zone Inspectors (only ever see their own tickets) get the simple, big-text, light version of
+  // the app. Admins and Managers get the same simple navigation and screens in the dark theme.
+  const isInspector = forcedAssigneeId !== undefined
   const [ticketCounts, pendingUsers] = await Promise.all([
     countTicketsByStatus(forcedAssigneeId),
     canApproveAccounts ? listPendingUsers() : Promise.resolve([]),
   ])
 
+  const todoCount = ticketCounts.byStatus
+    .filter((s) => s.slug !== 'resolved' && s.slug !== 'closed')
+    .reduce((sum, s) => sum + s.count, 0)
+  const firstName =
+    (user.name || user.email || '').replace(/\s*Zone Inspector$/i, '').trim() || 'there'
+
+  const links: NavLink[] = isInspector
+    ? [
+        { label: 'Home', href: '/dashboard', icon: 'home' },
+        { label: 'My tickets', href: '/tickets', icon: 'tasks', badge: todoCount },
+      ]
+    : [
+        { label: 'Dashboard', href: '/dashboard', icon: 'home' },
+        { label: 'Tickets', href: '/tickets', icon: 'tasks', badge: todoCount },
+        ...(ability.can('read', 'account')
+          ? [
+              {
+                label: 'People',
+                href: '/accounts',
+                icon: 'people' as const,
+                badge: pendingUsers.length,
+              },
+            ]
+          : []),
+      ]
+
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen">
-        <Sidebar
-          user={user}
-          ticketCount={ticketCounts.total}
-          pendingAccountsCount={pendingUsers.length}
-        />
-        <div className="flex min-w-0 flex-1 flex-col lg:pl-64">{children}</div>
+    <SidebarProvider simple light={isInspector}>
+      <div className={cn('flex min-h-screen', isInspector && 'simple-ui')}>
+        <SimpleNav name={firstName} links={links} />
+        <div className="flex min-w-0 flex-1 flex-col pb-24 lg:pb-0 lg:pl-64">{children}</div>
       </div>
     </SidebarProvider>
   )

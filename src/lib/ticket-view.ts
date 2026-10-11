@@ -1,4 +1,4 @@
-import { extractDroneSevaLink } from '@/lib/droneseva-link'
+import { extractDroneSevaLink, extractLocation } from '@/lib/droneseva-link'
 
 export type PersonView = { id: string; name: string; initials: string } | null
 
@@ -13,7 +13,12 @@ export type TicketListItemView = {
   type: { name: string; slug: string } | null
   assignee: PersonView
   owner: PersonView
+  sectorKey: string | null
   tags: { id: string; name: string; color: string }[]
+  /** When the ticket arrived. */
+  createdAt: string
+  /** Small picture of the first photo the ticket arrived with, if any. */
+  thumbUrl: string | null
   updatedAt: string
   comments: number
 }
@@ -45,6 +50,7 @@ export type TicketDetailView = {
   subject: string
   issueHtml: string
   droneSevaUrl: string | null
+  location: { latitude: number; longitude: number } | null
   priorityId: string | null
   statusId: string | null
   typeId: string | null
@@ -55,17 +61,23 @@ export type TicketDetailView = {
   dueDate: string | null
   createdAt: string
   resolvedAt: string | null
+  resolutionPhotos: CommentAttachmentView[]
+  resolutionNote: string
+  /** Photos the ticket arrived with, e.g. the drone image from DroneSeva. */
+  sourcePhotos: CommentAttachmentView[]
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function toTicketDetailView(t: any): TicketDetailView {
-  const { html: issueHtml, droneSevaUrl } = extractDroneSevaLink(t.issue ?? '')
+  const rawIssue = t.issue ?? ''
+  const { html: issueHtml, droneSevaUrl } = extractDroneSevaLink(rawIssue)
   return {
     id: String(t._id),
     number: t.number,
     subject: t.subject,
     issueHtml,
     droneSevaUrl,
+    location: extractLocation(rawIssue),
     priorityId: t.priorityId ? String(t.priorityId._id) : null,
     statusId: t.statusId ? String(t.statusId._id) : null,
     typeId: t.typeId ? String(t.typeId._id) : null,
@@ -80,6 +92,19 @@ export function toTicketDetailView(t: any): TicketDetailView {
     dueDate: t.dueDate ? new Date(t.dueDate).toISOString() : null,
     createdAt: new Date(t.createdAt).toISOString(),
     resolvedAt: t.resolvedAt ? new Date(t.resolvedAt).toISOString() : null,
+    resolutionNote: t.resolutionNote ?? '',
+    sourcePhotos: (t.sourcePhotos ?? []).map((a: CommentAttachmentView) => ({
+      url: a.url,
+      publicId: a.publicId,
+      width: a.width,
+      height: a.height,
+    })),
+    resolutionPhotos: (t.resolutionPhotos ?? []).map((a: CommentAttachmentView) => ({
+      url: a.url,
+      publicId: a.publicId,
+      width: a.width,
+      height: a.height,
+    })),
   }
 }
 
@@ -139,6 +164,13 @@ export function toEventView(e: any): EventView {
   }
 }
 
+/** A square 160px crop of a Cloudinary picture (other hosts are returned unchanged). */
+function cloudinaryThumb(url: string) {
+  return url.includes('/upload/')
+    ? url.replace('/upload/', '/upload/c_fill,w_160,h_160,q_auto/')
+    : url
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function toTicketListItem(t: any): TicketListItemView {
   return {
@@ -161,11 +193,14 @@ export function toTicketListItem(t: any): TicketListItemView {
     type: t.typeId ? { name: t.typeId.name, slug: t.typeId.slug } : null,
     assignee: toPerson(t.assigneeId),
     owner: toPerson(t.ownerId),
+    sectorKey: t.sectorKey ?? null,
     tags: (t.tagIds ?? []).map((tag: { _id: unknown; name: string; color: string }) => ({
       id: String(tag._id),
       name: tag.name,
       color: tag.color,
     })),
+    createdAt: new Date(t.createdAt).toISOString(),
+    thumbUrl: t.sourcePhotos?.[0]?.url ? cloudinaryThumb(t.sourcePhotos[0].url) : null,
     updatedAt: new Date(t.lastActivityAt).toISOString(),
     comments: t.counts?.comments ?? 0,
   }

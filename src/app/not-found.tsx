@@ -15,7 +15,7 @@ export default function NotFound() {
       </div>
       <Link
         href="/dashboard"
-        className="mt-2 inline-flex h-9 cursor-pointer items-center justify-center rounded-lg bg-accent px-4 text-sm font-medium text-black transition-colors hover:bg-accent-strong"
+        className="mt-2 inline-flex h-9 cursor-pointer items-center justify-center rounded-lg bg-accent px-4 text-sm font-medium text-on-accent transition-colors hover:bg-accent-strong"
       >
         Back to dashboard
       </Link>

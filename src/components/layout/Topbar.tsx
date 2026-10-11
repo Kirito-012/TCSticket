@@ -5,6 +5,7 @@ import { Search, Plus, Menu } from 'lucide-react'
 import { Button, buttonVariants } from '@/components/ui/Button'
 import { useSidebar } from '@/components/layout/SidebarContext'
 import { NotificationBell } from '@/components/layout/NotificationBell'
+import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { cn } from '@/lib/utils'
 
 export function Topbar({
@@ -16,7 +17,35 @@ export function Topbar({
   description?: string
   primaryAction?: { label: string; icon?: React.ReactNode; href?: string }
 }) {
-  const { setOpen } = useSidebar()
+  const { setOpen, simple, light } = useSidebar()
+
+  // Zone Inspectors: just the page name, big and plain. No menu button (they have the bottom
+  // bar), no search, no bell, no "New ticket".
+  if (simple) {
+    return (
+      <header className="sticky top-0 z-30 flex min-h-16 items-center gap-3 border-b-2 border-border bg-surface px-4 py-3 sm:px-8">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-xl font-bold leading-tight text-foreground sm:text-2xl">{title}</h1>
+          {description && (
+            <p className="mt-0.5 text-base text-muted [overflow-wrap:anywhere]">{description}</p>
+          )}
+        </div>
+        {/* The light (Zone Inspector) look keeps just the title. Admins and Managers also get the
+            notification bell and one big action button. */}
+        {!light && <ThemeToggle />}
+        {!light && <NotificationBell />}
+        {!light && primaryAction?.href && (
+          <Link
+            href={primaryAction.href}
+            className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-base font-bold text-on-accent sm:px-5"
+          >
+            <Plus className="h-5 w-5" strokeWidth={2.5} />
+            <span className="max-sm:sr-only">{primaryAction.label}</span>
+          </Link>
+        )}
+      </header>
+    )
+  }
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-md sm:gap-4 sm:px-8">
@@ -52,10 +81,11 @@ export function Topbar({
         (primaryAction.href ? (
           <Link
             href={primaryAction.href}
-            className={cn(buttonVariants({ size: 'md' }), 'shrink-0')}
+            aria-label={primaryAction.label}
+            className={cn(buttonVariants({ size: 'md' }), 'shrink-0 max-sm:w-9 max-sm:px-0')}
           >
             {primaryAction.icon ?? <Plus className="h-4 w-4" />}
-            {primaryAction.label}
+            <span className="hidden sm:inline">{primaryAction.label}</span>
           </Link>
         ) : (
           <Button size="md" className="shrink-0">

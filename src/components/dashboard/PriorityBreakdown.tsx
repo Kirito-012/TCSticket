@@ -26,8 +26,9 @@ export function PriorityBreakdown({ data: priorityBreakdown }: { data: PriorityB
             </Pie>
             <Tooltip
               contentStyle={{
-                background: '#101216',
-                border: '1px solid rgba(255,255,255,0.1)',
+                background: 'var(--surface)',
+                color: 'var(--foreground)',
+                border: '1px solid var(--border-strong)',
                 borderRadius: 10,
                 fontSize: 12,
               }}
