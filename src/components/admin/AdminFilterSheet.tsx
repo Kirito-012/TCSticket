@@ -11,6 +11,7 @@ import type { SectorOption } from '@/components/admin/AdminTicketFilters'
 type Draft = {
   sector: string
   urgent: boolean
+  status: string
   sort: 'activity' | 'newest' | 'oldest'
   view: 'cards' | 'list'
   from: string
@@ -61,9 +62,12 @@ function Choice({
  */
 export function AdminFilterSheet({
   sectors,
+  statuses,
   current,
 }: {
   sectors: SectorOption[]
+  /** The statuses to choose from (already limited to the current tab). */
+  statuses: { value: string; label: string }[]
   current: Draft
 }) {
   const router = useRouter()
@@ -78,6 +82,7 @@ export function AdminFilterSheet({
   const activeCount =
     Number(current.sector !== '') +
     Number(current.urgent) +
+    Number(current.status !== '') +
     Number(current.sort !== 'activity') +
     Number(current.from !== '' || current.to !== '') +
     Number(current.view !== 'cards')
@@ -93,6 +98,7 @@ export function AdminFilterSheet({
       value ? params.set(key, value) : params.delete(key)
     set('sector', draft.sector || null)
     set('urgent', draft.urgent ? '1' : null)
+    set('status', draft.status || null)
     set('sort', draft.sort === 'activity' ? null : draft.sort)
     set('view', draft.view === 'cards' ? null : draft.view)
     set('from', draft.from || null)
@@ -104,7 +110,15 @@ export function AdminFilterSheet({
   }
 
   function clearDraft() {
-    setDraft({ sector: '', urgent: false, sort: 'activity', view: 'cards', from: '', to: '' })
+    setDraft({
+      sector: '',
+      urgent: false,
+      status: '',
+      sort: 'activity',
+      view: 'cards',
+      from: '',
+      to: '',
+    })
   }
 
   const preset = activeDatePreset(draft.from, draft.to)
@@ -171,6 +185,29 @@ export function AdminFilterSheet({
               ))}
             </select>
           </section>
+
+          {statuses.length > 0 && (
+            <section>
+              <h3 className="mb-2 text-base font-bold text-foreground">Status</h3>
+              <div className="flex flex-wrap gap-2">
+                <Choice
+                  active={draft.status === ''}
+                  onClick={() => setDraft((d) => ({ ...d, status: '' }))}
+                >
+                  Any status
+                </Choice>
+                {statuses.map((s) => (
+                  <Choice
+                    key={s.value}
+                    active={draft.status === s.value}
+                    onClick={() => setDraft((d) => ({ ...d, status: s.value }))}
+                  >
+                    {s.label}
+                  </Choice>
+                ))}
+              </div>
+            </section>
+          )}
 
           <section>
             <h3 className="mb-2 text-base font-bold text-foreground">Show only</h3>

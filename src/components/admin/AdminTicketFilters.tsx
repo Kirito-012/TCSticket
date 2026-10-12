@@ -25,6 +25,8 @@ const SORTS = [
 export function AdminTicketFilters({
   sectors,
   sector,
+  statuses,
+  status,
   urgent,
   sort,
   view,
@@ -33,6 +35,9 @@ export function AdminTicketFilters({
 }: {
   sectors: SectorOption[]
   sector: string
+  /** The statuses to choose from (already limited to the current tab). */
+  statuses: { value: string; label: string }[]
+  status: string
   urgent: boolean
   sort: string
   view: 'cards' | 'list'
@@ -68,6 +73,16 @@ export function AdminTicketFilters({
             onChange={(v) => push({ sector: v || null })}
             placeholder="All sectors"
             options={[{ value: '', label: 'All sectors' }, ...sectors]}
+          />
+        </div>
+
+        <div className="w-52">
+          <Select
+            size="lg"
+            value={status}
+            onChange={(v) => push({ status: v || null })}
+            placeholder="All statuses"
+            options={[{ value: '', label: 'All statuses' }, ...statuses]}
           />
         </div>
 

@@ -81,6 +81,10 @@ export async function listTickets(params: ListTicketsParams) {
       await TicketStatusModel.find({ isResolved: true }).select('_id').lean()
     ).map((s) => s._id)
     filter.statusId = params.resolved ? { $in: resolvedIds } : { $nin: resolvedIds }
+    // A specific status only fits the tab it belongs to (e.g. "Open" is never on the Done tab).
+    if (status) {
+      filter.statusId = status.isResolved === params.resolved ? status._id : { $in: [] }
+    }
   }
   if (params.sectorKey) filter.sectorKey = params.sectorKey
   if (params.urgent) {

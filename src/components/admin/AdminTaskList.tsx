@@ -8,7 +8,13 @@ import { cn } from '@/lib/utils'
 import type { TicketListItemView } from '@/lib/ticket-view'
 
 type UserOption = { id: string; name: string }
-type StatusOption = { id: string; name: string; color: string }
+type StatusOption = {
+  id: string
+  name: string
+  color: string
+  slug?: string
+  isResolved?: boolean
+}
 
 export type TaskTab = 'todo' | 'unassigned' | 'done' | 'all'
 export type AgeKey = 'today' | 'd1to3' | 'd3to7' | 'over7'
@@ -63,6 +69,8 @@ export type ListState = {
   page: number
   sector: string
   urgent: boolean
+  /** One status, by its short name ("open", "pending" ...). */
+  status: string
   sort: 'activity' | 'newest' | 'oldest'
   view: 'cards' | 'list'
   /** Only tickets open for this long (from the dashboard's age chart). */
@@ -92,6 +100,7 @@ export function listHref(state: ListState) {
   if (state.q) params.set('q', state.q)
   if (state.sector) params.set('sector', state.sector)
   if (state.urgent) params.set('urgent', '1')
+  if (state.status) params.set('status', state.status)
   if (state.age) params.set('age', state.age)
   if (state.day) params.set('day', state.day)
   if (state.from) params.set('from', state.from)
@@ -137,8 +146,21 @@ export function AdminTaskList({
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1
   const to = Math.min(page * pageSize, total)
   const filtered = Boolean(
-    q || state.sector || state.urgent || state.age || state.day || state.from || state.to,
+    q ||
+    state.sector ||
+    state.urgent ||
+    state.status ||
+    state.age ||
+    state.day ||
+    state.from ||
+    state.to,
   )
+  // The statuses that make sense on this tab: unfinished ones on To do / Need someone, finished
+  // ones on Done, all of them on All.
+  const statusChoices = statuses
+    .filter((s) => s.slug && (tab === 'all' || Boolean(s.isResolved) === (tab === 'done')))
+    .map((s) => ({ value: s.slug as string, label: s.name }))
+  const statusName = statuses.find((s) => s.slug === state.status)?.name ?? state.status
   const dayText = state.day ? describeDay(state.day) : null
   // The dates mean the day a ticket was finished on the Done tab, and the day it arrived elsewhere.
   const rangeText = describeRange(state.from, state.to, tab === 'done' ? 'finished' : 'created')
@@ -155,7 +177,7 @@ export function AdminTaskList({
           return (
             <Link
               key={t.key}
-              href={listHref({ ...state, tab: t.key, page: 1 })}
+              href={listHref({ ...state, tab: t.key, status: '', page: 1 })}
               role="tab"
               aria-selected={active}
               className={cn(
@@ -183,6 +205,7 @@ export function AdminTaskList({
         {tab !== 'todo' && <input type="hidden" name="show" value={tab} />}
         {state.sector && <input type="hidden" name="sector" value={state.sector} />}
         {state.urgent && <input type="hidden" name="urgent" value="1" />}
+        {state.status && <input type="hidden" name="status" value={state.status} />}
         {state.age && <input type="hidden" name="age" value={state.age} />}
         {state.day && <input type="hidden" name="day" value={state.day} />}
         {state.from && <input type="hidden" name="from" value={state.from} />}
@@ -213,9 +236,11 @@ export function AdminTaskList({
       <div className="sm:hidden">
         <AdminFilterSheet
           sectors={sectors}
+          statuses={statusChoices}
           current={{
             sector: state.sector,
             urgent: state.urgent,
+            status: state.status,
             sort: state.sort,
             view: state.view,
             from: state.from,
@@ -227,6 +252,8 @@ export function AdminTaskList({
       <AdminTicketFilters
         sectors={sectors}
         sector={state.sector}
+        statuses={statusChoices}
+        status={state.status}
         urgent={state.urgent}
         sort={state.sort}
         view={state.view}
@@ -236,6 +263,7 @@ export function AdminTaskList({
 
       {(state.sector ||
         state.urgent ||
+        state.status ||
         state.sort !== 'activity' ||
         state.age ||
         dayText ||
@@ -248,6 +276,16 @@ export function AdminTaskList({
               aria-label={`Remove filter: ${sectorNames[state.sector] ?? state.sector}`}
             >
               {sectorNames[state.sector] ?? state.sector}
+              <X className="h-4 w-4" strokeWidth={2.5} />
+            </Link>
+          )}
+          {state.status && (
+            <Link
+              href={listHref({ ...state, status: '', page: 1 })}
+              className={CHIP}
+              aria-label={`Remove filter: Status ${statusName}`}
+            >
+              Status: {statusName}
               <X className="h-4 w-4" strokeWidth={2.5} />
             </Link>
           )}
@@ -317,6 +355,7 @@ export function AdminTaskList({
                 q: '',
                 sector: '',
                 urgent: false,
+                status: '',
                 age: '',
                 day: '',
                 from: '',

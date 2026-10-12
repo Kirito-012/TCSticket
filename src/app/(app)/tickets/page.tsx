@@ -53,6 +53,7 @@ export default async function TicketsPage({
     page: Math.max(1, Number(get('page')) || 1),
     sector: get('sector') ?? '',
     urgent: get('urgent') === '1',
+    status: /^[a-z0-9-]{1,40}$/.test(get('status') ?? '') ? (get('status') ?? '') : '',
     sort: get('sort') === 'newest' ? 'newest' : get('sort') === 'oldest' ? 'oldest' : 'activity',
     view: get('view') === 'list' ? 'list' : 'cards',
     age: AGES.find((a) => a === get('age')) ?? '',
@@ -80,6 +81,7 @@ export default async function TicketsPage({
       q: state.q || undefined,
       sectorKey: state.sector || undefined,
       urgent: state.urgent || undefined,
+      status: state.status || undefined,
       age: state.age || undefined,
       createdOn: dayParts?.[0] === 'created' ? dayParts[1] : undefined,
       resolvedOn: dayParts?.[0] === 'finished' ? dayParts[1] : undefined,
@@ -124,7 +126,13 @@ export default async function TicketsPage({
             id: String(u._id),
             name: u.fullname || u.email || 'Unknown',
           }))}
-          statuses={statuses.map((s) => ({ id: String(s._id), name: s.name, color: s.color }))}
+          statuses={statuses.map((s) => ({
+            id: String(s._id),
+            name: s.name,
+            color: s.color,
+            slug: s.slug,
+            isResolved: Boolean(s.isResolved),
+          }))}
           sectors={sectors}
           sectorNames={sectorNames}
           canAssign={canAssign}
