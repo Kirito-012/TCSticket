@@ -257,28 +257,6 @@ export default async function TicketDetailPage({
                 )}
               </Card>
 
-              {(ticket.resolutionPhotos.length > 0 || ticket.resolutionNote) && (
-                <Card className="p-5 sm:p-6">
-                  <h2 className="text-xl font-bold text-foreground">What the inspector did</h2>
-                  {ticket.resolutionNote && (
-                    <div className="mt-3 rounded-2xl border-2 border-border bg-surface-hover p-4">
-                      <p className="mb-1 text-base font-semibold text-muted">Their note</p>
-                      <p className="whitespace-pre-wrap text-lg text-foreground">
-                        {ticket.resolutionNote}
-                      </p>
-                    </div>
-                  )}
-                  {ticket.resolutionPhotos.length > 0 && (
-                    <div className="mt-4">
-                      <p className="mb-2 text-base font-semibold text-muted">
-                        Photos ({ticket.resolutionPhotos.length}) — tap one to enlarge
-                      </p>
-                      <ResolutionPhotoGrid photos={ticket.resolutionPhotos} />
-                    </div>
-                  )}
-                </Card>
-              )}
-
               <Card className="p-5 sm:p-6">
                 <h2 className="mb-4 text-xl font-bold text-foreground">Messages</h2>
                 <CommentThread
@@ -349,6 +327,28 @@ export default async function TicketDetailPage({
                   </div>
                 </div>
               </details>
+
+              {(ticket.resolutionPhotos.length > 0 || ticket.resolutionNote) && (
+                <Card className="p-5 sm:p-6">
+                  <h2 className="text-xl font-bold text-foreground">What the inspector did</h2>
+                  {ticket.resolutionNote && (
+                    <div className="mt-3 rounded-2xl border-2 border-border bg-surface-hover p-4">
+                      <p className="mb-1 text-base font-semibold text-muted">Their note</p>
+                      <p className="whitespace-pre-wrap text-lg text-foreground">
+                        {ticket.resolutionNote}
+                      </p>
+                    </div>
+                  )}
+                  {ticket.resolutionPhotos.length > 0 && (
+                    <div className="mt-4">
+                      <p className="mb-2 text-base font-semibold text-muted">
+                        Photos ({ticket.resolutionPhotos.length}) — tap one to enlarge
+                      </p>
+                      <ResolutionPhotoGrid photos={ticket.resolutionPhotos} compact />
+                    </div>
+                  )}
+                </Card>
+              )}
             </div>
           </div>
         </div>

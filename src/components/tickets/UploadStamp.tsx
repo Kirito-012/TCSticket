@@ -10,13 +10,32 @@ export function UploadStamp({
   at,
   label,
   className,
+  stacked = false,
 }: {
   at: string | null | undefined
   label?: string
   className?: string
+  /** Date on one line, time on the next — for narrow places. */
+  stacked?: boolean
 }) {
   const parts = formatUploadParts(at)
   if (!parts) return null
+  if (stacked) {
+    return (
+      <span
+        className={cn(
+          'flex flex-col rounded-lg border border-accent/40 bg-accent-soft px-2.5 py-1.5 text-sm text-accent-strong',
+          className,
+        )}
+      >
+        <span className="flex items-center gap-1.5 font-bold">
+          <CalendarClock className="h-4 w-4 shrink-0" strokeWidth={2.25} aria-hidden />
+          {parts.date}
+        </span>
+        <span className="pl-[22px] font-semibold">{parts.time}</span>
+      </span>
+    )
+  }
   return (
     <span
       className={cn(

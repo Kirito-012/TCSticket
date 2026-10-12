@@ -8,14 +8,17 @@ import { UploadStamp } from '@/components/tickets/UploadStamp'
 /** Read-only photo grid for the full (Admin/Manager) ticket page; clicking opens the popup. */
 export function ResolutionPhotoGrid({
   photos,
+  compact = false,
 }: {
   photos: { url: string; publicId: string; uploadedAt?: string | null }[]
+  /** Two across, for a narrow column. */
+  compact?: boolean
 }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className={compact ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-2 gap-3 sm:grid-cols-3'}>
         {photos.map((photo, i) => (
           <div key={photo.publicId}>
             <button
@@ -31,7 +34,7 @@ export function ResolutionPhotoGrid({
                 className="h-full w-full object-cover transition-opacity hover:opacity-90"
               />
             </button>
-            <UploadStamp at={photo.uploadedAt} className="mt-2" />
+            <UploadStamp at={photo.uploadedAt} stacked={compact} className="mt-2" />
           </div>
         ))}
       </div>
