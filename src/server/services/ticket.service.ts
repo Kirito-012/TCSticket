@@ -857,11 +857,16 @@ export async function setReportPdf(
   report: { url: string; publicId: string; name: string; bytes: number },
 ) {
   await dbConnect()
-  return TicketModel.findOneAndUpdate(
-    { number, deletedAt: null },
+  // The previous report, if any, is returned so its file can be cleaned up.
+  const previous = await TicketModel.findOne({ number, deletedAt: null }).select('reportPdf').lean()
+  if (!previous) return null
+  const result = await TicketModel.updateOne(
+    { _id: previous._id },
     { $set: { reportPdf: { ...report, uploadedAt: new Date() } } },
-    { returnDocument: 'before' }, // the previous report, if any, so its file can be cleaned up
   )
+  // Never report success for a save that changed nothing (e.g. a model that predates the field).
+  if (result.modifiedCount === 0) throw new Error('The report was not saved on the ticket')
+  return previous
 }
 
 /** Attaches a photo that arrived with the ticket (e.g. the DroneSeva drone image). */

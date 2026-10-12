@@ -45,8 +45,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ num
     return NextResponse.json({ error: 'Only PDF files are allowed' }, { status: 400 })
   }
 
+  let uploadedId: string | null = null
   try {
     const uploaded = await uploadReportPdf(bytes)
+    uploadedId = uploaded.publicId
     const name = (file.name || 'Detection report.pdf').replace(/[^\w. -]+/g, '_').slice(0, 120)
     const previous = await ticketService.setReportPdf(number, {
       url: uploaded.url,
@@ -63,6 +65,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ num
     return NextResponse.json({ report: { name, bytes: uploaded.bytes } }, { status: 201 })
   } catch (err) {
     logger.error({ err, number }, 'Failed to attach a detection report to a ticket')
+    if (uploadedId) await deleteReportPdf(uploadedId).catch(() => undefined) // no orphaned file
     return NextResponse.json({ error: 'Upload failed' }, { status: 502 })
   }
 }
