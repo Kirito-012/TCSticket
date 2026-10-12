@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { randomUUID } from 'node:crypto'
 import { v2 as cloudinary } from 'cloudinary'
 
 cloudinary.config({
@@ -45,6 +46,32 @@ export async function uploadCommentImage(
     width: result.width,
     height: result.height,
   }
+}
+
+export type UploadedReport = { url: string; publicId: string; bytes: number }
+
+/** Uploads a PDF (as a raw file, so it is stored exactly as sent) under tcs-ticket/reports. */
+export async function uploadReportPdf(
+  bytes: Buffer,
+  folder = 'tcs-ticket/reports',
+): Promise<UploadedReport> {
+  const result = await new Promise<{ secure_url: string; public_id: string; bytes: number }>(
+    (resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder, resource_type: 'raw', public_id: `${randomUUID()}.pdf` },
+        (error, result) => {
+          if (error || !result) return reject(error ?? new Error('Cloudinary upload failed'))
+          resolve(result)
+        },
+      )
+      stream.end(bytes)
+    },
+  )
+  return { url: result.secure_url, publicId: result.public_id, bytes: result.bytes }
+}
+
+export async function deleteReportPdf(publicId: string) {
+  await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' })
 }
 
 export async function deleteCommentImage(publicId: string) {

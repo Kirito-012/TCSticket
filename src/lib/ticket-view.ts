@@ -65,6 +65,8 @@ export type TicketDetailView = {
   resolutionNote: string
   /** Photos the ticket arrived with, e.g. the drone image from DroneSeva. */
   sourcePhotos: CommentAttachmentView[]
+  /** The detection report PDF, if one was attached (opened through /api/tickets/:n/report). */
+  report: { name: string; bytes: number; uploadedAt: string | null } | null
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -93,6 +95,15 @@ export function toTicketDetailView(t: any): TicketDetailView {
     createdAt: new Date(t.createdAt).toISOString(),
     resolvedAt: t.resolvedAt ? new Date(t.resolvedAt).toISOString() : null,
     resolutionNote: t.resolutionNote ?? '',
+    report: t.reportPdf?.publicId
+      ? {
+          name: t.reportPdf.name || 'Detection report.pdf',
+          bytes: t.reportPdf.bytes ?? 0,
+          uploadedAt: t.reportPdf.uploadedAt
+            ? new Date(t.reportPdf.uploadedAt).toISOString()
+            : null,
+        }
+      : null,
     sourcePhotos: (t.sourcePhotos ?? []).map(
       (a: CommentAttachmentView & { uploadedAt?: Date | string }) => ({
         url: a.url,

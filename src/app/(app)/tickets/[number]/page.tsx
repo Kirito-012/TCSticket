@@ -12,6 +12,7 @@ import { AssigneeDropdown } from '@/components/tickets/AssigneeDropdown'
 import { StatusSelect } from '@/components/tickets/StatusSelect'
 import { ResolutionPhotoGrid } from '@/components/tickets/ResolutionPhotoGrid'
 import { DronePhoto } from '@/components/tickets/DronePhoto'
+import { ReportViewer } from '@/components/tickets/ReportViewer'
 import { SurveyorResolutionPanel } from '@/components/tickets/SurveyorResolutionPanel'
 import { requireTicketScope } from '@/server/auth/session'
 import { dbConnect } from '@/server/db/connect'
@@ -120,6 +121,17 @@ export default async function TicketDetailPage({
                   <div className="mt-6 space-y-3">
                     <h2 className="text-xl font-bold text-foreground">Photo from the drone</h2>
                     <DronePhoto photos={ticket.sourcePhotos} />
+                  </div>
+                )}
+                {ticket.report && (
+                  <div className="mt-6 space-y-3">
+                    <h2 className="text-xl font-bold text-foreground">The report</h2>
+                    <ReportViewer
+                      number={ticket.number}
+                      name={ticket.report.name}
+                      bytes={ticket.report.bytes}
+                      uploadedAt={ticket.report.uploadedAt}
+                    />
                   </div>
                 )}
                 {ticket.location && (
@@ -233,6 +245,17 @@ export default async function TicketDetailPage({
                   <div className="mt-6 space-y-3">
                     <h2 className="text-xl font-bold text-foreground">Drone photo</h2>
                     <DronePhoto photos={ticket.sourcePhotos} showTime />
+                  </div>
+                )}
+                {ticket.report && (
+                  <div className="mt-6 space-y-3">
+                    <h2 className="text-xl font-bold text-foreground">Detection report</h2>
+                    <ReportViewer
+                      number={ticket.number}
+                      name={ticket.report.name}
+                      bytes={ticket.report.bytes}
+                      uploadedAt={ticket.report.uploadedAt}
+                    />
                   </div>
                 )}
                 {ticket.location && (

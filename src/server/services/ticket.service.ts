@@ -851,6 +851,19 @@ export async function getDashboardKpis() {
   }
 }
 
+/** Stores (or replaces) the detection report PDF on a ticket. */
+export async function setReportPdf(
+  number: number,
+  report: { url: string; publicId: string; name: string; bytes: number },
+) {
+  await dbConnect()
+  return TicketModel.findOneAndUpdate(
+    { number, deletedAt: null },
+    { $set: { reportPdf: { ...report, uploadedAt: new Date() } } },
+    { returnDocument: 'before' }, // the previous report, if any, so its file can be cleaned up
+  )
+}
+
 /** Attaches a photo that arrived with the ticket (e.g. the DroneSeva drone image). */
 export async function addSourcePhoto(
   number: number,

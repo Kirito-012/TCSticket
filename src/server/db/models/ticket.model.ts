@@ -46,6 +46,22 @@ const ticketSchema = new Schema(
       default: [],
     },
 
+    // The PDF report from DroneSeva's garbage detection (annotated map and detection table), for
+    // whoever works the ticket. Served through /api/tickets/:number/report, never by its raw URL.
+    reportPdf: {
+      type: new Schema(
+        {
+          url: { type: String, required: true },
+          publicId: { type: String, required: true },
+          name: { type: String, default: 'Detection report.pdf' },
+          bytes: { type: Number, default: 0 },
+          uploadedAt: { type: Date, default: () => new Date() },
+        },
+        { _id: false },
+      ),
+      default: null,
+    },
+
     // Surveyor-uploaded proof of cleanup. At least one is required before a surveyor can resolve.
     resolutionPhotos: {
       type: [
