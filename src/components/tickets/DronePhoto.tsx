@@ -5,6 +5,7 @@ import { Expand } from 'lucide-react'
 import { ImageLightbox } from '@/components/ui/ImageLightbox'
 import { cn } from '@/lib/utils'
 import { formatUploadTime } from '@/lib/format-upload-time'
+import { UploadStamp } from '@/components/tickets/UploadStamp'
 
 type Photo = {
   url: string
@@ -47,9 +48,7 @@ export function DronePhoto({ photos, showTime = false }: { photos: Photo[]; show
           Tap to enlarge
         </span>
       </button>
-      {caption(first) && (
-        <p className="text-base font-semibold text-muted-strong">{caption(first)}</p>
-      )}
+      {showTime && <UploadStamp at={first.uploadedAt} label="Uploaded" />}
 
       {rest.length > 0 && (
         <div className="flex flex-wrap gap-2">

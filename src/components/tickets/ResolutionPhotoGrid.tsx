@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ImageLightbox } from '@/components/ui/ImageLightbox'
 import { formatUploadTime } from '@/lib/format-upload-time'
+import { UploadStamp } from '@/components/tickets/UploadStamp'
 
 /** Read-only photo grid for the full (Admin/Manager) ticket page; clicking opens the popup. */
 export function ResolutionPhotoGrid({
@@ -30,11 +31,7 @@ export function ResolutionPhotoGrid({
                 className="h-full w-full object-cover transition-opacity hover:opacity-90"
               />
             </button>
-            {photo.uploadedAt && (
-              <p className="mt-1.5 text-sm font-medium text-muted-strong">
-                {formatUploadTime(photo.uploadedAt)}
-              </p>
-            )}
+            <UploadStamp at={photo.uploadedAt} className="mt-2" />
           </div>
         ))}
       </div>
