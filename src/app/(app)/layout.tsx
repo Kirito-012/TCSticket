@@ -1,4 +1,5 @@
 import { SimpleNav, type NavLink } from '@/components/layout/SimpleNav'
+import { LiveRefresh } from '@/components/layout/LiveRefresh'
 import { cn } from '@/lib/utils'
 import { SidebarProvider } from '@/components/layout/SidebarContext'
 import { requireTicketScope } from '@/server/auth/session'
@@ -45,6 +46,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <SidebarProvider simple light={isInspector}>
       <div className={cn('flex min-h-screen', isInspector && 'simple-ui')}>
+        <LiveRefresh />
         <SimpleNav name={firstName} links={links} />
         <div className="flex min-w-0 flex-1 flex-col pb-24 lg:pb-0 lg:pl-64">{children}</div>
       </div>
