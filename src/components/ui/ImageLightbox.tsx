@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { ChevronLeft, ChevronRight, Loader2, X } from 'lucide-react'
 
-export type LightboxImage = { url: string; alt?: string }
+export type LightboxImage = { url: string; alt?: string; caption?: string }
 
 /**
  * Full-screen image popup. Controlled: pass `index` (null = closed). Closes on the X button,
@@ -117,6 +117,11 @@ export function ImageLightbox({
         onClick={(e) => e.stopPropagation()}
         className="max-h-[80vh] max-w-full rounded-lg object-contain shadow-2xl sm:max-h-[88vh]"
       />
+      {image.caption && (
+        <p className="pointer-events-none absolute bottom-4 left-1/2 max-w-[90vw] -translate-x-1/2 rounded-full bg-black/75 px-4 py-2 text-center text-sm font-semibold text-white">
+          {image.caption}
+        </p>
+      )}
     </div>,
     document.body,
   )

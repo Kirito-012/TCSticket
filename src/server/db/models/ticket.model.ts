@@ -38,6 +38,9 @@ const ticketSchema = new Schema(
           publicId: { type: String, required: true },
           width: { type: Number, required: true },
           height: { type: Number, required: true },
+          // When the photo was attached. Photos added before this field existed have none; the
+          // ticket page then falls back to the ticket's own creation time.
+          uploadedAt: { type: Date, default: () => new Date() },
         },
       ],
       default: [],

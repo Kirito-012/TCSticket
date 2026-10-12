@@ -93,18 +93,25 @@ export function toTicketDetailView(t: any): TicketDetailView {
     createdAt: new Date(t.createdAt).toISOString(),
     resolvedAt: t.resolvedAt ? new Date(t.resolvedAt).toISOString() : null,
     resolutionNote: t.resolutionNote ?? '',
-    sourcePhotos: (t.sourcePhotos ?? []).map((a: CommentAttachmentView) => ({
-      url: a.url,
-      publicId: a.publicId,
-      width: a.width,
-      height: a.height,
-    })),
-    resolutionPhotos: (t.resolutionPhotos ?? []).map((a: CommentAttachmentView) => ({
-      url: a.url,
-      publicId: a.publicId,
-      width: a.width,
-      height: a.height,
-    })),
+    sourcePhotos: (t.sourcePhotos ?? []).map(
+      (a: CommentAttachmentView & { uploadedAt?: Date | string }) => ({
+        url: a.url,
+        publicId: a.publicId,
+        width: a.width,
+        height: a.height,
+        // Older photos were not stamped; they arrived with the ticket.
+        uploadedAt: new Date(a.uploadedAt ?? t.createdAt).toISOString(),
+      }),
+    ),
+    resolutionPhotos: (t.resolutionPhotos ?? []).map(
+      (a: CommentAttachmentView & { uploadedAt?: Date | string }) => ({
+        url: a.url,
+        publicId: a.publicId,
+        width: a.width,
+        height: a.height,
+        uploadedAt: a.uploadedAt ? new Date(a.uploadedAt).toISOString() : null,
+      }),
+    ),
   }
 }
 
@@ -113,6 +120,8 @@ export type CommentAttachmentView = {
   publicId: string
   width: number
   height: number
+  /** When the photo was uploaded (ISO). Only set for ticket photos. */
+  uploadedAt?: string | null
 }
 
 export type CommentView = {

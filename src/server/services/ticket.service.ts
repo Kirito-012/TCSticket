@@ -855,7 +855,10 @@ export async function addSourcePhoto(
   await dbConnect()
   return TicketModel.findOneAndUpdate(
     { number, deletedAt: null },
-    { $push: { sourcePhotos: photo }, $inc: { 'counts.attachments': 1 } },
+    {
+      $push: { sourcePhotos: { ...photo, uploadedAt: new Date() } },
+      $inc: { 'counts.attachments': 1 },
+    },
     { returnDocument: 'after' },
   )
 }

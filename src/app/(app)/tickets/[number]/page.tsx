@@ -232,7 +232,7 @@ export default async function TicketDetailPage({
                 {ticket.sourcePhotos.length > 0 && (
                   <div className="mt-6 space-y-3">
                     <h2 className="text-xl font-bold text-foreground">Drone photo</h2>
-                    <DronePhoto photos={ticket.sourcePhotos} />
+                    <DronePhoto photos={ticket.sourcePhotos} showTime />
                   </div>
                 )}
                 {ticket.location && (
