@@ -25,7 +25,8 @@ jobs:
 
       - name: npm install, build, and test
         run: |
-          npm install
+          # npm ci installs exactly what package-lock.json says; a fresh `npm install` hit an npm resolver bug
+          npm ci
           npm run build --if-present
           npm run test --if-present
 
@@ -33,7 +34,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          # `.next` (the built app) is a hidden folder, which upload-artifact skips unless told
+          # otherwise. Leave out the Git history and workflow files, which Azure does not need.
+          include-hidden-files: true
+          path: |
+            .
+            !.git
+            !.github
 
   deploy:
     runs-on: ubuntu-latest

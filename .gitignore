@@ -48,6 +48,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# this project uses pnpm (pnpm-lock.yaml is the tracked lockfile) — an npm-generated
-# package-lock.json shouldn't be committed alongside it
-/package-lock.json
+# pnpm-lock.yaml is the main lockfile (Vercel / local). package-lock.json is ALSO tracked now:
+# the Azure deploy workflow installs with `npm ci`, which needs it. Regenerate it with
+# `npm install --package-lock-only` after changing dependencies.
