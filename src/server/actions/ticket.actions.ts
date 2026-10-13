@@ -7,6 +7,7 @@ import { sanitizeHtml } from '@/lib/sanitize-html'
 import { createTicketSchema, updateTicketSchema, addCommentSchema } from '@/lib/schemas/ticket'
 import * as ticketService from '@/server/services/ticket.service'
 import { uploadCommentImage, deleteCommentImage } from '@/server/cloudinary'
+import { logger } from '@/lib/logger'
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024
 const ALLOWED_IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif'])
@@ -117,7 +118,8 @@ export async function uploadResolutionPhotoAction(
   try {
     image = await uploadCommentImage(file, 'tcs-ticket/resolutions')
     await ticketService.addResolutionPhoto(number, image, user.id)
-  } catch {
+  } catch (err) {
+    logger.error({ err, number }, 'Could not upload or save a resolution photo')
     return { error: 'Upload failed. Please try again.' }
   }
 
@@ -192,7 +194,8 @@ export async function uploadCommentImageAction(
   try {
     const image = await uploadCommentImage(file)
     return { image }
-  } catch {
+  } catch (err) {
+    logger.error({ err }, 'Could not upload a comment image')
     return { error: 'Upload failed. Please try again.' }
   }
 }
