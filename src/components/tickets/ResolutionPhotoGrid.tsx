@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { MapPin } from 'lucide-react'
+import { MapPin, ScanSearch } from 'lucide-react'
 import { ImageLightbox } from '@/components/ui/ImageLightbox'
 import { formatUploadTime } from '@/lib/format-upload-time'
 import { UploadStamp } from '@/components/tickets/UploadStamp'
@@ -17,6 +17,7 @@ export function ResolutionPhotoGrid({
     publicId: string
     uploadedAt?: string | null
     locationCheck?: CommentAttachmentView['locationCheck']
+    garbageCheck?: CommentAttachmentView['garbageCheck']
   }[]
   /** Two across, for a narrow column. */
   compact?: boolean
@@ -43,6 +44,7 @@ export function ResolutionPhotoGrid({
             </button>
             <UploadStamp at={photo.uploadedAt} stacked={compact} className="mt-2" />
             <PlaceNote check={photo.locationCheck} />
+            <GarbageNote check={photo.garbageCheck} />
           </div>
         ))}
       </div>
@@ -82,6 +84,22 @@ function PlaceNote({ check }: { check: CommentAttachmentView['locationCheck'] })
     <p className="mt-1.5 flex items-start gap-1.5 text-sm font-semibold text-accent-strong">
       <MapPin className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={2.25} aria-hidden />
       {text}
+    </p>
+  )
+}
+
+/** Under each photo: what the detection model saw (only for photos that were checked). */
+function GarbageNote({ check }: { check: CommentAttachmentView['garbageCheck'] }) {
+  if (!check) return null
+  if (check.status !== 'ok' || check.coveragePercent === null) {
+    return <p className="mt-1 text-sm text-muted">Garbage check not available</p>
+  }
+  const percent = check.coveragePercent
+  const shown = percent < 1 && percent > 0 ? '<1' : String(Math.round(percent))
+  return (
+    <p className="mt-1 flex items-start gap-1.5 text-sm font-semibold text-accent-strong">
+      <ScanSearch className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={2.25} aria-hidden />
+      Garbage in photo: {shown}%
     </p>
   )
 }

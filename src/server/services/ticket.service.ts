@@ -622,6 +622,12 @@ export async function listEvents(ticketId: string) {
 
 type ResolutionPhotoInput = { url: string; publicId: string; width: number; height: number }
 
+export type ResolutionPhotoGarbageCheck = {
+  status: 'ok' | 'unavailable'
+  coveragePercent: number | null
+  detections: number | null
+}
+
 export type ResolutionPhotoLocation = {
   latitude: number
   longitude: number
@@ -650,6 +656,7 @@ export async function addResolutionPhoto(
   photo: ResolutionPhotoInput,
   actorId: string,
   location?: ResolutionPhotoLocation | null,
+  garbageCheck?: ResolutionPhotoGarbageCheck | null,
 ) {
   await dbConnect()
   const ticket = await TicketModel.findOneAndUpdate(
@@ -661,6 +668,7 @@ export async function addResolutionPhoto(
           uploadedById: actorId,
           uploadedAt: new Date(),
           location: location ?? null,
+          garbageCheck: garbageCheck ? { ...garbageCheck, checkedAt: new Date() } : null,
         },
       },
       $inc: { 'counts.attachments': 1 },

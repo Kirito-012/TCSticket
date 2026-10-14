@@ -69,6 +69,19 @@ export type TicketDetailView = {
   report: { name: string; bytes: number; uploadedAt: string | null } | null
 }
 
+/** The stored garbage check of a proof photo, reduced to what the pages show. */
+export function toGarbageCheck(photo: {
+  garbageCheck?: unknown
+}): CommentAttachmentView['garbageCheck'] {
+  const g = photo.garbageCheck as
+    { status?: string; coveragePercent?: number | null } | null | undefined
+  if (!g) return null
+  return {
+    status: g.status === 'ok' ? 'ok' : 'unavailable',
+    coveragePercent: typeof g.coveragePercent === 'number' ? g.coveragePercent : null,
+  }
+}
+
 /** The stored location of a proof photo, reduced to what the pages show. */
 export function toLocationCheck(photo: {
   location?: unknown
@@ -134,13 +147,20 @@ export function toTicketDetailView(t: any): TicketDetailView {
       }),
     ),
     resolutionPhotos: (t.resolutionPhotos ?? []).map(
-      (a: CommentAttachmentView & { uploadedAt?: Date | string; location?: unknown }) => ({
+      (
+        a: CommentAttachmentView & {
+          uploadedAt?: Date | string
+          location?: unknown
+          garbageCheck?: unknown
+        },
+      ) => ({
         url: a.url,
         publicId: a.publicId,
         width: a.width,
         height: a.height,
         uploadedAt: a.uploadedAt ? new Date(a.uploadedAt).toISOString() : null,
         locationCheck: toLocationCheck(a),
+        garbageCheck: toGarbageCheck(a),
       }),
     ),
   }
@@ -158,6 +178,11 @@ export type CommentAttachmentView = {
     withinRadius: boolean | null
     distanceMeters: number | null
     method: 'camera' | 'gallery'
+  } | null
+  /** For proof-of-cleanup photos: how much of the picture is garbage (null = not checked). */
+  garbageCheck?: {
+    status: 'ok' | 'unavailable'
+    coveragePercent: number | null
   } | null
 }
 

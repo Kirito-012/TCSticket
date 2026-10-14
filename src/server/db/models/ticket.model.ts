@@ -90,6 +90,20 @@ const ticketSchema = new Schema(
             ),
             default: null,
           },
+          // The detection model's look at the photo: what percent of it is garbage. Status is
+          // "unavailable" when the service could not be reached and the photo was accepted unchecked.
+          garbageCheck: {
+            type: new Schema(
+              {
+                status: { type: String, enum: ['ok', 'unavailable'], required: true },
+                coveragePercent: { type: Number, default: null },
+                detections: { type: Number, default: null },
+                checkedAt: { type: Date, default: () => new Date() },
+              },
+              { _id: false },
+            ),
+            default: null,
+          },
         },
       ],
       default: [],

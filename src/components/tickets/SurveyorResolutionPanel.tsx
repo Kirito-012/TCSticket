@@ -264,7 +264,8 @@ export function SurveyorResolutionPanel({
       <section className="space-y-3">
         <h3 className="text-xl font-bold text-foreground">{step(2)}. Add photos</h3>
         <p className="text-lg text-muted">
-          Take a photo of the place after cleaning, or choose one from your phone.
+          Take a photo of the place after cleaning, or choose one from your phone. We check that the
+          place is clean.
           {!target && ' We also save where you were.'}
         </p>
 
@@ -485,8 +486,9 @@ function PhotoGrid({
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={u.previewUrl} alt="" className="h-full w-full object-cover opacity-60" />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50 p-2 text-center">
             <Loader2 className="h-8 w-8 animate-spin text-white" />
+            <span className="text-base font-bold text-white">Checking the photo…</span>
           </div>
         </div>
       ))}
