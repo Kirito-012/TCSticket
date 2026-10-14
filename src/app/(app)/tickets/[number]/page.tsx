@@ -15,6 +15,7 @@ import { DronePhoto } from '@/components/tickets/DronePhoto'
 import { ReportViewer } from '@/components/tickets/ReportViewer'
 import { SurveyorResolutionPanel } from '@/components/tickets/SurveyorResolutionPanel'
 import { requireTicketScope } from '@/server/auth/session'
+import { resolveRules } from '@/server/resolve-rules'
 import { dbConnect } from '@/server/db/connect'
 import * as ticketService from '@/server/services/ticket.service'
 import { TicketStatusModel } from '@/server/db/models/ticket-status.model'
@@ -165,6 +166,8 @@ export default async function TicketDetailPage({
                   photos={ticket.resolutionPhotos}
                   isResolved={done}
                   resolutionNote={ticket.resolutionNote}
+                  target={ticket.location}
+                  rules={resolveRules()}
                 />
               </Card>
             </div>

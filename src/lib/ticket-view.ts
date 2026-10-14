@@ -69,6 +69,22 @@ export type TicketDetailView = {
   report: { name: string; bytes: number; uploadedAt: string | null } | null
 }
 
+/** The stored location of a proof photo, reduced to what the pages show. */
+export function toLocationCheck(photo: {
+  location?: unknown
+}): CommentAttachmentView['locationCheck'] {
+  const l = photo.location as
+    | { withinRadius?: boolean | null; distanceMeters?: number | null; method?: string }
+    | null
+    | undefined
+  if (!l) return null
+  return {
+    withinRadius: l.withinRadius ?? null,
+    distanceMeters: typeof l.distanceMeters === 'number' ? l.distanceMeters : null,
+    method: l.method === 'camera' ? 'camera' : 'gallery',
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function toTicketDetailView(t: any): TicketDetailView {
   const rawIssue = t.issue ?? ''
@@ -79,7 +95,10 @@ export function toTicketDetailView(t: any): TicketDetailView {
     subject: t.subject,
     issueHtml,
     droneSevaUrl,
-    location: extractLocation(rawIssue),
+    location:
+      typeof t.location?.latitude === 'number' && typeof t.location?.longitude === 'number'
+        ? { latitude: t.location.latitude, longitude: t.location.longitude }
+        : extractLocation(rawIssue),
     priorityId: t.priorityId ? String(t.priorityId._id) : null,
     statusId: t.statusId ? String(t.statusId._id) : null,
     typeId: t.typeId ? String(t.typeId._id) : null,
@@ -115,12 +134,13 @@ export function toTicketDetailView(t: any): TicketDetailView {
       }),
     ),
     resolutionPhotos: (t.resolutionPhotos ?? []).map(
-      (a: CommentAttachmentView & { uploadedAt?: Date | string }) => ({
+      (a: CommentAttachmentView & { uploadedAt?: Date | string; location?: unknown }) => ({
         url: a.url,
         publicId: a.publicId,
         width: a.width,
         height: a.height,
         uploadedAt: a.uploadedAt ? new Date(a.uploadedAt).toISOString() : null,
+        locationCheck: toLocationCheck(a),
       }),
     ),
   }
@@ -133,6 +153,12 @@ export type CommentAttachmentView = {
   height: number
   /** When the photo was uploaded (ISO). Only set for ticket photos. */
   uploadedAt?: string | null
+  /** For proof-of-cleanup photos: where the inspector was when it was taken (null = not checked). */
+  locationCheck?: {
+    withinRadius: boolean | null
+    distanceMeters: number | null
+    method: 'camera' | 'gallery'
+  } | null
 }
 
 export type CommentView = {

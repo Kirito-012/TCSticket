@@ -8,6 +8,9 @@ import { createTicketSchema, updateTicketSchema, addCommentSchema } from '@/lib/
 import * as ticketService from '@/server/services/ticket.service'
 import { uploadCommentImage, deleteCommentImage } from '@/server/cloudinary'
 import { logger } from '@/lib/logger'
+import { evaluateLocation, verdictMessage, type LocationFix } from '@/lib/geo'
+import { resolveRules } from '@/server/resolve-rules'
+import type { ResolutionPhotoLocation } from '@/server/services/ticket.service'
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024
 const ALLOWED_IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif'])
@@ -97,7 +100,35 @@ async function checkSurveyorAccess(number: number) {
 }
 
 export type ResolutionPhotoState =
-  { error?: string; ok?: boolean; photo?: UploadedImageResult } | undefined
+  | {
+      error?: string
+      ok?: boolean
+      photo?: UploadedImageResult & { locationCheck?: ResolutionLocationCheck }
+      /** True when the photo was refused because the inspector is not at the ticket's spot. */
+      tooFar?: boolean
+      distanceMeters?: number
+    }
+  | undefined
+
+type ResolutionLocationCheck = {
+  withinRadius: boolean | null
+  distanceMeters: number | null
+  method: 'camera' | 'gallery'
+}
+
+/** Reads the phone's location reading that the browser sends along with a photo. */
+function readFix(formData: FormData): Partial<LocationFix> {
+  const num = (key: string) => {
+    const raw = formData.get(key)
+    return typeof raw === 'string' && raw.trim() !== '' ? Number(raw) : undefined
+  }
+  return {
+    latitude: num('latitude'),
+    longitude: num('longitude'),
+    accuracy: num('accuracy'),
+    capturedAt: num('capturedAt'),
+  }
+}
 
 /** Uploads one proof-of-cleanup photo to Cloudinary and attaches it to the ticket. */
 export async function uploadResolutionPhotoAction(
@@ -114,17 +145,52 @@ export async function uploadResolutionPhotoAction(
   }
   if (file.size > MAX_IMAGE_BYTES) return { error: 'Image must be under 8MB' }
 
+  // Where was the inspector? When the ticket has a spot, the photo only counts if they were at it
+  // — decided here, on the server, before anything is uploaded or saved.
+  const method = formData.get('method') === 'camera' ? 'camera' : 'gallery'
+  const fix = readFix(formData)
+  const rules = resolveRules()
+  const target = await ticketService.getTicketTarget(number)
+  let location: ResolutionPhotoLocation | null = null
+  if (target) {
+    const verdict = evaluateLocation(target, fix, rules)
+    if (!verdict.ok) {
+      return {
+        error: verdictMessage(verdict, rules),
+        tooFar: verdict.reason === 'too-far',
+        distanceMeters: verdict.distanceMeters,
+      }
+    }
+    location = {
+      latitude: fix.latitude!,
+      longitude: fix.longitude!,
+      accuracy: fix.accuracy!,
+      distanceMeters: verdict.distanceMeters,
+      withinRadius: true,
+      method,
+      capturedAt: new Date(fix.capturedAt!),
+    }
+  }
+
   let image: UploadedImageResult
   try {
     image = await uploadCommentImage(file, 'tcs-ticket/resolutions')
-    await ticketService.addResolutionPhoto(number, image, user.id)
+    await ticketService.addResolutionPhoto(number, image, user.id, location)
   } catch (err) {
     logger.error({ err, number }, 'Could not upload or save a resolution photo')
     return { error: 'Upload failed. Please try again.' }
   }
 
   revalidatePath(`/tickets/${number}`)
-  return { ok: true, photo: image }
+  return {
+    ok: true,
+    photo: {
+      ...image,
+      locationCheck: location
+        ? { withinRadius: true, distanceMeters: location.distanceMeters, method }
+        : undefined,
+    },
+  }
 }
 
 export async function removeResolutionPhotoAction(

@@ -72,6 +72,24 @@ const ticketSchema = new Schema(
           height: { type: Number, required: true },
           uploadedById: { type: Schema.Types.ObjectId, ref: 'User', required: true },
           uploadedAt: { type: Date, default: () => new Date() },
+          // Where the inspector was when the photo was taken, as read from their phone. Photos from
+          // before this check existed have none.
+          location: {
+            type: new Schema(
+              {
+                latitude: { type: Number, required: true },
+                longitude: { type: Number, required: true },
+                accuracy: { type: Number, default: null },
+                // Metres from the ticket's spot; withinRadius is null when the ticket has no spot.
+                distanceMeters: { type: Number, default: null },
+                withinRadius: { type: Boolean, default: null },
+                method: { type: String, enum: ['camera', 'gallery'], default: 'gallery' },
+                capturedAt: { type: Date, default: null },
+              },
+              { _id: false },
+            ),
+            default: null,
+          },
         },
       ],
       default: [],

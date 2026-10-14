@@ -10,6 +10,8 @@ import { TicketPriorityModel } from '@/server/db/models/ticket-priority.model'
 import { TicketTypeModel } from '@/server/db/models/ticket-type.model'
 import { TagModel } from '@/server/db/models/tag.model'
 import { UserModel } from '@/server/db/models/user.model'
+import { extractLocation } from '@/lib/droneseva-link'
+import { resolveRules } from '@/server/resolve-rules'
 import { nextSequence } from '@/server/db/models/counter.model'
 import { getRealSectors } from '@/server/sectors'
 
@@ -620,16 +622,47 @@ export async function listEvents(ticketId: string) {
 
 type ResolutionPhotoInput = { url: string; publicId: string; width: number; height: number }
 
+export type ResolutionPhotoLocation = {
+  latitude: number
+  longitude: number
+  accuracy: number | null
+  distanceMeters: number | null
+  withinRadius: boolean | null
+  method: 'camera' | 'gallery'
+  capturedAt: Date | null
+}
+
+/**
+ * The spot a ticket is about: its stored coordinates, or (for older tickets) the ones written in
+ * the issue text. Null when the ticket has no usable spot — then no location check applies.
+ */
+export async function getTicketTarget(number: number) {
+  await dbConnect()
+  const t = await TicketModel.findOne({ number, deletedAt: null }).select('location issue').lean()
+  if (!t) return null
+  const { latitude, longitude } = t.location ?? {}
+  if (typeof latitude === 'number' && typeof longitude === 'number') return { latitude, longitude }
+  return extractLocation(t.issue ?? '')
+}
+
 export async function addResolutionPhoto(
   number: number,
   photo: ResolutionPhotoInput,
   actorId: string,
+  location?: ResolutionPhotoLocation | null,
 ) {
   await dbConnect()
   const ticket = await TicketModel.findOneAndUpdate(
     { number, deletedAt: null },
     {
-      $push: { resolutionPhotos: { ...photo, uploadedById: actorId, uploadedAt: new Date() } },
+      $push: {
+        resolutionPhotos: {
+          ...photo,
+          uploadedById: actorId,
+          uploadedAt: new Date(),
+          location: location ?? null,
+        },
+      },
       $inc: { 'counts.attachments': 1 },
       $set: { lastActivityAt: new Date() },
     },
@@ -666,6 +699,19 @@ export async function resolveTicketWithProof(number: number, actorId: string, no
   if (!ticket) throw new Error('Ticket not found')
   if (!ticket.resolutionPhotos?.length) {
     throw new Error('Upload at least one photo before marking this ticket resolved.')
+  }
+  // When the ticket has a spot, at least one photo must have been taken within the radius of it.
+  const target = await getTicketTarget(number)
+  if (
+    target &&
+    !ticket.resolutionPhotos.some(
+      (p: { location?: { withinRadius?: boolean | null } | null }) =>
+        p.location?.withinRadius === true,
+    )
+  ) {
+    throw new Error(
+      `Take a photo at the place (within ${resolveRules().radiusMeters} m) before marking this ticket done.`,
+    )
   }
   const resolved = await TicketStatusModel.findOne({ slug: 'resolved' }).lean()
   if (!resolved) throw new Error('No "Resolved" status configured — run the seed script.')
