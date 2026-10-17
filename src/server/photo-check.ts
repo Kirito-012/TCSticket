@@ -2,8 +2,24 @@ import 'server-only'
 
 import { logger } from '@/lib/logger'
 
+/** Where the model found garbage: [left, top, right, bottom], each 0..1 of the picture. */
+export type GarbageBox = [number, number, number, number]
+
+function readBoxes(raw: unknown): GarbageBox[] {
+  if (!Array.isArray(raw)) return []
+  const boxes: GarbageBox[] = []
+  for (const item of raw) {
+    if (!Array.isArray(item) || item.length !== 4) continue
+    const [l, t, r, b] = item.map(Number)
+    if ([l, t, r, b].every((n) => Number.isFinite(n) && n >= 0 && n <= 1) && r > l && b > t) {
+      boxes.push([l, t, r, b])
+    }
+  }
+  return boxes
+}
+
 export type PhotoCheckResult =
-  | { status: 'ok'; coveragePercent: number; detections: number }
+  | { status: 'ok'; coveragePercent: number; detections: number; boxes: GarbageBox[] }
   | { status: 'unavailable'; reason: string }
   /** No detection service is set up (PHOTO_CHECK_URL is empty): the garbage check is switched off. */
   | { status: 'off' }
@@ -16,14 +32,16 @@ function readNumber(raw: string | undefined, fallback: number, min: number, max:
 /**
  * The garbage check's settings.
  *  - PHOTO_CHECK_URL: where the detection service is (empty = the check is off).
- *  - PHOTO_MAX_GARBAGE_PERCENT: a photo is accepted when garbage covers LESS than this (default 15).
+ *  - PHOTO_MAX_GARBAGE_PERCENT: a photo is accepted when garbage covers LESS than this (default 5).
+ *  - PHOTO_MAX_ITEMS: a photo is refused when the model finds this many items or more (default 5).
  *  - PHOTO_CHECK_STRICT=true: if the service cannot be reached, refuse the photo instead of
  *    accepting it unchecked (default: accept, and mark it "not checked").
  */
 export function photoRules() {
   return {
     enabled: Boolean(process.env.PHOTO_CHECK_URL),
-    maxGarbagePercent: readNumber(process.env.PHOTO_MAX_GARBAGE_PERCENT, 15, 1, 100),
+    maxGarbagePercent: readNumber(process.env.PHOTO_MAX_GARBAGE_PERCENT, 5, 1, 100),
+    maxItems: readNumber(process.env.PHOTO_MAX_ITEMS, 5, 1, 1000),
     strict: process.env.PHOTO_CHECK_STRICT === 'true',
   }
 }
@@ -47,7 +65,11 @@ export async function checkPhotoForGarbage(file: File): Promise<PhotoCheckResult
       logger.error({ status: res.status }, 'The photo check service refused the photo')
       return { status: 'unavailable', reason: `service answered ${res.status}` }
     }
-    const data = (await res.json()) as { coverage_percent?: number; detections?: number }
+    const data = (await res.json()) as {
+      coverage_percent?: number
+      detections?: number
+      boxes?: unknown
+    }
     if (typeof data.coverage_percent !== 'number' || !Number.isFinite(data.coverage_percent)) {
       return { status: 'unavailable', reason: 'unreadable answer' }
     }
@@ -55,6 +77,7 @@ export async function checkPhotoForGarbage(file: File): Promise<PhotoCheckResult
       status: 'ok',
       coveragePercent: data.coverage_percent,
       detections: typeof data.detections === 'number' ? data.detections : 0,
+      boxes: readBoxes(data.boxes),
     }
   } catch (err) {
     logger.error({ err }, 'Could not reach the photo check service')
