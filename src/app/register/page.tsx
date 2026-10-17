@@ -1,8 +1,10 @@
 import Link from 'next/link'
 import { Sparkles, ShieldCheck, Clock, Users } from 'lucide-react'
 import { RegisterForm } from '@/components/auth/RegisterForm'
+import { getSectorChoices } from '@/server/services/sector.service'
 
-export default function RegisterPage() {
+export default async function RegisterPage() {
+  const sectors = await getSectorChoices()
   return (
     <div className="flex min-h-screen">
       {/* Left — brand panel */}
@@ -20,8 +22,8 @@ export default function RegisterPage() {
 
         <div className="relative max-w-md space-y-6">
           <p className="text-2xl font-medium leading-snug tracking-tight text-foreground">
-            Request access as a Nodal Manager or Zone Inspector — an admin reviews every request
-            before you can sign in.
+            Request access as a Surveyor, Nodal Manager or Zone Inspector — an admin reviews every
+            request before you can sign in.
           </p>
 
           <div className="grid grid-cols-3 gap-4 border-t border-border pt-6">
@@ -63,7 +65,7 @@ export default function RegisterPage() {
           </p>
 
           <div className="mt-7">
-            <RegisterForm />
+            <RegisterForm sectors={sectors} />
           </div>
 
           <p className="mt-6 text-center text-sm text-muted">

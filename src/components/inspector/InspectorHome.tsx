@@ -61,7 +61,7 @@ function TicketsProgress({ todo, done }: { todo: number; done: number }) {
 }
 
 /**
- * Zone Inspector home: how much is waiting, how much is finished, and the next few jobs.
+ * Surveyor home: how much is waiting, how much is finished, and the next few jobs.
  * No charts, filters or tables — one thing to look at and one place to tap.
  */
 export function InspectorHome({

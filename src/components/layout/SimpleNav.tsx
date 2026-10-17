@@ -14,7 +14,7 @@ export type NavLink = { label: string; href: string; icon: NavIcon; badge?: numb
 /**
  * The simple navigation: a few big, labelled buttons plus Log out. A bar at the bottom of the
  * screen on phones (thumb reach, no hidden menu), and a plain left column on larger screens.
- * Zone Inspectors get Home + My tasks; Admins and Managers get Home + Tasks (+ People).
+ * Surveyors get Home + My tasks; Admins and Managers get Home + Tasks (+ People).
  */
 export function SimpleNav({ name, links }: { name: string; links: NavLink[] }) {
   const pathname = usePathname()

@@ -3,9 +3,17 @@
 import { useActionState, useState } from 'react'
 import { Mail, Lock, User, ArrowRight, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { PlacementField, type SectorChoice } from '@/components/accounts/PlacementField'
 import { registerAction, type RegisterState } from '@/server/actions/auth.actions'
 
-export function RegisterForm() {
+const ROLE_CHOICES = [
+  { key: 'agent', label: 'Surveyor' },
+  { key: 'manager', label: 'Nodal Manager' },
+  { key: 'zoneinspector', label: 'Zone Inspector' },
+] as const
+
+export function RegisterForm({ sectors }: { sectors: SectorChoice[] }) {
+  const [roleKey, setRoleKey] = useState<string>('')
   const [state, formAction, pending] = useActionState<RegisterState, FormData>(
     registerAction,
     undefined,
@@ -99,17 +107,28 @@ export function RegisterForm() {
 
       <div>
         <p className="mb-1.5 block text-xs font-medium text-muted-strong">I am a</p>
-        <div className="grid grid-cols-2 gap-3">
-          <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-border-strong bg-white/[0.03] py-2.5 text-sm font-medium text-muted-strong transition-colors has-[:checked]:border-accent/50 has-[:checked]:bg-accent-soft has-[:checked]:text-accent-strong">
-            <input type="radio" name="roleKey" value="manager" required className="sr-only" />
-            Nodal Manager
-          </label>
-          <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-border-strong bg-white/[0.03] py-2.5 text-sm font-medium text-muted-strong transition-colors has-[:checked]:border-accent/50 has-[:checked]:bg-accent-soft has-[:checked]:text-accent-strong">
-            <input type="radio" name="roleKey" value="agent" required className="sr-only" />
-            Zone Inspector
-          </label>
+        <div className="grid grid-cols-3 gap-3">
+          {ROLE_CHOICES.map((role) => (
+            <label
+              key={role.key}
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-border-strong bg-white/[0.03] px-1 py-2.5 text-center text-sm font-medium text-muted-strong transition-colors has-[:checked]:border-accent/50 has-[:checked]:bg-accent-soft has-[:checked]:text-accent-strong"
+            >
+              <input
+                type="radio"
+                name="roleKey"
+                value={role.key}
+                required
+                checked={roleKey === role.key}
+                onChange={() => setRoleKey(role.key)}
+                className="sr-only"
+              />
+              {role.label}
+            </label>
+          ))}
         </div>
       </div>
+
+      <PlacementField key={roleKey} roleKey={roleKey} sectors={sectors} />
 
       <Button type="submit" size="lg" className="w-full" disabled={pending}>
         {pending ? 'Submitting…' : 'Request access'}

@@ -71,6 +71,8 @@ export async function registerAction(
     email: formData.get('email'),
     password: formData.get('password'),
     roleKey: formData.get('roleKey'),
+    sectorNo: formData.get('sectorNo') ?? undefined,
+    zoneKey: formData.get('zoneKey') ?? undefined,
   })
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? 'Invalid input' }

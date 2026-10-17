@@ -1,7 +1,14 @@
 'use client'
 
 import { useTransition } from 'react'
-import { updateUserRoleAction, setUserActiveAction } from '@/server/actions/account.actions'
+import {
+  updateUserRoleAction,
+  updateUserPlacementAction,
+  setUserActiveAction,
+} from '@/server/actions/account.actions'
+import type { SectorChoice } from '@/components/accounts/PlacementField'
+import { placementKindOf, ZONE_OPTIONS } from '@/lib/placement'
+import { sectorNoOf } from '@/lib/zones'
 import { cn, initialsFor, timeAgo } from '@/lib/utils'
 import { Avatar } from '@/components/ui/Avatar'
 import { Select } from '@/components/ui/Select'
@@ -11,12 +18,58 @@ export type AccountRow = {
   fullname: string
   email: string
   roleId: string
+  roleKey: string
   roleName: string
+  /** Where the person works: a sector ('kumbh-sector-7') or, for a Zone Inspector, a zone ('zone-2'). */
+  sectorKey: string | null
+  zoneKey: string | null
   isActive: boolean
   createdAt: string
 }
 
 export type RoleOption = { id: string; name: string }
+
+/** Where a person works, as plain text or — for an Admin — a picker to move them. */
+function AreaCell({
+  user,
+  sectors,
+  editable,
+  disabled,
+  onChange,
+}: {
+  user: AccountRow
+  sectors: SectorChoice[]
+  editable: boolean
+  disabled: boolean
+  onChange: (userId: string, value: string) => void
+}) {
+  const kind = placementKindOf(user.roleKey)
+  if (kind === null) return <span className="text-xs text-muted">—</span>
+
+  const options = kind === 'sector' ? sectors : ZONE_OPTIONS
+  const value = kind === 'sector' ? String(sectorNoOf(user.sectorKey) ?? '') : (user.zoneKey ?? '')
+  const label = options.find((o) => o.value === value)?.label
+
+  if (!editable) {
+    return label ? (
+      <span className="text-xs font-medium text-muted-strong">{label}</span>
+    ) : (
+      <span className="text-xs font-medium text-warning">Not placed yet</span>
+    )
+  }
+  return (
+    <div className="w-48">
+      <Select
+        value={value}
+        disabled={disabled}
+        onChange={(next) => onChange(user.id, next)}
+        size="sm"
+        placeholder={kind === 'sector' ? 'Choose a sector' : 'Choose a zone'}
+        options={options}
+      />
+    </div>
+  )
+}
 
 export const ROLE_COLOR: Record<string, string> = {
   Admin: '#818cf8',
@@ -28,15 +81,25 @@ export const ROLE_COLOR: Record<string, string> = {
 export function AccountsTable({
   users,
   roles,
+  sectors,
   canEdit,
   canEditRole,
 }: {
   users: AccountRow[]
   roles: RoleOption[]
+  sectors: SectorChoice[]
   canEdit: boolean
   canEditRole: boolean
 }) {
   const [pending, startTransition] = useTransition()
+
+  function handlePlacementChange(userId: string, value: string) {
+    const user = users.find((u) => u.id === userId)
+    const kind = user ? placementKindOf(user.roleKey) : null
+    startTransition(() =>
+      updateUserPlacementAction(userId, kind === 'zone' ? { zoneKey: value } : { sectorNo: value }),
+    )
+  }
 
   function handleRoleChange(userId: string, roleId: string) {
     startTransition(() => updateUserRoleAction(userId, roleId))
@@ -102,6 +165,13 @@ export function AccountsTable({
               ) : (
                 <span className="text-xs font-medium text-muted-strong">{u.roleName}</span>
               )}
+              <AreaCell
+                user={u}
+                sectors={sectors}
+                editable={canEditRole}
+                disabled={pending}
+                onChange={handlePlacementChange}
+              />
               <span className="text-xs text-muted">Joined {timeAgo(u.createdAt)}</span>
               {canEdit && (
                 <button
@@ -124,6 +194,7 @@ export function AccountsTable({
             <tr className="border-b border-border text-left text-xs text-muted">
               <th className="px-5 py-3 font-medium">Name</th>
               <th className="px-3 py-3 font-medium">Role</th>
+              <th className="px-3 py-3 font-medium">Area</th>
               <th className="px-3 py-3 font-medium">Status</th>
               <th className="px-3 py-3 font-medium">Joined</th>
               {canEdit && <th className="px-5 py-3" />}
@@ -170,6 +241,15 @@ export function AccountsTable({
                       {u.roleName}
                     </span>
                   )}
+                </td>
+                <td className="px-3 py-3.5">
+                  <AreaCell
+                    user={u}
+                    sectors={sectors}
+                    editable={canEditRole}
+                    disabled={pending}
+                    onChange={handlePlacementChange}
+                  />
                 </td>
                 <td className="px-3 py-3.5">
                   <span

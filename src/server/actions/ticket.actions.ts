@@ -6,6 +6,8 @@ import { requireAbility, requireTicketScope } from '@/server/auth/session'
 import { sanitizeHtml } from '@/lib/sanitize-html'
 import { createTicketSchema, updateTicketSchema, addCommentSchema } from '@/lib/schemas/ticket'
 import * as ticketService from '@/server/services/ticket.service'
+import * as userService from '@/server/services/user.service'
+import { scopeAllows, scopeAllowsAssignee, type TicketScope } from '@/lib/ticket-scope'
 import { uploadCommentImage, deleteCommentImage } from '@/server/cloudinary'
 import { logger } from '@/lib/logger'
 import { evaluateLocation, verdictMessage, type LocationFix } from '@/lib/geo'
@@ -48,11 +50,21 @@ export async function createTicketAction(
   redirect(`/tickets/${ticket.number}`)
 }
 
+/** Whether a ticket (as loaded with its assignee) is one this person's scope allows them to touch. */
+function ticketInScope(scope: TicketScope, ticket: unknown): boolean {
+  const t = ticket as { sectorKey?: string | null; assigneeId?: { _id?: unknown } | null } | null
+  if (!t) return false
+  return scopeAllows(scope, {
+    sectorKey: t.sectorKey ?? null,
+    assigneeId: t.assigneeId?._id ? String(t.assigneeId._id) : null,
+  })
+}
+
 export async function updateTicketFieldAction(
   number: number,
   patch: Record<string, string | null>,
 ) {
-  const { user, ability, forcedAssigneeId } = await requireTicketScope()
+  const { user, ability, scope, forcedAssigneeId } = await requireTicketScope()
 
   const parsed = updateTicketSchema.safeParse(patch)
   if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? 'Invalid input')
@@ -62,13 +74,19 @@ export async function updateTicketFieldAction(
     throw new Error('You do not have permission to do that.')
   }
 
-  // Agent-scoped: block updates to tickets not assigned to them, even via a direct action call
-  // that bypasses the page's own visibility check (see tickets/[number]/page.tsx).
-  if (forcedAssigneeId) {
+  // Block updates to tickets outside the caller's scope (their own, their sector, their zone), even
+  // via a direct action call that bypasses the page's own visibility check
+  // (see tickets/[number]/page.tsx).
+  if (scope.kind !== 'all') {
     const ticket = await ticketService.getTicketByNumber(number)
-    const assignee = (ticket as { assigneeId?: { _id?: unknown } | null } | null)?.assigneeId
-    if (String(assignee?._id ?? '') !== forcedAssigneeId) {
-      throw new Error('You do not have permission to do that.')
+    if (!ticketInScope(scope, ticket)) throw new Error('You do not have permission to do that.')
+  }
+
+  // A ticket may only be handed to someone inside the caller's sector / zone.
+  if ('assigneeId' in parsed.data && parsed.data.assigneeId && scope.kind !== 'all') {
+    const placement = await userService.getUserPlacement(parsed.data.assigneeId)
+    if (!placement || !scopeAllowsAssignee(scope, placement)) {
+      throw new Error('You can only give a ticket to someone in your own area.')
     }
   }
 
@@ -89,17 +107,14 @@ export async function updateTicketFieldAction(
 /** Shared guard for the surveyor actions: caller may update tickets, and a surveyor (agent scope)
  *  may only touch tickets assigned to them. Returns an error message, or null when allowed. */
 async function checkSurveyorAccess(number: number) {
-  const { user, ability, forcedAssigneeId } = await requireTicketScope()
+  const { user, ability, scope } = await requireTicketScope()
   if (!ability.can('update', 'ticket') || !ability.can('create', 'attachment')) {
     return { user, error: 'You do not have permission to do that.' }
   }
   const ticket = await ticketService.getTicketByNumber(number)
   if (!ticket) return { user, error: 'Ticket not found.' }
-  if (forcedAssigneeId) {
-    const assignee = (ticket as { assigneeId?: { _id?: unknown } | null }).assigneeId
-    if (String(assignee?._id ?? '') !== forcedAssigneeId) {
-      return { user, error: 'You do not have permission to do that.' }
-    }
+  if (!ticketInScope(scope, ticket)) {
+    return { user, error: 'You do not have permission to do that.' }
   }
   return { user, error: null }
 }
@@ -118,6 +133,8 @@ export type ResolutionPhotoState =
       /** True when the photo was refused because it still shows too much garbage. */
       tooMuchGarbage?: boolean
       garbagePercent?: number
+      /** Where the model saw garbage in the refused photo ([left, top, right, bottom], 0..1). */
+      garbageBoxes?: [number, number, number, number][]
     }
   | undefined
 
@@ -189,12 +206,18 @@ export async function uploadResolutionPhotoAction(
   if (photoCheckRules.enabled) {
     const checked = await checkPhotoForGarbage(file)
     if (checked.status === 'ok') {
-      const verdict = garbageVerdict(checked.coveragePercent, photoCheckRules.maxGarbagePercent)
+      const verdict = garbageVerdict(
+        checked.coveragePercent,
+        photoCheckRules.maxGarbagePercent,
+        checked.detections,
+        photoCheckRules.maxItems,
+      )
       if (!verdict.ok) {
         return {
           error: verdict.message,
           tooMuchGarbage: true,
           garbagePercent: checked.coveragePercent,
+          garbageBoxes: checked.boxes,
         }
       }
       garbageCheck = {
@@ -314,17 +337,14 @@ export async function addCommentAction(
   const number = Number(formData.get('ticketNumber'))
   const isInternal = formData.get('isInternal') === 'true'
 
-  const { user, ability, forcedAssigneeId } = await requireTicketScope()
+  const { user, ability, scope } = await requireTicketScope()
   if (!ability.can('create', isInternal ? 'note' : 'comment')) {
     return { error: 'You do not have permission to do that.' }
   }
 
-  if (forcedAssigneeId) {
+  if (scope.kind !== 'all') {
     const ticket = await ticketService.getTicketByNumber(number)
-    const assignee = (ticket as { assigneeId?: { _id?: unknown } | null } | null)?.assigneeId
-    if (String(assignee?._id ?? '') !== forcedAssigneeId) {
-      return { error: 'You do not have permission to do that.' }
-    }
+    if (!ticketInScope(scope, ticket)) return { error: 'You do not have permission to do that.' }
   }
 
   let attachments: UploadedImageResult[] = []

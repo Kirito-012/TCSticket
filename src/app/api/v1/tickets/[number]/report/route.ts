@@ -7,7 +7,7 @@ const MAX_BYTES = 15 * 1024 * 1024
 
 /**
  * POST /api/v1/tickets/:number/report — service-to-service, like the photo endpoint.
- * DroneSeva sends the PDF report its garbage detection produced, so the Zone Inspector and the
+ * DroneSeva sends the PDF report its garbage detection produced, so the Surveyor and the
  * admins can open it from the ticket. Sending again replaces the previous report.
  *
  * Auth: `x-api-key: <INTEGRATION_API_KEY>`   Body: multipart/form-data with one `file` (a PDF).

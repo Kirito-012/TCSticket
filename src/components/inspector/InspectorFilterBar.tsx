@@ -55,7 +55,7 @@ function Choice({
 }
 
 /**
- * Zone Inspector filters, kept simple: one big "Filter and sort" button that opens a bottom sheet
+ * Surveyor filters, kept simple: one big "Filter and sort" button that opens a bottom sheet
  * of big choices — how to sort, when the ticket arrived (or one exact day), urgent only. Choices
  * are collected and applied together with one "Show tickets" button. The sheet can be dragged
  * down to close. The badge shows how many filters are on, so an inspector can always see why

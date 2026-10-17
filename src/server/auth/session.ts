@@ -4,6 +4,9 @@ import { redirect } from 'next/navigation'
 import { cache } from 'react'
 import { auth } from '@/server/auth/auth'
 import { defineAbilityFor } from '@/server/auth/ability'
+import { dbConnect } from '@/server/db/connect'
+import { UserModel } from '@/server/db/models/user.model'
+import { scopeFor, type TicketScope } from '@/lib/ticket-scope'
 
 /** Memoized per-request so repeated calls in the same render don't re-decode the session. */
 export const getSession = cache(async () => auth())
@@ -37,18 +40,29 @@ export async function requireAbility(grant?: { action: string; subject: string }
   return { user, ability }
 }
 
+/** Where the signed-in person works (zone / sector), read fresh so a change applies at once. */
+const getPlacement = cache(async (userId: string) => {
+  await dbConnect()
+  const doc = await UserModel.findById(userId).select('sectorKey zoneKey').lean()
+  return { sectorKey: doc?.sectorKey ?? null, zoneKey: doc?.zoneKey ?? null }
+})
+
 /**
- * Ticket-list/dashboard visibility scoping. Groups/Teams/Departments don't exist, so this is
- * deliberately coarse: an Agent (`ticket:read:own`, not `ticket:read:all`) only ever sees
- * tickets assigned to them — the caller's `assigneeId` filter is force-overridden server-side,
- * not just hidden in the UI. Admin/Manager (`ticket:read:all`) see everything.
+ * Ticket-list/dashboard visibility scoping, decided on the server (never just hidden in the UI):
+ *  - `ticket:read:all` (Admin): everything.
+ *  - `ticket:read:zone` (Zone Inspector): the tickets in the sectors of their zone.
+ *  - `ticket:read:sector` (Nodal Manager): the tickets in their sector.
+ *  - otherwise (Surveyor): only the tickets assigned to them.
  *
- * Returns `forcedAssigneeId: undefined` for anyone with `ticket:read:all` (no restriction).
+ * `scope` is the full answer. `forcedAssigneeId` is kept for the Surveyor screens: it is set only
+ * for someone limited to their own tickets, and undefined for everyone else.
  */
 export async function requireTicketScope() {
   // Every seeded role has *some* ticket:read:* grant, so this is authn-only, not authz-gated —
   // the scoping below is the actual access control.
   const { user, ability } = await requireAbility()
-  const forcedAssigneeId = ability.can('read:all', 'ticket') ? undefined : user.id
-  return { user, ability, forcedAssigneeId }
+  const placement = await getPlacement(user.id)
+  const scope: TicketScope = scopeFor({ id: user.id, ...placement }, user.grants)
+  const forcedAssigneeId = scope.kind === 'own' ? scope.assigneeId : undefined
+  return { user, ability, scope, placement, forcedAssigneeId }
 }

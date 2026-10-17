@@ -19,7 +19,7 @@ export function Topbar({
 }) {
   const { setOpen, simple, light } = useSidebar()
 
-  // Zone Inspectors: just the page name, big and plain. No menu button (they have the bottom
+  // Surveyors: just the page name, big and plain. No menu button (they have the bottom
   // bar), no search, no bell, no "New ticket".
   if (simple) {
     return (
@@ -30,7 +30,7 @@ export function Topbar({
             <p className="mt-0.5 text-base text-muted [overflow-wrap:anywhere]">{description}</p>
           )}
         </div>
-        {/* The light (Zone Inspector) look keeps just the title. Admins and Managers also get the
+        {/* The light (Surveyor) look keeps just the title. Admins and Managers also get the
             notification bell and one big action button. */}
         {!light && <ThemeToggle />}
         {!light && <NotificationBell />}

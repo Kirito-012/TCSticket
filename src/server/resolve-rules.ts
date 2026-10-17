@@ -8,7 +8,7 @@ function readNumber(raw: string | undefined, fallback: number, min: number, max:
 }
 
 /**
- * How close a Zone Inspector must be to the ticket's spot for a photo to count, and how rough a
+ * How close a Surveyor must be to the ticket's spot for a photo to count, and how rough a
  * phone location reading may be. Defaults: 10 m and 20 m. Change them without touching code with
  * the RESOLVE_RADIUS_METERS and RESOLVE_MAX_ACCURACY_METERS settings.
  */

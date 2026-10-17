@@ -112,7 +112,7 @@ export function HrdaSectorMap({ sectors, canFilter }: { sectors: Sector[]; canFi
               </Link>
               {!canFilter && (
                 <span className="hrda-sector-popup__note">
-                  Zone Inspector view is limited to your assigned tickets.
+                  Surveyor view is limited to your assigned tickets.
                 </span>
               )}
             </div>

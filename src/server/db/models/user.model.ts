@@ -6,7 +6,11 @@ const userSchema = new Schema(
     passwordHash: { type: String, required: true },
     fullname: { type: String, required: true },
     title: { type: String },
+    // Where this person works. A Surveyor and a Nodal Manager each belong to one sector
+    // ('kumbh-sector-<n>'); a Zone Inspector belongs to one zone ('zone-1' .. 'zone-4'). See
+    // src/lib/zones.ts. Admins have neither.
     sectorKey: { type: String, default: null },
+    zoneKey: { type: String, default: null },
     avatarUrl: { type: String },
     roleId: { type: Schema.Types.ObjectId, ref: 'Role', required: true },
     isActive: { type: Boolean, default: true },

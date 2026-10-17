@@ -5,6 +5,8 @@ import { TicketEventModel } from '@/server/db/models/ticket-event.model'
 import { TicketModel } from '@/server/db/models/ticket.model'
 import { UserModel } from '@/server/db/models/user.model'
 import type { AppAbility } from '@/server/auth/ability'
+import type { TicketScope } from '@/lib/ticket-scope'
+import { scopeFilter } from '@/server/services/ticket.service'
 
 const TICKET_EVENT_LIMIT = 25
 const PENDING_ACCOUNT_LIMIT = 25
@@ -51,11 +53,7 @@ export type NotificationItem = {
  * (`notificationsReadAt`) plus a small set of individually-opened item ids
  * (`readNotificationIds`) for items newer than that cursor.
  */
-export async function getNotifications(
-  userId: string,
-  ability: AppAbility,
-  forcedAssigneeId?: string,
-) {
+export async function getNotifications(userId: string, ability: AppAbility, scope?: TicketScope) {
   await dbConnect()
 
   const currentUser = await UserModel.findById(userId)
@@ -64,12 +62,11 @@ export async function getNotifications(
   const readAt = currentUser?.notificationsReadAt ?? currentUser?.createdAt ?? new Date(0)
   const readIds = new Set(currentUser?.readNotificationIds ?? [])
 
-  const eventTicketFilter = forcedAssigneeId
-    ? { deletedAt: null, assigneeId: forcedAssigneeId }
-    : { deletedAt: null }
-  const scopedTicketIds = forcedAssigneeId
-    ? (await TicketModel.find(eventTicketFilter).select('_id').lean()).map((t) => t._id)
-    : null
+  const eventTicketFilter = { deletedAt: null, ...scopeFilter(scope) }
+  const scopedTicketIds =
+    scope && scope.kind !== 'all'
+      ? (await TicketModel.find(eventTicketFilter).select('_id').lean()).map((t) => t._id)
+      : null
   const eventMatch = scopedTicketIds ? { ticketId: { $in: scopedTicketIds } } : {}
 
   const [events, pendingAccounts] = await Promise.all([

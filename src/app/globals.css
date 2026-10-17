@@ -255,10 +255,10 @@ body {
 }
 
 /*
- * Light theme. Zone Inspectors always get it (via the .simple-ui wrapper); Admins and Managers
+ * Light theme. Surveyors always get it (via the .simple-ui wrapper); Admins and Managers
  * can switch to it with the Light/Dark button (html.theme-light, remembered in a cookie).
  *
- * "Simple" look for Zone Inspectors: light background, dark text, strong contrast, and colours
+ * "Simple" look for Surveyors: light background, dark text, strong contrast, and colours
  * that stay readable outdoors in sunlight. Applied by wrapping the app in .simple-ui — every
  * component reads these same CSS variables, so only the values change.
  */

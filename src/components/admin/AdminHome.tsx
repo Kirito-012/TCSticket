@@ -49,12 +49,15 @@ export function AdminHome({
   needsAssigning,
   users,
   canAssign,
+  extra,
 }: {
   counts: Counts
   kpis: Kpis
   needsAssigning: TicketListItemView[]
   users: UserOption[]
   canAssign: boolean
+  /** Shown between the numbers and the "needs someone" list (zone cards, sector cards, a team). */
+  extra?: React.ReactNode
 }) {
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6">
@@ -90,6 +93,8 @@ export function AdminHome({
       </div>
 
       <AdminKpis kpis={kpis} />
+
+      {extra}
 
       <section className="space-y-3">
         <h2 className="text-xl font-bold text-foreground">Tickets that need someone</h2>

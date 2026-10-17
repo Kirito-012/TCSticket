@@ -25,7 +25,7 @@ function arrivedInRange(createdAt: string, filters: InspectorFilters) {
 }
 
 /**
- * Everything a Zone Inspector's Home and My tickets screens need: their own tickets, narrowed
+ * Everything a Surveyor's Home and My tickets screens need: their own tickets, narrowed
  * by the chosen filters, split into "to do" and "done". An inspector's workload is a handful of
  * tickets, so one query and an in-memory filter is simpler than paging.
  */

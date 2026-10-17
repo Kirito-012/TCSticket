@@ -8,10 +8,11 @@ import {
 import { InspectorTaskList } from '@/components/inspector/InspectorTaskList'
 import { requireTicketScope } from '@/server/auth/session'
 import { dbConnect } from '@/server/db/connect'
-import { UserModel } from '@/server/db/models/user.model'
 import { TicketStatusModel } from '@/server/db/models/ticket-status.model'
 import { listTickets, getTaskTabCounts } from '@/server/services/ticket.service'
 import { getInspectorTasks } from '@/server/services/inspector.service'
+import { getSectorOptions } from '@/server/services/sector.service'
+import { listAssignableUsers } from '@/server/services/user.service'
 import { parseInspectorFilters } from '@/lib/inspector-filters'
 import { toTicketListItem } from '@/lib/ticket-view'
 
@@ -28,9 +29,9 @@ export default async function TicketsPage({
   const sp = await searchParams
   const get = (key: string) => (Array.isArray(sp[key]) ? sp[key][0] : sp[key])
 
-  const { ability, forcedAssigneeId } = await requireTicketScope()
+  const { ability, scope, forcedAssigneeId } = await requireTicketScope()
 
-  // Zone Inspectors: a To do / Done switch and big cards.
+  // Surveyors: a To do / Done switch and big cards.
   if (forcedAssigneeId) {
     const show = get('show') === 'done' ? 'done' : 'todo'
     const filters = parseInspectorFilters(get)
@@ -45,7 +46,8 @@ export default async function TicketsPage({
     )
   }
 
-  // Admins and Managers: four tabs, one search box, a few useful filters, then cards or a list.
+  // Admins, Zone Inspectors and Nodal Managers: four tabs, one search box, a few useful filters,
+  // then cards or a list — always limited to their own zone / sector.
   const tab = TABS.find((t) => t === get('show')) ?? 'todo'
   const state: ListState = {
     tab,
@@ -75,8 +77,9 @@ export default async function TicketsPage({
   await dbConnect()
   const canAssign = ability.can('assign', 'ticket')
   const canUpdate = ability.can('update', 'ticket')
-  const [{ items, total }, counts, people, inspectors, statuses] = await Promise.all([
+  const [{ items, total }, counts, people, sectorOptions, statuses] = await Promise.all([
     listTickets({
+      scope,
       ...tabFilters,
       q: state.q || undefined,
       sectorKey: state.sector || undefined,
@@ -93,23 +96,14 @@ export default async function TicketsPage({
       sortField: state.sort === 'activity' ? 'lastActivityAt' : 'createdAt',
       sortDir: state.sort === 'oldest' ? 'asc' : 'desc',
     }),
-    getTaskTabCounts(),
-    canAssign
-      ? UserModel.find({ isActive: true, deletedAt: null }).select('fullname email').lean()
-      : Promise.resolve([]),
-    // Each sector has one Zone Inspector; their name ("BAHADRABAD-01") is the sector's name.
-    UserModel.find({ isActive: true, deletedAt: null, sectorKey: { $ne: null } })
-      .select('fullname sectorKey')
-      .sort({ fullname: 1 })
-      .lean(),
+    getTaskTabCounts(scope),
+    canAssign ? listAssignableUsers(scope) : Promise.resolve([]),
+    getSectorOptions(scope),
     TicketStatusModel.find().sort({ order: 1 }).lean(),
   ])
 
-  const sectorName = (fullname: string) => fullname.replace(/\s*Zone Inspector$/i, '').trim()
-  const sectors = inspectors.map((u) => ({
-    value: String(u.sectorKey),
-    label: sectorName(u.fullname),
-  }))
+  // The sector filter lists the sectors this person may see (all of them for an Admin).
+  const sectors = sectorOptions.map((s) => ({ value: s.value, label: s.label }))
   const sectorNames = Object.fromEntries(sectors.map((s) => [s.value, s.label]))
 
   return (

@@ -5,23 +5,24 @@ import { SidebarProvider } from '@/components/layout/SidebarContext'
 import { requireTicketScope } from '@/server/auth/session'
 import { countTicketsByStatus } from '@/server/services/ticket.service'
 import { listPendingUsers } from '@/server/services/user.service'
+import { personShortName } from '@/lib/plain-words'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const { user, ability, forcedAssigneeId } = await requireTicketScope()
+  const { user, ability, scope } = await requireTicketScope()
   const canApproveAccounts = ability.can('update', 'account')
-  // Zone Inspectors (only ever see their own tickets) get the simple, big-text, light version of
-  // the app. Admins and Managers get the same simple navigation and screens in the dark theme.
-  const isInspector = forcedAssigneeId !== undefined
+  // Surveyors (only ever see their own tickets) get the simple, big-text, light version of the
+  // app. Admins, Zone Inspectors and Nodal Managers get the same simple navigation and screens in
+  // the dark theme.
+  const isInspector = scope.kind === 'own'
   const [ticketCounts, pendingUsers] = await Promise.all([
-    countTicketsByStatus(forcedAssigneeId),
+    countTicketsByStatus(scope),
     canApproveAccounts ? listPendingUsers() : Promise.resolve([]),
   ])
 
   const todoCount = ticketCounts.byStatus
     .filter((s) => s.slug !== 'resolved' && s.slug !== 'closed')
     .reduce((sum, s) => sum + s.count, 0)
-  const firstName =
-    (user.name || user.email || '').replace(/\s*Zone Inspector$/i, '').trim() || 'there'
+  const firstName = personShortName(user.name || user.email || '') || 'there'
 
   const links: NavLink[] = isInspector
     ? [

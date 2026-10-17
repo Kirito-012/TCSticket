@@ -4,8 +4,8 @@ import { requireTicketScope } from '@/server/auth/session'
 import * as notificationService from '@/server/services/notification.service'
 
 export async function getNotificationsAction() {
-  const { user, ability, forcedAssigneeId } = await requireTicketScope()
-  return notificationService.getNotifications(user.id, ability, forcedAssigneeId)
+  const { user, ability, scope } = await requireTicketScope()
+  return notificationService.getNotifications(user.id, ability, scope)
 }
 
 export async function markAllNotificationsReadAction() {

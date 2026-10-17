@@ -36,6 +36,11 @@ const ALLOWED_IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'i
 
 type UploadingPhoto = { id: string; previewUrl: string }
 type PhotoMethod = 'camera' | 'gallery'
+type RefusedPhoto = {
+  previewUrl: string
+  boxes: [number, number, number, number][]
+  percent: number | null
+}
 
 /** What the "where am I" card shows. */
 type PlaceState =
@@ -51,6 +56,7 @@ export function SurveyorResolutionPanel({
   resolutionNote,
   target,
   rules,
+  originalPhotoUrl,
 }: {
   ticketNumber: number
   photos: CommentAttachmentView[]
@@ -59,6 +65,8 @@ export function SurveyorResolutionPanel({
   /** The ticket's spot. Null = this ticket has none, so there is no location check. */
   target: LatLon | null
   rules: LocationRules
+  /** The drone photo the garbage was first found in, shown next to a refused photo. */
+  originalPhotoUrl: string | null
 }) {
   const router = useRouter()
   const cameraInputRef = useRef<HTMLInputElement>(null)
@@ -81,6 +89,12 @@ export function SurveyorResolutionPanel({
     setPhotos(serverPhotos)
   }
 
+  // A photo the garbage check refused, kept so the model's findings can be shown on it.
+  const [refused, setRefused] = useState<RefusedPhoto | null>(null)
+
+  // Testing aid (development only): type coordinates instead of using the phone's location.
+  const [manualFix, setManualFix] = useState<LatLon | null>(null)
+
   const finding = place.kind === 'finding'
 
   /**
@@ -89,21 +103,27 @@ export function SurveyorResolutionPanel({
    */
   async function locate(): Promise<{ fix: LocationFix; verdict: LocationVerdict | null } | null> {
     setError(null) // a fresh check replaces any older warning
-    setPlace({ kind: 'finding', accuracy: null })
-    const result = await getBestPosition({
-      onProgress: (accuracy) => setPlace({ kind: 'finding', accuracy }),
-    })
-    if (!result.ok) {
-      setPlace({ kind: 'problem', message: positionProblemMessage(result.reason) })
-      return null
+    let fix: LocationFix
+    if (manualFix) {
+      fix = { ...manualFix, accuracy: 5, capturedAt: Date.now() }
+    } else {
+      setPlace({ kind: 'finding', accuracy: null })
+      const result = await getBestPosition({
+        onProgress: (accuracy) => setPlace({ kind: 'finding', accuracy }),
+      })
+      if (!result.ok) {
+        setPlace({ kind: 'problem', message: positionProblemMessage(result.reason) })
+        return null
+      }
+      fix = result.fix
     }
-    const verdict = target ? evaluateLocation(target, result.fix, rules) : null
+    const verdict = target ? evaluateLocation(target, fix, rules) : null
     setPlace(
       verdict
         ? { kind: 'result', verdict, message: verdictMessage(verdict, rules) }
         : { kind: 'idle' },
     )
-    return { fix: result.fix, verdict }
+    return { fix, verdict }
   }
 
   async function uploadOne(file: File, fix: LocationFix, method: PhotoMethod) {
@@ -118,6 +138,7 @@ export function SurveyorResolutionPanel({
 
     const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
     const previewUrl = URL.createObjectURL(file)
+    let keepPreview = false
     setUploading((prev) => [...prev, { id, previewUrl }])
 
     try {
@@ -129,8 +150,21 @@ export function SurveyorResolutionPanel({
       fd.set('accuracy', String(fix.accuracy))
       fd.set('capturedAt', String(fix.capturedAt))
       const result = await uploadResolutionPhotoAction(ticketNumber, fd)
-      if (result?.error) setError(result.error)
-      else if (result?.photo) {
+      if (result?.error) {
+        setError(result.error)
+        if (result.tooMuchGarbage) {
+          // Keep the photo on screen so the model's findings can be drawn on it.
+          keepPreview = true
+          setRefused((prev) => {
+            if (prev) URL.revokeObjectURL(prev.previewUrl)
+            return {
+              previewUrl,
+              boxes: result.garbageBoxes ?? [],
+              percent: result.garbagePercent ?? null,
+            }
+          })
+        }
+      } else if (result?.photo) {
         const uploaded = result.photo
         setPhotos((prev) =>
           prev.some((p) => p.publicId === uploaded.publicId) ? prev : [...prev, uploaded],
@@ -140,13 +174,21 @@ export function SurveyorResolutionPanel({
       setError('The photo did not upload. Please try again.')
     } finally {
       setUploading((prev) => prev.filter((u) => u.id !== id))
-      URL.revokeObjectURL(previewUrl)
+      if (!keepPreview) URL.revokeObjectURL(previewUrl)
     }
+  }
+
+  function clearRefused() {
+    setRefused((prev) => {
+      if (prev) URL.revokeObjectURL(prev.previewUrl)
+      return null
+    })
   }
 
   async function handleFiles(files: FileList | null, method: PhotoMethod) {
     if (!files || files.length === 0) return
     setError(null)
+    clearRefused()
     const selected = Array.from(files)
     if (cameraInputRef.current) cameraInputRef.current.value = ''
     if (galleryInputRef.current) galleryInputRef.current.value = ''
@@ -261,6 +303,10 @@ export function SurveyorResolutionPanel({
         </section>
       )}
 
+      {process.env.NODE_ENV !== 'production' && (
+        <ManualCoordinates target={target} value={manualFix} onChange={setManualFix} />
+      )}
+
       <section className="space-y-3">
         <h3 className="text-xl font-bold text-foreground">{step(2)}. Add photos</h3>
         <p className="text-lg text-muted">
@@ -279,6 +325,10 @@ export function SurveyorResolutionPanel({
         {lightbox}
 
         {!target && <PlaceCard place={place} />}
+
+        {refused && (
+          <RefusedPhotoCard photo={refused} original={originalPhotoUrl} onClose={clearRefused} />
+        )}
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label
@@ -360,6 +410,201 @@ export function SurveyorResolutionPanel({
         )}
       </section>
     </div>
+  )
+}
+
+/** The refused photo with a red box around each place the model saw garbage. */
+function RefusedPhotoCard({
+  photo,
+  original,
+  onClose,
+}: {
+  photo: RefusedPhoto
+  original: string | null
+  onClose: () => void
+}) {
+  const shown =
+    photo.percent === null ? null : photo.percent < 1 ? '<1' : String(Math.round(photo.percent))
+  return (
+    <div className="space-y-3 rounded-2xl border-2 border-danger bg-danger-soft p-4">
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-lg font-bold text-danger">
+          This photo was not accepted
+          {shown !== null && (
+            <span className="block text-base font-semibold">
+              The red boxes show the garbage we found ({shown}% of the picture)
+            </span>
+          )}
+        </p>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-surface text-foreground"
+        >
+          <X className="h-5 w-5" strokeWidth={2.5} />
+        </button>
+      </div>
+      <div className={cn('grid gap-3', original && 'sm:grid-cols-2')}>
+        {original && (
+          <figure className="space-y-1.5">
+            <figcaption className="text-base font-bold text-foreground">
+              Before: the drone photo
+            </figcaption>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={original}
+              alt="The original drone photo"
+              className="block max-h-[28rem] w-full rounded-xl object-contain"
+            />
+          </figure>
+        )}
+        <figure className="space-y-1.5">
+          <figcaption className="text-base font-bold text-foreground">
+            {original ? 'Now: your photo' : 'Your photo'}
+          </figcaption>
+          <div className="relative mx-auto w-fit max-w-full overflow-hidden rounded-xl">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={photo.previewUrl}
+              alt="The photo that was not accepted"
+              className="block max-h-[28rem] max-w-full"
+            />
+            {photo.boxes.map(([l, t, r, b], i) => (
+              <span
+                key={i}
+                className="pointer-events-none absolute border-[3px] border-red-500 bg-red-500/20"
+                style={{
+                  left: `${l * 100}%`,
+                  top: `${t * 100}%`,
+                  width: `${(r - l) * 100}%`,
+                  height: `${(b - t) * 100}%`,
+                }}
+              />
+            ))}
+          </div>
+        </figure>
+      </div>
+      {photo.boxes.length === 0 && (
+        <p className="text-base text-foreground">
+          The garbage is spread over too much of the picture to outline.
+        </p>
+      )}
+    </div>
+  )
+}
+
+/**
+ * TESTING ONLY (shown in development, never in production): lets you type the coordinates the
+ * photo is "taken" at, so the location check can be tried from a desktop.
+ */
+function ManualCoordinates({
+  target,
+  value,
+  onChange,
+}: {
+  target: LatLon | null
+  value: LatLon | null
+  onChange: (value: LatLon | null) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [lat, setLat] = useState('')
+  const [lon, setLon] = useState('')
+  const [problem, setProblem] = useState<string | null>(null)
+
+  function apply() {
+    const latitude = Number(lat)
+    const longitude = Number(lon)
+    if (
+      lat.trim() === '' ||
+      lon.trim() === '' ||
+      !Number.isFinite(latitude) ||
+      !Number.isFinite(longitude) ||
+      Math.abs(latitude) > 90 ||
+      Math.abs(longitude) > 180
+    ) {
+      setProblem('Enter a latitude (-90 to 90) and a longitude (-180 to 180).')
+      return
+    }
+    setProblem(null)
+    onChange({ latitude, longitude })
+  }
+
+  function clear() {
+    setProblem(null)
+    onChange(null)
+  }
+
+  return (
+    <section className="rounded-2xl border-2 border-dashed border-border-strong p-4">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="cursor-pointer text-base font-bold text-muted"
+      >
+        {open ? 'Hide' : 'Show'} testing: type coordinates by hand
+        {value && ' (in use)'}
+      </button>
+      {open && (
+        <div className="mt-3 space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <input
+              value={lat}
+              onChange={(e) => setLat(e.target.value)}
+              inputMode="decimal"
+              placeholder="Latitude"
+              aria-label="Latitude"
+              className="min-h-12 rounded-xl border-2 border-border-strong bg-surface px-3 text-lg text-foreground outline-none focus:border-accent"
+            />
+            <input
+              value={lon}
+              onChange={(e) => setLon(e.target.value)}
+              inputMode="decimal"
+              placeholder="Longitude"
+              aria-label="Longitude"
+              className="min-h-12 rounded-xl border-2 border-border-strong bg-surface px-3 text-lg text-foreground outline-none focus:border-accent"
+            />
+          </div>
+          {problem && <p className="text-base font-semibold text-danger">{problem}</p>}
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={apply}
+              className="min-h-12 cursor-pointer rounded-xl bg-accent px-4 text-base font-bold text-on-accent"
+            >
+              Use these coordinates
+            </button>
+            {target && (
+              <button
+                type="button"
+                onClick={() => {
+                  setLat(String(target.latitude))
+                  setLon(String(target.longitude))
+                }}
+                className="min-h-12 cursor-pointer rounded-xl border-2 border-border-strong bg-surface px-4 text-base font-bold text-foreground"
+              >
+                Fill with the ticket&apos;s spot
+              </button>
+            )}
+            {value && (
+              <button
+                type="button"
+                onClick={clear}
+                className="min-h-12 cursor-pointer rounded-xl border-2 border-border-strong bg-surface px-4 text-base font-bold text-foreground"
+              >
+                Use the real location again
+              </button>
+            )}
+          </div>
+          {value && (
+            <p className="text-base text-muted">
+              Photos will use {value.latitude}, {value.longitude} instead of your location.
+            </p>
+          )}
+        </div>
+      )}
+    </section>
   )
 }
 

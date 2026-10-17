@@ -11,7 +11,7 @@ import {
 import { cn } from '@/lib/utils'
 import type { TicketListItemView } from '@/lib/ticket-view'
 
-/** Zone Inspector task list: a To do / Done switch and big cards — no table, search or filters. */
+/** Surveyor task list: a To do / Done switch and big cards — no table, search or filters. */
 export function InspectorTaskList({
   todo,
   done,

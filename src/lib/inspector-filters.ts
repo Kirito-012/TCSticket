@@ -1,5 +1,5 @@
 /**
- * The filters a Zone Inspector can put on their ticket list, and how they travel in the address
+ * The filters a Surveyor can put on their ticket list, and how they travel in the address
  * (so a filtered list survives a refresh and the Back button). Plain data only — safe to import
  * from both server and client code.
  */

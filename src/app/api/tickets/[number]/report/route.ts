@@ -7,7 +7,7 @@ import { TicketModel } from '@/server/db/models/ticket.model'
 
 /**
  * GET /api/tickets/:number/report — the ticket's detection report PDF, for signed-in people who
- * may see that ticket (the same rule as the ticket page: a Zone Inspector only gets their own).
+ * may see that ticket (the same rule as the ticket page: a Surveyor only gets their own).
  * `?download=1` saves the file; without it the PDF is shown inside the page's viewer.
  * The file's real address is never given out.
  */

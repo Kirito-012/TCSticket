@@ -21,7 +21,8 @@ import * as ticketService from '@/server/services/ticket.service'
 import { TicketStatusModel } from '@/server/db/models/ticket-status.model'
 import { TicketPriorityModel } from '@/server/db/models/ticket-priority.model'
 import { TicketTypeModel } from '@/server/db/models/ticket-type.model'
-import { UserModel } from '@/server/db/models/user.model'
+import * as userService from '@/server/services/user.service'
+import { scopeAllows } from '@/lib/ticket-scope'
 import { toTicketDetailView, toCommentView, toEventView } from '@/lib/ticket-view'
 import { cn } from '@/lib/utils'
 import { isDone, isUrgent, plainStatusLabel, plainTitle } from '@/lib/plain-words'
@@ -35,18 +36,23 @@ export default async function TicketDetailPage({
   const number = Number(numberParam)
   if (!Number.isInteger(number)) notFound()
 
-  const { user, ability, forcedAssigneeId } = await requireTicketScope()
+  const { ability, scope, forcedAssigneeId } = await requireTicketScope()
 
   await dbConnect()
   const ticketDoc = await ticketService.getTicketByNumber(number)
   if (!ticketDoc) notFound()
 
-  // Agent-scoped: a ticket not assigned to them doesn't exist as far as they're concerned —
-  // same as it not existing, not a "you're not allowed" page (avoids confirming it exists).
-  if (forcedAssigneeId) {
-    const assignee = (ticketDoc as { assigneeId?: { _id?: unknown } | null }).assigneeId
-    const assigneeId = assignee?._id ? String(assignee._id) : null
-    if (assigneeId !== user.id) notFound()
+  // A ticket outside the person's scope (not theirs, or not in their sector / zone) doesn't exist
+  // as far as they're concerned — same as it not existing, not a "you're not allowed" page (avoids
+  // confirming it exists).
+  const assignee = (ticketDoc as { assigneeId?: { _id?: unknown } | null }).assigneeId
+  if (
+    !scopeAllows(scope, {
+      sectorKey: (ticketDoc as { sectorKey?: string | null }).sectorKey ?? null,
+      assigneeId: assignee?._id ? String(assignee._id) : null,
+    })
+  ) {
+    notFound()
   }
 
   const [commentsRaw, eventsRaw, statuses, priorities, types, users] = await Promise.all([
@@ -55,7 +61,7 @@ export default async function TicketDetailPage({
     TicketStatusModel.find().sort({ order: 1 }).lean(),
     TicketPriorityModel.find().sort({ order: 1 }).lean(),
     TicketTypeModel.find({ isActive: true }).sort({ name: 1 }).lean(),
-    UserModel.find({ isActive: true, deletedAt: null }).select('fullname email').lean(),
+    userService.listAssignableUsers(scope),
   ])
 
   const ticket = toTicketDetailView(ticketDoc)
@@ -71,8 +77,8 @@ export default async function TicketDetailPage({
   const status = statuses.find((s) => String(s._id) === ticket.statusId)
   const priority = priorities.find((p) => String(p._id) === ticket.priorityId)
 
-  // Zone Inspector view: plain and big — what the job is, where it is, and the steps to finish it.
-  // (Agent scope = Zone Inspector; Admin/Manager keep the full page below.)
+  // Surveyor view: plain and big — what the job is, where it is, and the steps to finish it.
+  // (Agent scope = Surveyor; Admin/Manager keep the full page below.)
   if (forcedAssigneeId) {
     const done = isDone(status)
     return (
@@ -168,6 +174,7 @@ export default async function TicketDetailPage({
                   resolutionNote={ticket.resolutionNote}
                   target={ticket.location}
                   rules={resolveRules()}
+                  originalPhotoUrl={ticket.sourcePhotos[0]?.url ?? null}
                 />
               </Card>
             </div>

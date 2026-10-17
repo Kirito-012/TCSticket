@@ -14,6 +14,7 @@ import { extractLocation } from '@/lib/droneseva-link'
 import { resolveRules } from '@/server/resolve-rules'
 import { nextSequence } from '@/server/db/models/counter.model'
 import { getRealSectors } from '@/server/sectors'
+import type { TicketScope } from '@/lib/ticket-scope'
 
 const POPULATE = [
   { path: 'ownerId', select: 'fullname email avatarUrl' },
@@ -24,7 +25,25 @@ const POPULATE = [
   { path: 'tagIds', select: 'name slug color' },
 ]
 
+/**
+ * The part of a ticket query that keeps a person inside what they may see (see
+ * src/lib/ticket-scope.ts): their own tickets, or the tickets of their sector / zone. Add it to
+ * every query that feeds a screen.
+ */
+export function scopeFilter(scope?: TicketScope): QueryFilter<Ticket> {
+  if (!scope || scope.kind === 'all') return {}
+  if (scope.kind === 'own') return { assigneeId: new Types.ObjectId(scope.assigneeId) }
+  return { sectorKey: { $in: scope.sectorKeys } }
+}
+
+/** Like scopeFilter, but only the sector part: for numbers that are about the place, not the person. */
+function sectorOnlyFilter(scope?: TicketScope): QueryFilter<Ticket> {
+  return scope?.kind === 'sectors' ? { sectorKey: { $in: scope.sectorKeys } } : {}
+}
+
 export type ListTicketsParams = {
+  /** Who is asking. Whatever else is asked for, tickets outside this scope never come back. */
+  scope?: TicketScope
   status?: string
   priority?: string
   type?: string
@@ -150,6 +169,14 @@ export async function listTickets(params: ListTicketsParams) {
     if (params.to) filter.createdAt.$lte = new Date(params.to)
   }
 
+  // Last, so nothing asked for above can widen what this person is allowed to see.
+  if (params.scope?.kind === 'own') filter.assigneeId = new Types.ObjectId(params.scope.assigneeId)
+  if (params.scope?.kind === 'sectors') {
+    const allowed = params.scope.sectorKeys
+    const asked = params.sectorKey
+    filter.sectorKey = { $in: asked ? allowed.filter((k) => k === asked) : allowed }
+  }
+
   const sortField = params.sortField ?? 'lastActivityAt'
   const sortDir = params.sortDir === 'asc' ? 1 : -1
 
@@ -167,18 +194,16 @@ export async function listTickets(params: ListTicketsParams) {
 }
 
 /**
- * Counts of non-deleted tickets per status, keyed by status slug, plus a grand total.
- * Pass `assigneeId` to scope the counts to one user's queue (Agent role — see
- * `requireTicketScope()` in `src/server/auth/session.ts`).
+ * Counts of non-deleted tickets per status, keyed by status slug, plus a grand total, for the
+ * tickets this scope may see (see `requireTicketScope()` in `src/server/auth/session.ts`).
  */
-export async function countTicketsByStatus(assigneeId?: string) {
+export async function countTicketsByStatus(scope?: TicketScope) {
   await dbConnect()
 
   const statuses = await TicketStatusModel.find().sort({ order: 1 }).lean()
-  const match: QueryFilter<Ticket> = { deletedAt: null }
-  // aggregate() does NOT schema-cast filter values the way find()/countDocuments() do — an
-  // uncast string here silently matches zero documents against the stored ObjectId.
-  if (assigneeId) match.assigneeId = new Types.ObjectId(assigneeId)
+  // scopeFilter casts the assignee to an ObjectId: aggregate() does NOT schema-cast filter values
+  // the way find()/countDocuments() do, so an uncast string would silently match nothing.
+  const match: QueryFilter<Ticket> = { deletedAt: null, ...scopeFilter(scope) }
   const counts = await TicketModel.aggregate([
     { $match: match },
     { $group: { _id: '$statusId', count: { $sum: 1 } } },
@@ -196,18 +221,15 @@ export async function countTicketsByStatus(assigneeId?: string) {
 }
 
 /**
- * Everything the dashboard page needs, in one call. All widgets accept `assigneeId` for
- * Agent-role scoping (see `requireTicketScope()`) — Admin/Manager pass `undefined` and see
- * workspace-wide data.
+ * Everything the dashboard page needs, in one call, for the tickets this scope may see (see
+ * `requireTicketScope()`). Admins pass nothing and see the whole workspace.
  */
-export async function getDashboardData(assigneeId?: string) {
+export async function getDashboardData(scope?: TicketScope) {
   await dbConnect()
 
-  const baseMatch: QueryFilter<Ticket> = { deletedAt: null }
-  // ObjectId, not string — this feeds both countDocuments() (casts either way) and aggregate()
-  // pipelines below (does NOT cast; an uncast string here would silently match nothing).
-  if (assigneeId) baseMatch.assigneeId = new Types.ObjectId(assigneeId)
-
+  // scopeFilter uses an ObjectId for the assignee, not a string — this feeds both countDocuments()
+  // (casts either way) and the aggregate() pipelines below (do NOT cast).
+  const baseMatch: QueryFilter<Ticket> = { deletedAt: null, ...scopeFilter(scope) }
   const startOfToday = new Date()
   startOfToday.setHours(0, 0, 0, 0)
   const sevenDaysAgo = new Date(startOfToday)
@@ -307,17 +329,23 @@ export async function getDashboardData(assigneeId?: string) {
   const [openTicketsCount, totalCount, unassignedCount] = await Promise.all([
     TicketModel.countDocuments(openMatch),
     TicketModel.countDocuments(baseMatch),
-    // Workspace-wide, not scoped by assigneeId — "how many need a home" is inherently an
-    // Admin/Manager question. null for an Agent's dashboard (their view is assignee-locked to
-    // themselves, so an "unassigned" count in their own scope is always zero/meaningless).
-    assigneeId ? null : TicketModel.countDocuments({ deletedAt: null, assigneeId: null }),
+    // "How many need a home" is a question for whoever hands tickets out, so it covers their zone
+    // or sector. null for a Surveyor (their view is locked to their own tickets).
+    scope?.kind === 'own'
+      ? null
+      : TicketModel.countDocuments({
+          deletedAt: null,
+          assigneeId: null,
+          ...sectorOnlyFilter(scope),
+        }),
   ])
 
-  // Recent activity — most recent events, scoped to the caller's tickets when assigneeId is set.
-  const eventTicketFilter = assigneeId ? { deletedAt: null, assigneeId } : { deletedAt: null }
-  const scopedTicketIds = assigneeId
-    ? (await TicketModel.find(eventTicketFilter).select('_id').lean()).map((t) => t._id)
-    : null
+  // Recent activity — most recent events, only on the tickets this scope may see.
+  const eventTicketFilter: QueryFilter<Ticket> = { deletedAt: null, ...scopeFilter(scope) }
+  const scopedTicketIds =
+    scope && scope.kind !== 'all'
+      ? (await TicketModel.find(eventTicketFilter).select('_id').lean()).map((t) => t._id)
+      : null
   const eventMatch = scopedTicketIds ? { ticketId: { $in: scopedTicketIds } } : {}
   const recentEvents = await TicketEventModel.find(eventMatch)
     .sort({ createdAt: -1 })
@@ -373,11 +401,13 @@ export async function getDashboardData(assigneeId?: string) {
       setTimeout(() => resolve([]), 6000),
     ),
   ])
-  const sectors = sectorOutlines.map((sector) => ({
-    ...sector,
-    count: sectorCounts.get(sector.key)?.count ?? 0,
-    openCount: sectorCounts.get(sector.key)?.open ?? 0,
-  }))
+  const sectors = sectorOutlines
+    .filter((sector) => scope?.kind !== 'sectors' || scope.sectorKeys.includes(sector.key))
+    .map((sector) => ({
+      ...sector,
+      count: sectorCounts.get(sector.key)?.count ?? 0,
+      openCount: sectorCounts.get(sector.key)?.open ?? 0,
+    }))
 
   return {
     openTicketsCount,
@@ -735,12 +765,12 @@ export async function getResolvedStatusId() {
 
 /** Counts for the Admin/Manager task tabs and Home: unfinished, finished, unfinished-and-unassigned,
  *  all, and finished today. */
-export async function getTaskTabCounts() {
+export async function getTaskTabCounts(scope?: TicketScope) {
   await dbConnect()
   const resolvedIds = (await TicketStatusModel.find({ isResolved: true }).select('_id').lean()).map(
     (s) => s._id,
   )
-  const base: QueryFilter<Ticket> = { deletedAt: null }
+  const base: QueryFilter<Ticket> = { deletedAt: null, ...scopeFilter(scope) }
   const startOfToday = new Date()
   startOfToday.setHours(0, 0, 0, 0)
   const [todo, done, unassigned, all, doneToday] = await Promise.all([
@@ -781,7 +811,7 @@ const WAITING_DAYS = 3
  * this week against last week, how long finishing takes, how many open tickets have someone, how
  * many are urgent, and how many have been waiting a long time.
  */
-export async function getDashboardKpis() {
+export async function getDashboardKpis(scope?: TicketScope) {
   await dbConnect()
 
   const now = Date.now()
@@ -799,7 +829,7 @@ export async function getDashboardKpis() {
   const resolvedIds = resolvedStatuses.map((s) => s._id)
   const urgentIds = urgentPriorities.map((p) => p._id)
 
-  const base: QueryFilter<Ticket> = { deletedAt: null }
+  const base: QueryFilter<Ticket> = { deletedAt: null, ...scopeFilter(scope) }
   const open: QueryFilter<Ticket> = { ...base, statusId: { $nin: resolvedIds } }
 
   // Per-day counts for the last 14 days (oldest first), bucketed by the server's local calendar
@@ -816,7 +846,7 @@ export async function getDashboardKpis() {
   )
   const perDay = async (field: 'createdAt' | 'resolvedAt') => {
     const rows = await TicketModel.aggregate([
-      { $match: { deletedAt: null, [field]: { $gte: seriesStart } } },
+      { $match: { ...base, [field]: { $gte: seriesStart } } },
       {
         $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: `$${field}`, timezone: tz } },
@@ -856,7 +886,7 @@ export async function getDashboardKpis() {
     TicketModel.countDocuments({ ...open, priorityId: { $in: urgentIds } }),
     TicketModel.countDocuments({ ...open, createdAt: { $lt: waitingBefore } }),
     TicketModel.aggregate([
-      { $match: { deletedAt: null, resolvedAt: { $gte: monthAgo } } },
+      { $match: { ...base, resolvedAt: { $gte: monthAgo } } },
       {
         $group: {
           _id: null,

@@ -10,91 +10,8 @@ import { TicketStatusModel } from '../src/server/db/models/ticket-status.model'
 import { TicketPriorityModel } from '../src/server/db/models/ticket-priority.model'
 import { TicketTypeModel } from '../src/server/db/models/ticket-type.model'
 import { getRealSectors } from '../src/server/sectors'
-
-const ALL_GRANTS = [
-  'ticket:read:own',
-  'ticket:read:group',
-  'ticket:read:all',
-  'ticket:create',
-  'ticket:update',
-  'ticket:delete',
-  'ticket:assign',
-  'ticket:merge',
-  'comment:create',
-  'comment:update:own',
-  'comment:update:any',
-  'comment:delete',
-  'note:read',
-  'note:create',
-  'attachment:create',
-  'attachment:delete',
-  'account:read',
-  'account:create',
-  'account:update',
-  'account:delete',
-  'group:manage',
-  'team:manage',
-  'department:manage',
-  'report:view',
-  'report:generate',
-  'notice:manage',
-  'settings:manage',
-  'role:manage',
-]
-
-const ROLES = [
-  { key: 'admin', name: 'Admin', rank: 0, isSystem: true, grants: ALL_GRANTS },
-  {
-    key: 'manager',
-    name: 'Nodal Manager',
-    rank: 1,
-    isSystem: true,
-    grants: [
-      'ticket:read:all',
-      'ticket:create',
-      'ticket:update',
-      'ticket:assign',
-      'ticket:merge',
-      'comment:create',
-      'comment:update:own',
-      'comment:update:any',
-      'comment:delete',
-      'note:read',
-      'note:create',
-      'attachment:create',
-      'attachment:delete',
-      'account:read',
-      'account:create',
-      'account:update',
-      'group:manage',
-      'team:manage',
-      'department:manage',
-      'report:view',
-      'report:generate',
-      'notice:manage',
-    ],
-  },
-  {
-    key: 'agent',
-    name: 'Zone Inspector',
-    rank: 2,
-    isSystem: true,
-    // 'own' not 'group' — Groups/Teams/Departments aren't built. An Agent's ticket list and
-    // dashboard are scoped server-side to assigneeId === self (see requireTicketScope() in
-    // src/server/auth/session.ts). ticket:assign is NOT granted — only Admin/Manager assign.
-    grants: [
-      'ticket:read:own',
-      'ticket:create',
-      'ticket:update',
-      'comment:create',
-      'comment:update:own',
-      'note:read',
-      'note:create',
-      'attachment:create',
-      'report:view',
-    ],
-  },
-] as const
+import { ROLES } from './role-definitions'
+import { ensurePlacedUsers } from './placed-users'
 
 const STATUSES = [
   { name: 'New', slug: 'new', color: '#818cf8', order: 0, isResolved: false, isDefault: true },
@@ -257,8 +174,8 @@ async function seed() {
         $set: {
           email,
           passwordHash: await bcrypt.hash(demoPassword, 12),
-          fullname: `${sector.name} Zone Inspector`,
-          title: 'Zone Inspector',
+          fullname: `${sector.name} Surveyor`,
+          title: 'Surveyor',
           roleId: roleDocs.agent,
           sectorKey: sector.key,
           isActive: true,
@@ -268,16 +185,27 @@ async function seed() {
       { upsert: true },
     )
   }
+  // One Zone Inspector per zone and one Nodal Manager per sector (never changes existing accounts).
+  await ensurePlacedUsers({
+    zoneInspectorRoleId: roleDocs.zoneinspector,
+    nodalManagerRoleId: roleDocs.manager,
+    sectorNames: new Map(sectors.map((x) => [x.sectorNo, x.name])),
+    zonePassword: process.env.SEED_ZONE_PASSWORD ?? 'zone@123',
+    nodalPassword: process.env.SEED_NODAL_PASSWORD ?? 'nodal@123',
+    apply: true,
+  })
   await UserModel.updateMany(
     { sectorKey: { $in: ['haridwar-north', 'haridwar-central', 'haridwar-south'] } },
     { $set: { sectorKey: null, isActive: false } },
   )
 
   console.log(
-    `\nDone. Seeded 3 roles, 5 statuses, 4 priorities, 4 types, 1 admin user, 1 service account, and ${sectors.length} real sector zone inspectors.`,
+    `\nDone. Seeded 4 roles, 5 statuses, 4 priorities, 4 types, 1 admin user, 1 service account, and ${sectors.length} real sector surveyors, zone inspectors and nodal managers.`,
   )
   console.log(`Log in with: ${adminEmail} / ${adminPassword}`)
-  console.log(`Demo zone inspector password: ${demoPassword}`)
+  console.log(
+    `Demo password for the surveyors, zone inspectors and nodal managers: ${demoPassword}`,
+  )
   console.log(`DroneSeva integration service-account id: ${botUser._id.toString()} (${botEmail})`)
   process.exit(0)
 }

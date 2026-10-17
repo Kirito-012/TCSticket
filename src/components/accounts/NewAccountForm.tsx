@@ -4,11 +4,18 @@ import { useActionState, useState } from 'react'
 import { AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
+import { PlacementField, type SectorChoice } from '@/components/accounts/PlacementField'
 import { createAccountAction, type ActionState } from '@/server/actions/account.actions'
 
-type RoleOption = { id: string; name: string }
+type RoleOption = { id: string; key: string; name: string }
 
-export function NewAccountForm({ roles }: { roles: RoleOption[] }) {
+export function NewAccountForm({
+  roles,
+  sectors,
+}: {
+  roles: RoleOption[]
+  sectors: SectorChoice[]
+}) {
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     createAccountAction,
     undefined,
@@ -78,6 +85,12 @@ export function NewAccountForm({ roles }: { roles: RoleOption[] }) {
           options={roles.map((r) => ({ value: r.id, label: r.name }))}
         />
       </div>
+
+      <PlacementField
+        key={roleId}
+        roleKey={roles.find((r) => r.id === roleId)?.key ?? ''}
+        sectors={sectors}
+      />
 
       <div className="flex items-center justify-end gap-3 border-t border-border pt-5">
         <Button type="submit" size="lg" disabled={pending}>

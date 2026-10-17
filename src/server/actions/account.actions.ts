@@ -19,6 +19,8 @@ export async function createAccountAction(
     email: formData.get('email'),
     password: formData.get('password'),
     roleId: formData.get('roleId'),
+    sectorNo: formData.get('sectorNo') ?? undefined,
+    zoneKey: formData.get('zoneKey') ?? undefined,
   })
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? 'Invalid input' }
@@ -40,6 +42,17 @@ export async function updateUserRoleAction(userId: string, roleId: string) {
   // reassigning roles is Admin-only so a Manager can't promote themselves or anyone else.
   if (user.roleKey !== 'admin') redirect('/accounts')
   await userService.updateUserRole(userId, roleId)
+  revalidatePath('/accounts')
+}
+
+/** Admin only: moves a Surveyor / Nodal Manager to another sector, or a Zone Inspector to another zone. */
+export async function updateUserPlacementAction(
+  userId: string,
+  placement: { sectorNo?: string | null; zoneKey?: string | null },
+) {
+  const { user } = await requireAbility({ action: 'update', subject: 'account' })
+  if (user.roleKey !== 'admin') redirect('/accounts')
+  await userService.updateUserPlacement(userId, placement)
   revalidatePath('/accounts')
 }
 

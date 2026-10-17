@@ -93,7 +93,7 @@ export function evaluateLocation(
   return { ok: true, distanceMeters: distance }
 }
 
-/** Plain-words message for a refused location check (shown to the Zone Inspector). */
+/** Plain-words message for a refused location check (shown to the Surveyor). */
 export function verdictMessage(verdict: LocationVerdict, rules: LocationRules): string {
   if (verdict.ok) return ''
   const m = (n: number | undefined) => (n === undefined ? '' : `${Math.max(1, Math.round(n))} m`)

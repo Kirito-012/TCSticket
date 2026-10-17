@@ -9,7 +9,7 @@ const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 /**
  * POST /api/v1/tickets/:number/images — service-to-service, like POST /api/v1/tickets.
  * DroneSeva sends the drone photo a ticket was raised from; it is stored with the ticket so the
- * Zone Inspector sees the place they are being sent to.
+ * Surveyor sees the place they are being sent to.
  *
  * Auth: `x-api-key: <INTEGRATION_API_KEY>`   Body: multipart/form-data with one `file`.
  */

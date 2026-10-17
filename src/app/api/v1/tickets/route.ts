@@ -7,6 +7,7 @@ import { createIntegrationTicketSchema } from '@/lib/schemas/integration'
 import { sanitizeHtml } from '@/lib/sanitize-html'
 import { logger } from '@/lib/logger'
 import * as ticketService from '@/server/services/ticket.service'
+import * as userService from '@/server/services/user.service'
 import { findSector } from '@/server/sectors'
 
 const INTEGRATION_TYPE_SLUG = 'garbage-detection'
@@ -90,9 +91,7 @@ export async function POST(req: NextRequest) {
       ? { latitude: parsed.data.latitude, longitude: parsed.data.longitude }
       : coordinatesFromIssue(parsed.data.issue)
   const sector = location ? await findSector(location.latitude, location.longitude) : null
-  const assignee = sector
-    ? await UserModel.findOne({ sectorKey: sector.key, isActive: true, deletedAt: null }).lean()
-    : null
+  const assignee = sector ? await userService.findSectorSurveyor(sector.key) : null
 
   const ticket = await ticketService.createTicket({
     subject: parsed.data.subject,

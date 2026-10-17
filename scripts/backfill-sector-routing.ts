@@ -4,10 +4,13 @@ config({ path: '.env.local' })
 import { dbConnect } from '../src/server/db/connect'
 import { TicketModel } from '../src/server/db/models/ticket.model'
 import { UserModel } from '../src/server/db/models/user.model'
+import { RoleModel } from '../src/server/db/models/role.model'
 import { findSector } from '../src/server/sectors'
 
 async function main() {
   await dbConnect()
+  // New tickets go to the sector's Surveyor (role "agent"), not its Nodal Manager.
+  const surveyorRole = await RoleModel.findOne({ key: 'agent' }).select('_id').lean()
   const tickets = await TicketModel.find({
     $or: [
       { 'location.latitude': { $ne: null }, 'location.longitude': { $ne: null } },
@@ -36,6 +39,7 @@ async function main() {
 
     const assignee = await UserModel.findOne({
       sectorKey: sector.key,
+      roleId: surveyorRole?._id,
       isActive: true,
       deletedAt: null,
     })

@@ -5,6 +5,7 @@ import { PendingApprovals } from '@/components/accounts/PendingApprovals'
 import { CurrentUserCard } from '@/components/accounts/CurrentUserCard'
 import { requireAbility } from '@/server/auth/session'
 import * as userService from '@/server/services/user.service'
+import { getSectorChoices } from '@/server/services/sector.service'
 
 export default async function AccountsPage() {
   const { user: sessionUser, ability } = await requireAbility({
@@ -17,10 +18,11 @@ export default async function AccountsPage() {
   // anyone else) to Admin.
   const canEditRole = sessionUser.roleKey === 'admin'
 
-  const [usersRaw, pendingRaw, rolesRaw] = await Promise.all([
+  const [usersRaw, pendingRaw, rolesRaw, sectors] = await Promise.all([
     userService.listUsers(),
     canEdit ? userService.listPendingUsers() : Promise.resolve([]),
     userService.listRoles(),
+    getSectorChoices(),
   ])
 
   const users = usersRaw.map((u) => {
@@ -30,7 +32,10 @@ export default async function AccountsPage() {
       fullname: u.fullname || u.email,
       email: u.email,
       roleId: role ? String(role._id) : '',
+      roleKey: role?.key ?? '',
       roleName: role?.name ?? 'Unknown',
+      sectorKey: u.sectorKey ?? null,
+      zoneKey: u.zoneKey ?? null,
       isActive: u.isActive,
       createdAt: new Date(u.createdAt as Date).toISOString(),
     }
@@ -75,6 +80,7 @@ export default async function AccountsPage() {
           <AccountsTable
             users={otherUsers}
             roles={roles}
+            sectors={sectors}
             canEdit={canEdit}
             canEditRole={canEditRole}
           />

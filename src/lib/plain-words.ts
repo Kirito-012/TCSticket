@@ -1,5 +1,5 @@
 /**
- * Plain-language wording for the Zone Inspector screens. The full app keeps its ticketing terms
+ * Plain-language wording for the Surveyor screens. The full app keeps its ticketing terms
  * (New / Open / Pending / Resolved, priorities); inspectors only ever see "To do" and "Done",
  * and "Urgent" when something really is.
  */
@@ -38,4 +38,9 @@ const FRIENDLY_STATUS: Record<string, string> = {
 
 export function friendlyStatusName(name: string) {
   return FRIENDLY_STATUS[name.trim().toLowerCase()] ?? name
+}
+
+/** "BAHADRABAD-01 Surveyor" -> "BAHADRABAD-01": a name without the role it was saved with. */
+export function personShortName(fullname: string): string {
+  return fullname.replace(/\s*(Zone Inspector|Surveyor|Nodal Manager)$/i, '').trim()
 }

@@ -5,9 +5,9 @@ import { createContext, useContext, useState } from 'react'
 const SidebarContext = createContext<{
   open: boolean
   setOpen: (open: boolean) => void
-  /** True for Zone Inspectors: the simple, big-text layout (no search, bell or menu drawer). */
+  /** True for Surveyors: the simple, big-text layout (no search, bell or menu drawer). */
   simple: boolean
-  /** True when the simple layout also uses the light theme (Zone Inspectors only). */
+  /** True when the simple layout also uses the light theme (Surveyors only). */
   light: boolean
 } | null>(null)
 
