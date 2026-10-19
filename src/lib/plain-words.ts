@@ -11,8 +11,8 @@ export function isDone(status: StatusLike) {
   return Boolean(status?.isResolved) || status?.slug === 'resolved' || status?.slug === 'closed'
 }
 
-export function plainStatusLabel(status: StatusLike) {
-  return isDone(status) ? 'Done' : 'To do'
+export function plainStatusLabel(status: StatusLike, t: (text: string) => string = (s) => s) {
+  return isDone(status) ? t('Done') : t('To do')
 }
 
 export function isUrgent(priority: PriorityLike) {
@@ -20,8 +20,14 @@ export function isUrgent(priority: PriorityLike) {
 }
 
 /** "Garbage detected — Ward 5" reads as a system message; say what the person has to do. */
-export function plainTitle(subject: string) {
-  return subject.replace(/^Garbage detected\s*(?:—|-)\s*/i, 'Clean up: ')
+export function plainTitle(
+  subject: string,
+  t: (text: string, params?: Record<string, string | number>) => string = (s, p) =>
+    p ? s.replace(/\{(\w+)\}/g, (w, k: string) => (k in p ? String(p[k]) : w)) : s,
+) {
+  return subject
+    .replace(/^Garbage detected\s*(?:—|-)\s*/i, `${t('Clean up:')} `)
+    .replace(/\(spot (\d+)\)\s*$/i, (_m, n: string) => `(${t('spot {n}', { n })})`)
 }
 
 /**

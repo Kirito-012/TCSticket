@@ -1,8 +1,11 @@
 import Link from 'next/link'
 import { Sparkles, ShieldCheck, Zap, Users } from 'lucide-react'
 import { LoginForm } from '@/components/auth/LoginForm'
+import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher'
+import { getT } from '@/i18n/server'
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const t = await getT()
   return (
     <div className="flex min-h-screen">
       {/* Left — brand panel */}
@@ -55,7 +58,8 @@ export default function LoginPage() {
       </div>
 
       {/* Right — form */}
-      <div className="flex flex-1 flex-col items-center justify-center bg-background px-6 py-12">
+      <div className="relative flex flex-1 flex-col items-center justify-center bg-background px-6 py-12">
+        <LanguageSwitcher className="absolute right-4 top-4" />
         <div className="w-full max-w-sm animate-fade-in">
           <div className="mb-8 flex items-center gap-2.5 lg:hidden">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
@@ -66,17 +70,19 @@ export default function LoginPage() {
             </span>
           </div>
 
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Welcome back</h1>
-          <p className="mt-1.5 text-sm text-muted">Sign in to your workspace to continue</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            {t('Welcome back')}
+          </h1>
+          <p className="mt-1.5 text-sm text-muted">{t('Sign in to your workspace to continue')}</p>
 
           <div className="mt-7">
             <LoginForm />
           </div>
 
           <p className="mt-6 text-center text-sm text-muted">
-            New to TheCraftSync?{' '}
+            {t('New to TheCraftSync?')}{' '}
             <Link href="/register" className="font-medium text-accent-strong hover:text-accent">
-              Create an account
+              {t('Create an account')}
             </Link>
           </p>
         </div>

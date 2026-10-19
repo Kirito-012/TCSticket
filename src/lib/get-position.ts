@@ -1,4 +1,5 @@
 import type { LocationFix } from '@/lib/geo'
+import { makeTranslate, type Translate } from '../i18n/config'
 
 export type PositionOutcome =
   | { ok: true; fix: LocationFix }
@@ -72,15 +73,24 @@ export function getBestPosition({
 /** Plain-words advice for a failed location request. */
 export function positionProblemMessage(
   reason: 'denied' | 'unavailable' | 'timeout' | 'unsupported',
+  t: Translate = makeTranslate({}),
 ) {
   switch (reason) {
     case 'denied':
-      return 'Location is turned off for this website. Tap the lock icon next to the web address, set Location to "Allow", then try again.'
+      return t(
+        'Location is turned off for this website. Tap the lock icon next to the web address, set Location to "Allow", then try again.',
+      )
     case 'unsupported':
-      return 'This phone or browser cannot share its location, so the photo cannot be checked. Please use a phone with location.'
+      return t(
+        'This phone or browser cannot share its location, so the photo cannot be checked. Please use a phone with location.',
+      )
     case 'timeout':
-      return 'We could not find your location in time. Go outside where the sky is open, make sure Location is on, and try again.'
+      return t(
+        'We could not find your location in time. Go outside where the sky is open, make sure Location is on, and try again.',
+      )
     default:
-      return 'We could not read your location. Make sure Location is turned on in your phone settings, then try again.'
+      return t(
+        'We could not read your location. Make sure Location is turned on in your phone settings, then try again.',
+      )
   }
 }

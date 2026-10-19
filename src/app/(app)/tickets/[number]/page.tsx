@@ -23,6 +23,8 @@ import { TicketPriorityModel } from '@/server/db/models/ticket-priority.model'
 import { TicketTypeModel } from '@/server/db/models/ticket-type.model'
 import * as userService from '@/server/services/user.service'
 import { scopeAllows } from '@/lib/ticket-scope'
+import { localizeIssueHtml } from '@/lib/localize-issue'
+import { getT } from '@/i18n/server'
 import { toTicketDetailView, toCommentView, toEventView } from '@/lib/ticket-view'
 import { cn } from '@/lib/utils'
 import { isDone, isUrgent, plainStatusLabel, plainTitle } from '@/lib/plain-words'
@@ -37,6 +39,7 @@ export default async function TicketDetailPage({
   if (!Number.isInteger(number)) notFound()
 
   const { ability, scope, forcedAssigneeId } = await requireTicketScope()
+  const t = await getT()
 
   await dbConnect()
   const ticketDoc = await ticketService.getTicketByNumber(number)
@@ -83,7 +86,7 @@ export default async function TicketDetailPage({
     const done = isDone(status)
     return (
       <>
-        <Topbar title="Ticket" description={plainTitle(ticket.subject)} />
+        <Topbar title={t('Ticket')} description={plainTitle(ticket.subject, t)} />
         <main className="flex-1 px-4 py-6 animate-fade-in sm:px-8">
           <div className="mx-auto max-w-6xl space-y-5">
             <Link
@@ -91,7 +94,7 @@ export default async function TicketDetailPage({
               className="inline-flex min-h-12 items-center gap-2 rounded-2xl border-2 border-border-strong bg-surface px-5 text-lg font-bold text-foreground"
             >
               <ArrowLeft className="h-6 w-6" strokeWidth={2.5} />
-              Back to my tickets
+              {t('Back to my tickets')}
             </Link>
 
             <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
@@ -103,36 +106,41 @@ export default async function TicketDetailPage({
                       done ? 'bg-accent-soft text-accent-strong' : 'bg-warning-soft text-warning',
                     )}
                   >
-                    {plainStatusLabel(status)}
+                    {plainStatusLabel(status, t)}
                   </span>
                   {!done && isUrgent(priority) && (
                     <span className="rounded-full bg-danger px-3 py-1 text-base font-semibold text-white">
-                      Urgent
+                      {t('Urgent')}
                     </span>
                   )}
                 </div>
                 <h1 className="mt-3 text-2xl font-bold leading-snug text-foreground [overflow-wrap:anywhere]">
-                  {plainTitle(ticket.subject)}
+                  {plainTitle(ticket.subject, t)}
                 </h1>
                 <div
                   className="mt-3 text-lg leading-relaxed text-muted-strong [&_p]:my-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
                   dangerouslySetInnerHTML={{
                     // "Show me the way" below replaces the ticket's own Google Maps link.
-                    __html: ticket.issueHtml.replace(
-                      /<p>\s*<a[^>]*>\s*Open location in Google Maps\s*<\/a>\s*<\/p>/i,
-                      '',
+                    __html: localizeIssueHtml(
+                      ticket.issueHtml.replace(
+                        /<p>\s*<a[^>]*>\s*Open location in Google Maps\s*<\/a>\s*<\/p>/i,
+                        '',
+                      ),
+                      t,
                     ),
                   }}
                 />
                 {ticket.sourcePhotos.length > 0 && (
                   <div className="mt-6 space-y-3">
-                    <h2 className="text-xl font-bold text-foreground">Photo from the drone</h2>
+                    <h2 className="text-xl font-bold text-foreground">
+                      {t('Photo from the drone')}
+                    </h2>
                     <DronePhoto photos={ticket.sourcePhotos} />
                   </div>
                 )}
                 {ticket.report && (
                   <div className="mt-6 space-y-3">
-                    <h2 className="text-xl font-bold text-foreground">The report</h2>
+                    <h2 className="text-xl font-bold text-foreground">{t('The report')}</h2>
                     <ReportViewer
                       number={ticket.number}
                       name={ticket.report.name}
@@ -143,7 +151,7 @@ export default async function TicketDetailPage({
                 )}
                 {ticket.location && (
                   <div className="mt-6 space-y-3">
-                    <h2 className="text-xl font-bold text-foreground">Where is it?</h2>
+                    <h2 className="text-xl font-bold text-foreground">{t('Where is it?')}</h2>
                     <a
                       href={`https://www.google.com/maps/dir/?api=1&destination=${ticket.location.latitude},${ticket.location.longitude}`}
                       target="_blank"
@@ -151,10 +159,10 @@ export default async function TicketDetailPage({
                       className="flex min-h-14 items-center justify-center gap-3 rounded-2xl bg-accent px-5 text-lg font-bold text-white"
                     >
                       <MapPin className="h-6 w-6" strokeWidth={2.5} />
-                      Show me the way
+                      {t('Show me the way')}
                     </a>
                     <iframe
-                      title="Map of the place"
+                      title={t('Map of the place')}
                       src={`https://www.openstreetmap.org/export/embed.html?bbox=${ticket.location.longitude - 0.01}%2C${ticket.location.latitude - 0.01}%2C${ticket.location.longitude + 0.01}%2C${ticket.location.latitude + 0.01}&layer=mapnik&marker=${ticket.location.latitude}%2C${ticket.location.longitude}`}
                       className="h-56 w-full rounded-2xl border-2 border-border-strong"
                       loading="lazy"
@@ -165,7 +173,7 @@ export default async function TicketDetailPage({
 
               <Card className="p-5 sm:p-6">
                 <h2 className="mb-5 text-2xl font-bold text-foreground">
-                  {done ? 'Your work' : 'Finish this ticket'}
+                  {done ? t('Your work') : t('Finish this ticket')}
                 </h2>
                 <SurveyorResolutionPanel
                   ticketNumber={ticket.number}

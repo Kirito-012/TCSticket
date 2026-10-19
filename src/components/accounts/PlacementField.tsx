@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Select } from '@/components/ui/Select'
 import { placementKindOf, ZONE_OPTIONS } from '@/lib/placement'
+import { useT } from '@/i18n/client'
 
 export type SectorChoice = { value: string; label: string }
 
@@ -19,6 +20,7 @@ export function PlacementField({
   sectors: SectorChoice[]
   size?: 'sm' | 'md' | 'lg'
 }) {
+  const t = useT()
   const kind = placementKindOf(roleKey)
   const [sectorNo, setSectorNo] = useState('')
   const [zoneKey, setZoneKey] = useState('')
@@ -27,7 +29,7 @@ export function PlacementField({
   return (
     <div>
       <label className="mb-1.5 block text-xs font-medium text-muted-strong">
-        {kind === 'sector' ? 'Which sector?' : 'Which zone?'}
+        {kind === 'sector' ? t('Which sector?') : t('Which zone?')}
       </label>
       {kind === 'sector' ? (
         <Select
@@ -35,7 +37,7 @@ export function PlacementField({
           value={sectorNo}
           onChange={setSectorNo}
           size={size}
-          placeholder="Choose a sector"
+          placeholder={t('Choose a sector')}
           options={sectors}
         />
       ) : (
@@ -44,7 +46,7 @@ export function PlacementField({
           value={zoneKey}
           onChange={setZoneKey}
           size={size}
-          placeholder="Choose a zone"
+          placeholder={t('Choose a zone')}
           options={ZONE_OPTIONS}
         />
       )}

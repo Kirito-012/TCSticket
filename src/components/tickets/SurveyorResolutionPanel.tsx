@@ -28,6 +28,7 @@ import {
 } from '@/lib/geo'
 import { getBestPosition, positionProblemMessage } from '@/lib/get-position'
 import { cn } from '@/lib/utils'
+import { useT } from '@/i18n/client'
 import type { CommentAttachmentView } from '@/lib/ticket-view'
 
 // Keep in sync with MAX_IMAGE_BYTES / ALLOWED_IMAGE_TYPES in server/actions/ticket.actions.ts.
@@ -69,6 +70,7 @@ export function SurveyorResolutionPanel({
   originalPhotoUrl: string | null
 }) {
   const router = useRouter()
+  const t = useT()
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const galleryInputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState<string | null>(null)
@@ -112,7 +114,7 @@ export function SurveyorResolutionPanel({
         onProgress: (accuracy) => setPlace({ kind: 'finding', accuracy }),
       })
       if (!result.ok) {
-        setPlace({ kind: 'problem', message: positionProblemMessage(result.reason) })
+        setPlace({ kind: 'problem', message: positionProblemMessage(result.reason, t) })
         return null
       }
       fix = result.fix
@@ -120,7 +122,7 @@ export function SurveyorResolutionPanel({
     const verdict = target ? evaluateLocation(target, fix, rules) : null
     setPlace(
       verdict
-        ? { kind: 'result', verdict, message: verdictMessage(verdict, rules) }
+        ? { kind: 'result', verdict, message: verdictMessage(verdict, rules, t) }
         : { kind: 'idle' },
     )
     return { fix, verdict }
@@ -128,11 +130,11 @@ export function SurveyorResolutionPanel({
 
   async function uploadOne(file: File, fix: LocationFix, method: PhotoMethod) {
     if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
-      setError('Please choose a photo (JPG or PNG).')
+      setError(t('Please choose a photo (JPG or PNG).'))
       return
     }
     if (file.size > MAX_IMAGE_BYTES) {
-      setError('That photo is too big. Please choose a smaller one.')
+      setError(t('That photo is too big. Please choose a smaller one.'))
       return
     }
 
@@ -171,7 +173,7 @@ export function SurveyorResolutionPanel({
         )
       }
     } catch {
-      setError('The photo did not upload. Please try again.')
+      setError(t('The photo did not upload. Please try again.'))
     } finally {
       setUploading((prev) => prev.filter((u) => u.id !== id))
       if (!keepPreview) URL.revokeObjectURL(previewUrl)
@@ -220,7 +222,7 @@ export function SurveyorResolutionPanel({
 
   function handleResolve() {
     // Marking done can't be undone by an inspector, so ask once in plain words.
-    if (!window.confirm('Mark this ticket as done?')) return
+    if (!window.confirm(t('Mark this ticket as done?'))) return
     setError(null)
     startResolve(async () => {
       const result = await resolveTicketAction(ticketNumber, note)
@@ -231,7 +233,7 @@ export function SurveyorResolutionPanel({
 
   const lightbox = (
     <ImageLightbox
-      images={photos.map((p) => ({ url: p.url, alt: 'Resolution photo' }))}
+      images={photos.map((p) => ({ url: p.url, alt: t('Your photo') }))}
       index={lightboxIndex}
       onChange={setLightboxIndex}
       onClose={() => setLightboxIndex(null)}
@@ -243,17 +245,17 @@ export function SurveyorResolutionPanel({
       <div className="space-y-5">
         <div className="flex items-center gap-3 rounded-2xl border-2 border-accent bg-accent-soft p-4">
           <CheckCircle2 className="h-10 w-10 shrink-0 text-accent" strokeWidth={2.25} />
-          <p className="text-xl font-bold text-foreground">This ticket is done</p>
+          <p className="text-xl font-bold text-foreground">{t('This ticket is done')}</p>
         </div>
         {resolutionNote && (
           <div className="rounded-2xl border-2 border-border-strong bg-surface p-4">
-            <p className="mb-1 text-base font-semibold text-muted">Your note</p>
+            <p className="mb-1 text-base font-semibold text-muted">{t('Your note')}</p>
             <p className="whitespace-pre-wrap text-lg text-foreground">{resolutionNote}</p>
           </div>
         )}
         {photos.length > 0 && (
           <div>
-            <p className="mb-2 text-lg font-bold text-foreground">Your photos</p>
+            <p className="mb-2 text-lg font-bold text-foreground">{t('Your photos')}</p>
             <PhotoGrid photos={photos} uploading={[]} onOpen={setLightboxIndex} />
           </div>
         )}
@@ -281,10 +283,12 @@ export function SurveyorResolutionPanel({
 
       {target && (
         <section className="space-y-3">
-          <h3 className="text-xl font-bold text-foreground">1. Go to the place</h3>
+          <h3 className="text-xl font-bold text-foreground">{t('1. Go to the place')}</h3>
           <p className="text-lg text-muted">
-            Stand at the marked spot (within {rules.radiusMeters} m). We check this with your
-            phone&apos;s location when you add a photo.
+            {t(
+              "Stand at the marked spot (within {radius} m). We check this with your phone's location when you add a photo.",
+              { radius: rules.radiusMeters },
+            )}
           </p>
           <PlaceCard place={place} />
           <button
@@ -298,7 +302,7 @@ export function SurveyorResolutionPanel({
             ) : (
               <MapPin className="h-7 w-7" strokeWidth={2.25} />
             )}
-            Check where I am
+            {t('Check where I am')}
           </button>
         </section>
       )}
@@ -308,11 +312,14 @@ export function SurveyorResolutionPanel({
       )}
 
       <section className="space-y-3">
-        <h3 className="text-xl font-bold text-foreground">{step(2)}. Add photos</h3>
+        <h3 className="text-xl font-bold text-foreground">
+          {step(2)}. {t('Add photos')}
+        </h3>
         <p className="text-lg text-muted">
-          Take a photo of the place after cleaning, or choose one from your phone. We check that the
-          place is clean.
-          {!target && ' We also save where you were.'}
+          {t(
+            'Take a photo of the place after cleaning, or choose one from your phone. We check that the place is clean.',
+          )}
+          {!target && ` ${t('We also save where you were.')}`}
         </p>
 
         <PhotoGrid
@@ -338,7 +345,7 @@ export function SurveyorResolutionPanel({
             )}
           >
             <Camera className="h-7 w-7" strokeWidth={2.25} />
-            Take a photo
+            {t('Take a photo')}
             <input
               ref={cameraInputRef}
               type="file"
@@ -355,7 +362,7 @@ export function SurveyorResolutionPanel({
             )}
           >
             <ImagePlus className="h-7 w-7" strokeWidth={2.25} />
-            Choose from phone
+            {t('Choose from phone')}
             <input
               ref={galleryInputRef}
               type="file"
@@ -367,13 +374,14 @@ export function SurveyorResolutionPanel({
           </label>
         </div>
         <p className="text-base text-muted">
-          When your phone asks, please tap <strong>Allow</strong> for location.
+          {t('When your phone asks, please tap Allow for location.')}
         </p>
       </section>
 
       <section className="space-y-3">
         <label htmlFor="resolution-note" className="block text-xl font-bold text-foreground">
-          {step(3)}. Anything to tell us? <span className="font-normal text-muted">(optional)</span>
+          {step(3)}. {t('Anything to tell us?')}{' '}
+          <span className="font-normal text-muted">({t('optional')})</span>
         </label>
         <textarea
           id="resolution-note"
@@ -381,13 +389,15 @@ export function SurveyorResolutionPanel({
           onChange={(e) => setNote(e.target.value)}
           maxLength={1000}
           rows={4}
-          placeholder="Write here if you want to add something"
+          placeholder={t('Write here if you want to add something')}
           className="w-full resize-y rounded-2xl border-2 border-border-strong bg-surface px-4 py-3 text-lg text-foreground outline-none placeholder:text-muted focus:border-accent"
         />
       </section>
 
       <section className="space-y-3">
-        <h3 className="text-xl font-bold text-foreground">{step(4)}. Finished?</h3>
+        <h3 className="text-xl font-bold text-foreground">
+          {step(4)}. {t('Finished?')}
+        </h3>
         <button
           type="button"
           onClick={handleResolve}
@@ -399,13 +409,15 @@ export function SurveyorResolutionPanel({
           ) : (
             <CheckCircle2 className="h-7 w-7" strokeWidth={2.5} />
           )}
-          Mark as done
+          {t('Mark as done')}
         </button>
-        {photos.length === 0 && <p className="text-lg text-muted">Add at least one photo first.</p>}
+        {photos.length === 0 && (
+          <p className="text-lg text-muted">{t('Add at least one photo first.')}</p>
+        )}
         {photos.length > 0 && !hasPhotoAtThePlace && (
           <p className="flex items-start gap-2 text-lg font-semibold text-warning">
             <AlertTriangle className="mt-0.5 h-6 w-6 shrink-0" />
-            Take a photo at the place first. Photos from somewhere else do not count.
+            {t('Take a photo at the place first. Photos from somewhere else do not count.')}
           </p>
         )}
       </section>
@@ -423,23 +435,26 @@ function RefusedPhotoCard({
   original: string | null
   onClose: () => void
 }) {
+  const t = useT()
   const shown =
     photo.percent === null ? null : photo.percent < 1 ? '<1' : String(Math.round(photo.percent))
   return (
     <div className="space-y-3 rounded-2xl border-2 border-danger bg-danger-soft p-4">
       <div className="flex items-start justify-between gap-3">
         <p className="text-lg font-bold text-danger">
-          This photo was not accepted
+          {t('This photo was not accepted')}
           {shown !== null && (
             <span className="block text-base font-semibold">
-              The red boxes show the garbage we found ({shown}% of the picture)
+              {t('The red boxes show the garbage we found ({percent}% of the picture)', {
+                percent: shown,
+              })}
             </span>
           )}
         </p>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close"
+          aria-label={t('Close')}
           className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-surface text-foreground"
         >
           <X className="h-5 w-5" strokeWidth={2.5} />
@@ -449,36 +464,36 @@ function RefusedPhotoCard({
         {original && (
           <figure className="space-y-1.5">
             <figcaption className="text-base font-bold text-foreground">
-              Before: the drone photo
+              {t('Before: the drone photo')}
             </figcaption>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={original}
-              alt="The original drone photo"
+              alt={t('The original drone photo')}
               className="block max-h-[28rem] w-full rounded-xl object-contain"
             />
           </figure>
         )}
         <figure className="space-y-1.5">
           <figcaption className="text-base font-bold text-foreground">
-            {original ? 'Now: your photo' : 'Your photo'}
+            {original ? t('Now: your photo') : t('Your photo')}
           </figcaption>
           <div className="relative mx-auto w-fit max-w-full overflow-hidden rounded-xl">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={photo.previewUrl}
-              alt="The photo that was not accepted"
+              alt={t('The photo that was not accepted')}
               className="block max-h-[28rem] max-w-full"
             />
-            {photo.boxes.map(([l, t, r, b], i) => (
+            {photo.boxes.map(([l, top, r, b], i) => (
               <span
                 key={i}
                 className="pointer-events-none absolute border-[3px] border-red-500 bg-red-500/20"
                 style={{
                   left: `${l * 100}%`,
-                  top: `${t * 100}%`,
+                  top: `${top * 100}%`,
                   width: `${(r - l) * 100}%`,
-                  height: `${(b - t) * 100}%`,
+                  height: `${(b - top) * 100}%`,
                 }}
               />
             ))}
@@ -487,7 +502,7 @@ function RefusedPhotoCard({
       </div>
       {photo.boxes.length === 0 && (
         <p className="text-base text-foreground">
-          The garbage is spread over too much of the picture to outline.
+          {t('The garbage is spread over too much of the picture to outline.')}
         </p>
       )}
     </div>
@@ -610,6 +625,7 @@ function ManualCoordinates({
 
 /** The big "where am I" card: finding, at the place, too far, or a problem with the location. */
 function PlaceCard({ place }: { place: PlaceState }) {
+  const t = useT()
   if (place.kind === 'idle') return null
 
   if (place.kind === 'finding') {
@@ -620,10 +636,12 @@ function PlaceCard({ place }: { place: PlaceState }) {
       >
         <Loader2 className="mt-0.5 h-6 w-6 shrink-0 animate-spin" />
         <span>
-          Finding your location…
+          {t('Finding your location…')}
           {place.accuracy !== null && (
             <span className="block text-base font-normal text-muted">
-              Accurate to about {Math.max(1, Math.round(place.accuracy))} m
+              {t('Accurate to about {meters} m', {
+                meters: Math.max(1, Math.round(place.accuracy)),
+              })}
             </span>
           )}
         </span>
@@ -651,9 +669,11 @@ function PlaceCard({ place }: { place: PlaceState }) {
       >
         <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0" strokeWidth={2.25} />
         <span>
-          You are at the place
+          {t('You are at the place')}
           <span className="block text-base font-medium">
-            About {Math.max(0, Math.round(place.verdict.distanceMeters))} m from the marked spot
+            {t('About {meters} m from the marked spot', {
+              meters: Math.max(0, Math.round(place.verdict.distanceMeters)),
+            })}
           </span>
         </span>
       </div>
@@ -684,6 +704,7 @@ function PhotoGrid({
   onRemove?: (publicId: string) => void
   removingId?: string | null
 }) {
+  const t = useT()
   if (photos.length === 0 && uploading.length === 0) return null
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -695,16 +716,16 @@ function PhotoGrid({
           <button
             type="button"
             onClick={() => onOpen(i)}
-            aria-label={`View photo ${i + 1} of ${photos.length}`}
+            aria-label={t('View photo {n} of {total}', { n: i + 1, total: photos.length })}
             className="block h-full w-full cursor-zoom-in"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={p.url} alt="Your photo" className="h-full w-full object-cover" />
+            <img src={p.url} alt={t('Your photo')} className="h-full w-full object-cover" />
           </button>
           {p.locationCheck?.withinRadius && (
             <span className="pointer-events-none absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full bg-black/75 px-2.5 py-1 text-sm font-bold text-white">
               <MapPin className="h-4 w-4 text-emerald-300" strokeWidth={2.5} />
-              At the place
+              {t('At the place')}
             </span>
           )}
           {onRemove && (
@@ -712,7 +733,7 @@ function PhotoGrid({
               type="button"
               onClick={() => onRemove(p.publicId)}
               disabled={removingId === p.publicId}
-              aria-label="Remove this photo"
+              aria-label={t('Remove this photo')}
               className="absolute right-2 top-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-black/75 text-white disabled:opacity-50"
             >
               {removingId === p.publicId ? (
@@ -733,7 +754,7 @@ function PhotoGrid({
           <img src={u.previewUrl} alt="" className="h-full w-full object-cover opacity-60" />
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50 p-2 text-center">
             <Loader2 className="h-8 w-8 animate-spin text-white" />
-            <span className="text-base font-bold text-white">Checking the photo…</span>
+            <span className="text-base font-bold text-white">{t('Checking the photo…')}</span>
           </div>
         </div>
       ))}

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { CalendarDays, Check, SlidersHorizontal } from 'lucide-react'
 import { BottomSheet } from '@/components/ui/BottomSheet'
 import { cn } from '@/lib/utils'
+import { useT } from '@/i18n/client'
 import {
   DEFAULT_INSPECTOR_FILTERS,
   activeFilterCount,
@@ -69,6 +70,7 @@ export function InspectorFilterBar({
   filters: InspectorFilters
 }) {
   const router = useRouter()
+  const t = useT()
   const [pending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState<InspectorFilters>(filters)
@@ -99,19 +101,19 @@ export function InspectorFilterBar({
         )}
       >
         <SlidersHorizontal className="h-6 w-6" strokeWidth={2.25} />
-        Filter and sort
+        {t('Filter and sort')}
         {count > 0 && (
           <span className="rounded-full bg-accent px-2.5 py-0.5 text-base font-bold text-on-accent">
             {count}
           </span>
         )}
-        <span className="ml-auto text-base font-semibold text-muted">Change</span>
+        <span className="ml-auto text-base font-semibold text-muted">{t('Change')}</span>
       </button>
 
       <BottomSheet
         open={open}
         onClose={close}
-        title="Filter and sort"
+        title={t('Filter and sort')}
         footer={
           <div className="flex gap-3">
             <button
@@ -119,21 +121,21 @@ export function InspectorFilterBar({
               onClick={() => setDraft(DEFAULT_INSPECTOR_FILTERS)}
               className="min-h-14 shrink-0 cursor-pointer rounded-2xl border-2 border-border-strong px-5 text-base font-bold text-foreground"
             >
-              Clear all
+              {t('Clear all')}
             </button>
             <button
               type="button"
               onClick={apply}
               className="min-h-14 flex-1 cursor-pointer rounded-2xl bg-accent px-5 text-lg font-bold text-on-accent"
             >
-              Show tickets
+              {t('Show tickets')}
             </button>
           </div>
         }
       >
         <div className="space-y-6 px-5 py-4">
           <section>
-            <h3 className="mb-2 text-base font-bold text-foreground">Sort</h3>
+            <h3 className="mb-2 text-base font-bold text-foreground">{t('Sort')}</h3>
             <div className="flex flex-wrap gap-2">
               {SORT_CHOICES.map((c) => (
                 <Choice
@@ -141,14 +143,14 @@ export function InspectorFilterBar({
                   active={draft.sort === c.key}
                   onClick={() => setDraft((d) => ({ ...d, sort: c.key }))}
                 >
-                  {c.label}
+                  {t(c.label)}
                 </Choice>
               ))}
             </div>
           </section>
 
           <section>
-            <h3 className="mb-2 text-base font-bold text-foreground">When did it arrive?</h3>
+            <h3 className="mb-2 text-base font-bold text-foreground">{t('When did it arrive?')}</h3>
             <div className="flex flex-wrap gap-2">
               {WHEN_CHOICES.map((c) => (
                 <Choice
@@ -156,14 +158,14 @@ export function InspectorFilterBar({
                   active={!draft.on && draft.when === c.key}
                   onClick={() => setDraft((d) => ({ ...d, when: c.key, on: '' }))}
                 >
-                  {c.label}
+                  {t(c.label)}
                 </Choice>
               ))}
             </div>
             <label className="mt-3 block">
               <span className="mb-1 flex items-center gap-2 text-base font-semibold text-muted-strong">
                 <CalendarDays className="h-5 w-5" />
-                Or pick one day
+                {t('Or pick one day')}
               </span>
               <input
                 type="date"
@@ -175,13 +177,13 @@ export function InspectorFilterBar({
           </section>
 
           <section>
-            <h3 className="mb-2 text-base font-bold text-foreground">Only</h3>
+            <h3 className="mb-2 text-base font-bold text-foreground">{t('Only')}</h3>
             <Choice
               active={draft.urgentOnly}
               onClick={() => setDraft((d) => ({ ...d, urgentOnly: !d.urgentOnly }))}
             >
               {draft.urgentOnly && <Check className="h-4 w-4" strokeWidth={3} />}
-              Urgent tickets
+              {t('Urgent tickets')}
             </Choice>
           </section>
         </div>

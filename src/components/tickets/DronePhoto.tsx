@@ -6,6 +6,8 @@ import { ImageLightbox } from '@/components/ui/ImageLightbox'
 import { cn } from '@/lib/utils'
 import { formatUploadTime } from '@/lib/format-upload-time'
 import { UploadStamp } from '@/components/tickets/UploadStamp'
+import { useLocale, useT } from '@/i18n/client'
+import { localeTag } from '@/i18n/config'
 
 type Photo = {
   url: string
@@ -21,34 +23,38 @@ type Photo = {
  * extra photos (if any) show as small pictures underneath.
  */
 export function DronePhoto({ photos, showTime = false }: { photos: Photo[]; showTime?: boolean }) {
+  const t = useT()
+  const locale = localeTag(useLocale())
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const [first, ...rest] = photos
   if (!first) return null
   const caption = (p: Photo) =>
-    showTime && p.uploadedAt ? `Uploaded ${formatUploadTime(p.uploadedAt)}` : undefined
+    showTime && p.uploadedAt
+      ? t('Uploaded {time}', { time: formatUploadTime(p.uploadedAt, locale) })
+      : undefined
 
   return (
     <div className="space-y-3">
       <button
         type="button"
         onClick={() => setOpenIndex(0)}
-        aria-label="Enlarge the drone photo"
+        aria-label={t('Enlarge the drone photo')}
         className="group relative block w-full cursor-zoom-in overflow-hidden rounded-2xl border-2 border-border-strong"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={first.url}
-          alt="Drone photo of the place"
+          alt={t('Drone photo of the place')}
           width={first.width}
           height={first.height}
           className="max-h-[420px] w-full object-cover"
         />
         <span className="absolute bottom-3 right-3 inline-flex items-center gap-2 rounded-full bg-black/70 px-3 py-1.5 text-sm font-semibold text-white">
           <Expand className="h-4 w-4" />
-          Tap to enlarge
+          {t('Tap to enlarge')}
         </span>
       </button>
-      {showTime && <UploadStamp at={first.uploadedAt} label="Uploaded" />}
+      {showTime && <UploadStamp at={first.uploadedAt} label={t('Uploaded')} />}
 
       {rest.length > 0 && (
         <div className="flex flex-wrap gap-2">
@@ -57,7 +63,7 @@ export function DronePhoto({ photos, showTime = false }: { photos: Photo[]; show
               key={p.publicId}
               type="button"
               onClick={() => setOpenIndex(i + 1)}
-              aria-label={`Enlarge photo ${i + 2}`}
+              aria-label={t('Enlarge photo {n}', { n: i + 2 })}
               title={caption(p)}
               className={cn(
                 'h-20 w-20 cursor-zoom-in overflow-hidden rounded-xl border-2 border-border-strong',
@@ -73,7 +79,7 @@ export function DronePhoto({ photos, showTime = false }: { photos: Photo[]; show
       <ImageLightbox
         images={photos.map((p) => ({
           url: p.url,
-          alt: 'Drone photo of the place',
+          alt: t('Drone photo of the place'),
           caption: caption(p),
         }))}
         index={openIndex}

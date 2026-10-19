@@ -3,6 +3,8 @@
  * browser (which only warns early, so nobody uploads a photo that will be refused).
  */
 
+import { makeTranslate, type Translate } from '../i18n/config'
+
 export type LatLon = { latitude: number; longitude: number }
 
 /** A reading of the person's phone location. `capturedAt` is a time in milliseconds. */
@@ -93,20 +95,35 @@ export function evaluateLocation(
   return { ok: true, distanceMeters: distance }
 }
 
-/** Plain-words message for a refused location check (shown to the Surveyor). */
-export function verdictMessage(verdict: LocationVerdict, rules: LocationRules): string {
+/**
+ * Plain-words message for a refused location check (shown to the Surveyor). Pass the translate
+ * function to have it in the person's language; without it the message is English.
+ */
+export function verdictMessage(
+  verdict: LocationVerdict,
+  rules: LocationRules,
+  t: Translate = makeTranslate({}),
+): string {
   if (verdict.ok) return ''
   const m = (n: number | undefined) => (n === undefined ? '' : `${Math.max(1, Math.round(n))} m`)
   switch (verdict.reason) {
     case 'too-far':
-      return `You are about ${m(verdict.distanceMeters)} from the place. Go to the marked spot (within ${rules.radiusMeters} m) and take the photo again. The ticket is not done yet.`
+      return t(
+        'You are about {distance} from the place. Go to the marked spot (within {radius} m) and take the photo again. The ticket is not done yet.',
+        { distance: m(verdict.distanceMeters), radius: rules.radiusMeters },
+      )
     case 'inaccurate':
-      return `Your phone's location is not accurate enough yet (about ${m(verdict.accuracyMeters)}). Stand outside in the open for a moment, then try again.`
+      return t(
+        "Your phone's location is not accurate enough yet (about {accuracy}). Stand outside in the open for a moment, then try again.",
+        { accuracy: m(verdict.accuracyMeters) },
+      )
     case 'stale':
-      return 'Your location reading is out of date. Please try again.'
+      return t('Your location reading is out of date. Please try again.')
     case 'invalid':
     case 'no-location':
     default:
-      return 'We could not read your location. Please allow location for this website, then try again.'
+      return t(
+        'We could not read your location. Please allow location for this website, then try again.',
+      )
   }
 }

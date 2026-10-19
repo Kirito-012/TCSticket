@@ -5,8 +5,10 @@ import { useActionState, useState } from 'react'
 import { Mail, Lock, ArrowRight, AlertCircle, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { login } from '@/server/actions/auth.actions'
+import { useT } from '@/i18n/client'
 
 export function LoginForm() {
+  const t = useT()
   const [state, formAction, pending] = useActionState(login, undefined)
   const [showPassword, setShowPassword] = useState(false)
 
@@ -21,7 +23,7 @@ export function LoginForm() {
 
       <div>
         <label htmlFor="email" className="mb-1.5 block text-xs font-medium text-muted-strong">
-          Email address
+          {t('Email address')}
         </label>
         <div className="relative">
           <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
@@ -40,13 +42,13 @@ export function LoginForm() {
       <div>
         <div className="mb-1.5 flex items-center justify-between">
           <label htmlFor="password" className="block text-xs font-medium text-muted-strong">
-            Password
+            {t('Password')}
           </label>
           <Link
             href="/forgot-password"
             className="text-xs font-medium text-accent-strong hover:text-accent"
           >
-            Forgot password?
+            {t('Forgot password?')}
           </Link>
         </div>
         <div className="relative">
@@ -63,7 +65,7 @@ export function LoginForm() {
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            aria-label={showPassword ? t('Hide password') : t('Show password')}
             tabIndex={-1}
             className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-muted hover:text-foreground"
           >
@@ -77,11 +79,11 @@ export function LoginForm() {
           type="checkbox"
           className="h-3.5 w-3.5 cursor-pointer rounded border-border-strong bg-transparent accent-emerald-500"
         />
-        Keep me signed in for 30 days
+        {t('Keep me signed in for 30 days')}
       </label>
 
       <Button type="submit" size="lg" className="w-full" disabled={pending}>
-        {pending ? 'Signing in…' : 'Sign in'}
+        {pending ? t('Signing in…') : t('Sign in')}
         {!pending && <ArrowRight className="h-4 w-4" />}
       </Button>
     </form>

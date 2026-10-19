@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { ChevronLeft, ChevronRight, Loader2, X } from 'lucide-react'
+import { useT } from '@/i18n/client'
 
 export type LightboxImage = { url: string; alt?: string; caption?: string }
 
@@ -25,6 +26,7 @@ export function ImageLightbox({
   onChange: (index: number) => void
   onClose: () => void
 }) {
+  const t = useT()
   const closeRef = useRef<HTMLButtonElement>(null)
   const [loadedUrl, setLoadedUrl] = useState<string | null>(null)
   const open = index !== null && images[index] !== undefined
@@ -57,7 +59,7 @@ export function ImageLightbox({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Image preview"
+      aria-label={t('Image preview')}
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-3 sm:p-8"
       onClick={onClose}
     >
@@ -65,7 +67,7 @@ export function ImageLightbox({
         ref={closeRef}
         type="button"
         onClick={onClose}
-        aria-label="Close image"
+        aria-label={t('Close image')}
         className="absolute right-3 top-3 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 sm:right-5 sm:top-5"
       >
         <X className="h-5 w-5" />
@@ -79,7 +81,7 @@ export function ImageLightbox({
               e.stopPropagation()
               onChange((index! - 1 + count) % count)
             }}
-            aria-label="Previous image"
+            aria-label={t('Previous image')}
             className="absolute left-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 sm:left-5"
           >
             <ChevronLeft className="h-6 w-6" />
@@ -90,7 +92,7 @@ export function ImageLightbox({
               e.stopPropagation()
               onChange((index! + 1) % count)
             }}
-            aria-label="Next image"
+            aria-label={t('Next image')}
             className="absolute right-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 sm:right-5"
           >
             <ChevronRight className="h-6 w-6" />
@@ -104,7 +106,7 @@ export function ImageLightbox({
       {loadedUrl !== image.url && (
         <Loader2
           className="absolute h-8 w-8 animate-spin text-white/70"
-          aria-label="Loading image"
+          aria-label={t('Loading image')}
         />
       )}
 
@@ -112,7 +114,7 @@ export function ImageLightbox({
       <img
         key={image.url}
         src={image.url}
-        alt={image.alt ?? 'Image preview'}
+        alt={image.alt ?? t('Image preview')}
         onLoad={() => setLoadedUrl(image.url)}
         onClick={(e) => e.stopPropagation()}
         className="max-h-[80vh] max-w-full rounded-lg object-contain shadow-2xl sm:max-h-[88vh]"

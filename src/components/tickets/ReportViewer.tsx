@@ -6,6 +6,7 @@ import { Download, ExternalLink, FileText, Loader2, Minus, Plus, X } from 'lucid
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import { UploadStamp } from '@/components/tickets/UploadStamp'
 import { cn } from '@/lib/utils'
+import { useT } from '@/i18n/client'
 
 type Props = {
   /** The ticket number — the report is fetched from /api/tickets/:number/report. */
@@ -27,13 +28,9 @@ const formatSize = (bytes: number) =>
  * popup right on the page, full-screen on phones — and "Download". The pages are drawn by the page
  * itself (pdf.js), because phone browsers often cannot show a PDF inside a popup.
  */
-export function ReportViewer({
-  number,
-  name,
-  bytes,
-  uploadedAt,
-  title = 'Detection report',
-}: Props) {
+export function ReportViewer({ number, name, bytes, uploadedAt, title }: Props) {
+  const t = useT()
+  const shownTitle = title ?? t('Detection report')
   const [open, setOpen] = useState(false)
   const reportUrl = `/api/tickets/${number}/report`
 
@@ -44,11 +41,11 @@ export function ReportViewer({
           <FileText className="h-6 w-6" strokeWidth={2} aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-lg font-bold text-foreground">{title}</p>
+          <p className="text-lg font-bold text-foreground">{shownTitle}</p>
           <p className="text-base text-muted [overflow-wrap:anywhere]">
             PDF{bytes > 0 && ` · ${formatSize(bytes)}`}
           </p>
-          {uploadedAt && <UploadStamp at={uploadedAt} label="Added" className="mt-2" />}
+          {uploadedAt && <UploadStamp at={uploadedAt} label={t('Added')} className="mt-2" />}
         </div>
       </div>
 
@@ -59,7 +56,7 @@ export function ReportViewer({
           className="flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-accent px-4 text-lg font-bold text-on-accent transition-opacity hover:opacity-90"
         >
           <FileText className="h-5 w-5" strokeWidth={2.25} />
-          View report
+          {t('View report')}
         </button>
         <a
           href={`${reportUrl}?download=1`}
@@ -67,7 +64,7 @@ export function ReportViewer({
           className="flex min-h-12 items-center justify-center gap-2 rounded-2xl border-2 border-border-strong px-4 text-lg font-bold text-foreground transition-colors hover:bg-surface-hover"
         >
           <Download className="h-5 w-5" strokeWidth={2.25} />
-          Download
+          {t('Download')}
         </a>
       </div>
 
@@ -76,7 +73,7 @@ export function ReportViewer({
           reportUrl={reportUrl}
           downloadUrl={`${reportUrl}?download=1`}
           name={name}
-          title={title}
+          title={shownTitle}
           onClose={() => setOpen(false)}
         />
       )}
@@ -99,6 +96,7 @@ function ReportPopup({
   title: string
   onClose: () => void
 }) {
+  const t = useT()
   const scrollRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   const canvases = useRef<(HTMLCanvasElement | null)[]>([])
@@ -248,24 +246,24 @@ function ReportPopup({
             <h2 className="truncate text-lg font-bold text-foreground">{title}</h2>
             {doc && (
               <p className="text-sm text-muted">
-                Page {currentPage} of {doc.numPages}
+                {t('Page {page} of {total}', { page: currentPage, total: doc.numPages })}
               </p>
             )}
           </div>
           <a
             href={downloadUrl}
             download={name}
-            aria-label="Download the report"
+            aria-label={t('Download the report')}
             className="inline-flex h-11 min-w-11 items-center justify-center gap-2 rounded-xl border-2 border-border-strong px-3 text-base font-bold text-foreground hover:bg-surface-hover"
           >
             <Download className="h-5 w-5" />
-            <span className="hidden sm:inline">Download</span>
+            <span className="hidden sm:inline">{t('Download')}</span>
           </a>
           <button
             ref={closeRef}
             type="button"
             onClick={onClose}
-            aria-label="Close the report"
+            aria-label={t('Close the report')}
             className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-surface-hover text-foreground"
           >
             <X className="h-6 w-6" />
@@ -279,7 +277,7 @@ function ReportPopup({
           {error ? (
             <div className="mx-auto flex max-w-sm flex-col items-center gap-4 py-16 text-center">
               <p className="text-lg font-semibold text-foreground">
-                The report could not be shown here.
+                {t('The report could not be shown here.')}
               </p>
               <a
                 href={reportUrl}
@@ -288,7 +286,7 @@ function ReportPopup({
                 className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-accent px-5 text-lg font-bold text-on-accent"
               >
                 <ExternalLink className="h-5 w-5" />
-                Open in a new tab
+                {t('Open in a new tab')}
               </a>
             </div>
           ) : (
@@ -296,7 +294,7 @@ function ReportPopup({
               {(!doc || rendered === 0) && (
                 <div className="flex items-center justify-center gap-3 py-16 text-lg text-muted">
                   <Loader2 className="h-6 w-6 animate-spin" aria-hidden />
-                  Loading the report…
+                  {t('Loading the report…')}
                 </div>
               )}
               <div
@@ -337,7 +335,7 @@ function ReportPopup({
               type="button"
               onClick={() => setZoomIndex((i) => Math.max(0, i - 1))}
               disabled={zoomIndex === 0}
-              aria-label="Zoom out"
+              aria-label={t('Zoom out')}
               className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full disabled:opacity-40"
             >
               <Minus className="h-5 w-5" />
@@ -349,7 +347,7 @@ function ReportPopup({
               type="button"
               onClick={() => setZoomIndex((i) => Math.min(ZOOM_STEPS.length - 1, i + 1))}
               disabled={zoomIndex === ZOOM_STEPS.length - 1}
-              aria-label="Zoom in"
+              aria-label={t('Zoom in')}
               className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full disabled:opacity-40"
             >
               <Plus className="h-5 w-5" />

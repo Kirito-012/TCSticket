@@ -15,6 +15,7 @@ import { getSectorOptions } from '@/server/services/sector.service'
 import { listAssignableUsers } from '@/server/services/user.service'
 import { parseInspectorFilters } from '@/lib/inspector-filters'
 import { toTicketListItem } from '@/lib/ticket-view'
+import { getT } from '@/i18n/server'
 
 const CARD_PAGE_SIZE = 12
 const LIST_PAGE_SIZE = 25
@@ -30,6 +31,7 @@ export default async function TicketsPage({
   const get = (key: string) => (Array.isArray(sp[key]) ? sp[key][0] : sp[key])
 
   const { ability, scope, forcedAssigneeId } = await requireTicketScope()
+  const t = await getT()
 
   // Surveyors: a To do / Done switch and big cards.
   if (forcedAssigneeId) {
@@ -38,7 +40,7 @@ export default async function TicketsPage({
     const { todo, done } = await getInspectorTasks(forcedAssigneeId, filters)
     return (
       <>
-        <Topbar title="My tickets" description="Tap a ticket to open it" />
+        <Topbar title={t('My tickets')} description={t('Tap a ticket to open it')} />
         <main className="flex-1 px-4 py-6 animate-fade-in sm:px-8">
           <InspectorTaskList todo={todo} done={done} show={show} filters={filters} />
         </main>
@@ -109,9 +111,9 @@ export default async function TicketsPage({
   return (
     <>
       <Topbar
-        title="Tickets"
-        description="Everything that needs doing"
-        primaryAction={{ label: 'New ticket', href: '/tickets/new' }}
+        title={t('Tickets')}
+        description={t('Everything that needs doing')}
+        primaryAction={{ label: t('New ticket'), href: '/tickets/new' }}
       />
       <main className="flex-1 px-4 py-6 animate-fade-in sm:px-8">
         <AdminTaskList

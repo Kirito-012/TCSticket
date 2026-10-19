@@ -4,7 +4,9 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, ClipboardList, Users, LogOut, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher'
 import { logout } from '@/server/actions/auth.actions'
+import { useT } from '@/i18n/client'
 
 const ICONS: Record<NavIcon, LucideIcon> = { home: Home, tasks: ClipboardList, people: Users }
 
@@ -18,13 +20,14 @@ export type NavLink = { label: string; href: string; icon: NavIcon; badge?: numb
  */
 export function SimpleNav({ name, links }: { name: string; links: NavLink[] }) {
   const pathname = usePathname()
+  const t = useT()
   const LINKS = links
 
   return (
     <>
       {/* Phones: bottom bar */}
       <nav
-        aria-label="Main"
+        aria-label={t('Main menu')}
         style={{ gridTemplateColumns: `repeat(${LINKS.length + 1}, minmax(0, 1fr))` }}
         className="fixed inset-x-0 bottom-0 z-40 grid border-t-2 border-border-strong bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
       >
@@ -56,7 +59,7 @@ export function SimpleNav({ name, links }: { name: string; links: NavLink[] }) {
             className="flex min-h-[68px] cursor-pointer flex-col items-center justify-center gap-1 text-base font-semibold text-muted-strong"
           >
             <LogOut className="h-6 w-6" strokeWidth={2.25} />
-            Log out
+            {t('Log out')}
           </button>
         </form>
       </nav>
@@ -65,9 +68,9 @@ export function SimpleNav({ name, links }: { name: string; links: NavLink[] }) {
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r-2 border-border bg-surface lg:flex">
         <div className="px-6 py-6">
           <p className="text-xl font-bold text-foreground">TheCraftSync</p>
-          <p className="mt-1 text-base text-muted">Hello, {name}</p>
+          <p className="mt-1 text-base text-muted">{t('Hello, {name}', { name })}</p>
         </div>
-        <nav aria-label="Main" className="flex-1 space-y-2 px-4">
+        <nav aria-label={t('Main menu')} className="flex-1 space-y-2 px-4">
           {LINKS.map((link) => {
             const active = pathname?.startsWith(link.href)
             const Icon = ICONS[link.icon]
@@ -93,13 +96,16 @@ export function SimpleNav({ name, links }: { name: string; links: NavLink[] }) {
             )
           })}
         </nav>
+        <div className="px-4 pb-2">
+          <LanguageSwitcher className="w-full [&>select]:w-full" />
+        </div>
         <form action={logout} className="p-4">
           <button
             type="submit"
             className="flex w-full cursor-pointer items-center gap-3 rounded-xl border-2 border-border-strong px-4 py-3.5 text-lg font-semibold text-muted-strong hover:bg-surface-hover"
           >
             <LogOut className="h-6 w-6" strokeWidth={2.25} />
-            Log out
+            {t('Log out')}
           </button>
         </form>
       </aside>

@@ -1,4 +1,8 @@
+'use client'
+
 import { CalendarClock } from 'lucide-react'
+import { useLocale } from '@/i18n/client'
+import { localeTag } from '@/i18n/config'
 import { formatUploadParts } from '@/lib/format-upload-time'
 import { cn } from '@/lib/utils'
 
@@ -18,7 +22,8 @@ export function UploadStamp({
   /** Date on one line, time on the next — for narrow places. */
   stacked?: boolean
 }) {
-  const parts = formatUploadParts(at)
+  const locale = useLocale()
+  const parts = formatUploadParts(at, localeTag(locale))
   if (!parts) return null
   if (stacked) {
     return (

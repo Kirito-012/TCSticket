@@ -14,6 +14,7 @@ import { evaluateLocation, verdictMessage, type LocationFix } from '@/lib/geo'
 import { resolveRules } from '@/server/resolve-rules'
 import { garbageVerdict } from '@/lib/garbage-check'
 import { checkPhotoForGarbage, photoRules } from '@/server/photo-check'
+import { getT } from '@/i18n/server'
 import type {
   ResolutionPhotoGarbageCheck,
   ResolutionPhotoLocation,
@@ -163,15 +164,16 @@ export async function uploadResolutionPhotoAction(
   number: number,
   formData: FormData,
 ): Promise<ResolutionPhotoState> {
+  const t = await getT()
   const { user, error } = await checkSurveyorAccess(number)
-  if (error) return { error }
+  if (error) return { error: t(error) }
 
   const file = formData.get('file')
-  if (!(file instanceof File) || file.size === 0) return { error: 'No file provided' }
+  if (!(file instanceof File) || file.size === 0) return { error: t('No file provided') }
   if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
-    return { error: 'Only PNG, JPEG, WEBP, and GIF images are allowed' }
+    return { error: t('Only PNG, JPEG, WEBP, and GIF images are allowed') }
   }
-  if (file.size > MAX_IMAGE_BYTES) return { error: 'Image must be under 8MB' }
+  if (file.size > MAX_IMAGE_BYTES) return { error: t('Image must be under 8MB') }
 
   // Where was the inspector? When the ticket has a spot, the photo only counts if they were at it
   // — decided here, on the server, before anything is uploaded or saved.
@@ -184,7 +186,7 @@ export async function uploadResolutionPhotoAction(
     const verdict = evaluateLocation(target, fix, rules)
     if (!verdict.ok) {
       return {
-        error: verdictMessage(verdict, rules),
+        error: verdictMessage(verdict, rules, t),
         tooFar: verdict.reason === 'too-far',
         distanceMeters: verdict.distanceMeters,
       }
@@ -211,6 +213,7 @@ export async function uploadResolutionPhotoAction(
         photoCheckRules.maxGarbagePercent,
         checked.detections,
         photoCheckRules.maxItems,
+        t,
       )
       if (!verdict.ok) {
         return {
@@ -226,7 +229,7 @@ export async function uploadResolutionPhotoAction(
         detections: checked.detections,
       }
     } else if (photoCheckRules.strict) {
-      return { error: 'We could not check the photo right now. Please try again in a moment.' }
+      return { error: t('We could not check the photo right now. Please try again in a moment.') }
     } else {
       // The check service is down: accept the photo, but record that it was not checked.
       garbageCheck = { status: 'unavailable', coveragePercent: null, detections: null }
@@ -239,7 +242,7 @@ export async function uploadResolutionPhotoAction(
     await ticketService.addResolutionPhoto(number, image, user.id, location, garbageCheck)
   } catch (err) {
     logger.error({ err, number }, 'Could not upload or save a resolution photo')
-    return { error: 'Upload failed. Please try again.' }
+    return { error: t('Upload failed. Please try again.') }
   }
 
   revalidatePath(`/tickets/${number}`)
@@ -261,8 +264,9 @@ export async function removeResolutionPhotoAction(
   number: number,
   publicId: string,
 ): Promise<ResolutionPhotoState> {
+  const t = await getT()
   const { user, error } = await checkSurveyorAccess(number)
-  if (error) return { error }
+  if (error) return { error: t(error) }
 
   const removed = await ticketService.removeResolutionPhoto(number, publicId, user.id)
   if (removed) await deleteCommentImage(removed.publicId).catch(() => {})
@@ -277,18 +281,28 @@ export async function resolveTicketAction(
   number: number,
   note?: string,
 ): Promise<ResolutionPhotoState> {
+  const t = await getT()
   const { user, error } = await checkSurveyorAccess(number)
-  if (error) return { error }
+  if (error) return { error: t(error) }
 
   const cleanNote = (note ?? '').trim()
   if (cleanNote.length > MAX_NOTE_LENGTH) {
-    return { error: `Note must be at most ${MAX_NOTE_LENGTH} characters.` }
+    return { error: t('Note must be at most {max} characters.', { max: MAX_NOTE_LENGTH }) }
   }
 
   try {
     await ticketService.resolveTicketWithProof(number, user.id, cleanNote)
   } catch (err) {
-    return { error: err instanceof Error ? err.message : 'Could not resolve the ticket.' }
+    // The service's own sentences are translated when they are known ones; anything else shows as is.
+    const message = err instanceof Error ? err.message : 'Could not resolve the ticket.'
+    const radius = /^Take a photo at the place \(within (\d+) m\)/.exec(message)?.[1]
+    return {
+      error: radius
+        ? t('Take a photo at the place (within {radius} m) before marking this ticket done.', {
+            radius,
+          })
+        : t(message),
+    }
   }
 
   revalidatePath(`/tickets/${number}`)

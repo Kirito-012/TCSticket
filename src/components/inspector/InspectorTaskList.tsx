@@ -10,9 +10,10 @@ import {
 } from '@/lib/inspector-filters'
 import { cn } from '@/lib/utils'
 import type { TicketListItemView } from '@/lib/ticket-view'
+import { getT } from '@/i18n/server'
 
 /** Surveyor task list: a To do / Done switch and big cards — no table, search or filters. */
-export function InspectorTaskList({
+export async function InspectorTaskList({
   todo,
   done,
   show,
@@ -23,17 +24,22 @@ export function InspectorTaskList({
   show: 'todo' | 'done'
   filters: InspectorFilters
 }) {
+  const t = await getT()
   const tasks = show === 'done' ? done : todo
   const filtered = activeFilterCount(filters) > 0
 
   const tabs = [
-    { key: 'todo', label: 'To do', count: todo.length, href: inspectorHref('todo', filters) },
-    { key: 'done', label: 'Done', count: done.length, href: inspectorHref('done', filters) },
+    { key: 'todo', label: t('To do'), count: todo.length, href: inspectorHref('todo', filters) },
+    { key: 'done', label: t('Done'), count: done.length, href: inspectorHref('done', filters) },
   ] as const
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-5 md:max-w-5xl">
-      <div className="grid max-w-md grid-cols-2 gap-3" role="tablist" aria-label="Show tickets">
+      <div
+        className="grid max-w-md grid-cols-2 gap-3"
+        role="tablist"
+        aria-label={t('Show tickets')}
+      >
         {tabs.map((tab) => (
           <Link
             key={tab.key}
@@ -70,21 +76,25 @@ export function InspectorTaskList({
             <Inbox className="mx-auto h-12 w-12 text-muted" strokeWidth={2} />
           )}
           <p className="mt-3 text-2xl font-bold text-foreground">
-            {filtered ? 'No tickets match' : show === 'todo' ? 'All done!' : 'Nothing here yet'}
+            {filtered
+              ? t('No tickets match')
+              : show === 'todo'
+                ? t('All done!')
+                : t('Nothing here yet')}
           </p>
           <p className="mt-1 text-lg text-muted">
             {filtered
-              ? 'Try a different day or clear the filters.'
+              ? t('Try a different day or clear the filters.')
               : show === 'todo'
-                ? 'You have no tickets waiting right now.'
-                : 'Tickets you finish will show up here.'}
+                ? t('You have no tickets waiting right now.')
+                : t('Tickets you finish will show up here.')}
           </p>
           {filtered && (
             <Link
               href={inspectorHref(show, DEFAULT_INSPECTOR_FILTERS)}
               className="mt-4 inline-flex min-h-12 items-center rounded-2xl border-2 border-border-strong px-5 text-lg font-bold text-foreground"
             >
-              Clear all filters
+              {t('Clear all filters')}
             </Link>
           )}
         </div>

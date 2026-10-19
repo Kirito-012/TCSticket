@@ -6,9 +6,11 @@ import { requireTicketScope } from '@/server/auth/session'
 import { countTicketsByStatus } from '@/server/services/ticket.service'
 import { listPendingUsers } from '@/server/services/user.service'
 import { personShortName } from '@/lib/plain-words'
+import { getT } from '@/i18n/server'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, ability, scope } = await requireTicketScope()
+  const t = await getT()
   const canApproveAccounts = ability.can('update', 'account')
   // Surveyors (only ever see their own tickets) get the simple, big-text, light version of the
   // app. Admins, Zone Inspectors and Nodal Managers get the same simple navigation and screens in
@@ -26,16 +28,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const links: NavLink[] = isInspector
     ? [
-        { label: 'Home', href: '/dashboard', icon: 'home' },
-        { label: 'My tickets', href: '/tickets', icon: 'tasks', badge: todoCount },
+        { label: t('Home'), href: '/dashboard', icon: 'home' },
+        { label: t('My tickets'), href: '/tickets', icon: 'tasks', badge: todoCount },
       ]
     : [
-        { label: 'Dashboard', href: '/dashboard', icon: 'home' },
-        { label: 'Tickets', href: '/tickets', icon: 'tasks', badge: todoCount },
+        { label: t('Dashboard'), href: '/dashboard', icon: 'home' },
+        { label: t('Tickets'), href: '/tickets', icon: 'tasks', badge: todoCount },
         ...(ability.can('read', 'account')
           ? [
               {
-                label: 'People',
+                label: t('People'),
                 href: '/accounts',
                 icon: 'people' as const,
                 badge: pendingUsers.length,

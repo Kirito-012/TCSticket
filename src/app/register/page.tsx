@@ -2,9 +2,12 @@ import Link from 'next/link'
 import { Sparkles, ShieldCheck, Clock, Users } from 'lucide-react'
 import { RegisterForm } from '@/components/auth/RegisterForm'
 import { getSectorChoices } from '@/server/services/sector.service'
+import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher'
+import { getT } from '@/i18n/server'
 
 export default async function RegisterPage() {
   const sectors = await getSectorChoices()
+  const t = await getT()
   return (
     <div className="flex min-h-screen">
       {/* Left — brand panel */}
@@ -46,7 +49,8 @@ export default async function RegisterPage() {
       </div>
 
       {/* Right — form */}
-      <div className="flex flex-1 flex-col items-center justify-center bg-background px-6 py-12">
+      <div className="relative flex flex-1 flex-col items-center justify-center bg-background px-6 py-12">
+        <LanguageSwitcher className="absolute right-4 top-4" />
         <div className="w-full max-w-sm animate-fade-in">
           <div className="mb-8 flex items-center gap-2.5 lg:hidden">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
@@ -58,10 +62,10 @@ export default async function RegisterPage() {
           </div>
 
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Request an account
+            {t('Request an account')}
           </h1>
           <p className="mt-1.5 text-sm text-muted">
-            Fill in your details — an admin will review and approve your access.
+            {t('Fill in your details — an admin will review and approve your access.')}
           </p>
 
           <div className="mt-7">
@@ -69,9 +73,9 @@ export default async function RegisterPage() {
           </div>
 
           <p className="mt-6 text-center text-sm text-muted">
-            Already have an account?{' '}
+            {t('Already have an account?')}{' '}
             <Link href="/login" className="font-medium text-accent-strong hover:text-accent">
-              Sign in
+              {t('Sign in')}
             </Link>
           </p>
         </div>

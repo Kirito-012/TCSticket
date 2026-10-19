@@ -5,6 +5,7 @@ import { ScopedDashboard } from '@/components/zones/ScopedDashboard'
 import { requireTicketScope } from '@/server/auth/session'
 import { getInspectorTasks } from '@/server/services/inspector.service'
 import { personShortName } from '@/lib/plain-words'
+import { getT } from '@/i18n/server'
 
 /**
  * The home screen follows the role:
@@ -15,13 +16,14 @@ import { personShortName } from '@/lib/plain-words'
  */
 export default async function DashboardPage() {
   const { user, scope, placement, ability, forcedAssigneeId } = await requireTicketScope()
+  const t = await getT()
 
   if (forcedAssigneeId) {
     const { todo, done } = await getInspectorTasks(forcedAssigneeId)
     const name = personShortName(user.name || user.email || '')
     return (
       <>
-        <Topbar title="Home" description={name ? `Hello, ${name}` : undefined} />
+        <Topbar title={t('Home')} description={name ? t('Hello, {name}', { name }) : undefined} />
         <main className="flex-1 px-4 py-6 animate-fade-in sm:px-8">
           <InspectorHome todo={todo} done={done} />
         </main>

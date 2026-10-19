@@ -3,9 +3,13 @@ import { CheckCircle2, ChevronRight, ClipboardList } from 'lucide-react'
 import { cn, timeAgo } from '@/lib/utils'
 import { isDone, isUrgent, plainStatusLabel, plainTitle } from '@/lib/plain-words'
 import type { TicketListItemView } from '@/lib/ticket-view'
+import { getLocale, getT } from '@/i18n/server'
+import { localeTag } from '@/i18n/config'
 
 /** One task as a big, tappable card: what it is, whether it's to do or done, and how urgent. */
-export function TaskCard({ task }: { task: TicketListItemView }) {
+export async function TaskCard({ task }: { task: TicketListItemView }) {
+  const t = await getT()
+  const locale = localeTag(await getLocale())
   const done = isDone(task.status)
   const urgent = !done && isUrgent(task.priority)
 
@@ -38,7 +42,7 @@ export function TaskCard({ task }: { task: TicketListItemView }) {
 
       <div className="min-w-0 flex-1">
         <p className="text-lg font-bold leading-snug text-foreground [overflow-wrap:anywhere]">
-          {plainTitle(task.subject)}
+          {plainTitle(task.subject, t)}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <span
@@ -47,14 +51,16 @@ export function TaskCard({ task }: { task: TicketListItemView }) {
               done ? 'bg-accent-soft text-accent-strong' : 'bg-slate-200 text-slate-700',
             )}
           >
-            {plainStatusLabel(task.status)}
+            {plainStatusLabel(task.status, t)}
           </span>
           {urgent && (
             <span className="rounded-full bg-danger px-3 py-1 text-base font-semibold text-white">
-              Urgent
+              {t('Urgent')}
             </span>
           )}
-          <span className="text-base text-muted">{timeAgo(task.updatedAt)}</span>
+          <span className="text-base text-muted">
+            {timeAgo(task.updatedAt, { locale, justNow: t('just now') })}
+          </span>
         </div>
       </div>
 

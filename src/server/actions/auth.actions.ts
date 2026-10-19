@@ -7,10 +7,12 @@ import { dbConnect } from '@/server/db/connect'
 import { UserModel } from '@/server/db/models/user.model'
 import { registerSchema } from '@/lib/schemas/register'
 import * as userService from '@/server/services/user.service'
+import { getT } from '@/i18n/server'
 
 export type LoginState = { error?: string } | undefined
 
 export async function login(_prevState: LoginState, formData: FormData): Promise<LoginState> {
+  const t = await getT()
   const email = String(formData.get('email') ?? '')
     .trim()
     .toLowerCase()
@@ -25,12 +27,13 @@ export async function login(_prevState: LoginState, formData: FormData): Promise
     if (user && (await bcrypt.compare(password, user.passwordHash))) {
       if (user.status === 'pending') {
         return {
-          error:
+          error: t(
             "Your account is awaiting admin approval — you'll be able to sign in once it's approved.",
+          ),
         }
       }
       if (user.status === 'rejected') {
-        return { error: 'Your account request was not approved. Contact an admin for help.' }
+        return { error: t('Your account request was not approved. Contact an admin for help.') }
       }
     }
   }
@@ -45,9 +48,9 @@ export async function login(_prevState: LoginState, formData: FormData): Promise
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
-          return { error: 'Invalid email or password.' }
+          return { error: t('Invalid email or password.') }
         default:
-          return { error: 'Something went wrong. Please try again.' }
+          return { error: t('Something went wrong. Please try again.') }
       }
     }
     // NEXT_REDIRECT is thrown on success — let it propagate.
