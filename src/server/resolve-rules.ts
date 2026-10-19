@@ -9,12 +9,12 @@ function readNumber(raw: string | undefined, fallback: number, min: number, max:
 
 /**
  * How close a Surveyor must be to the ticket's spot for a photo to count, and how rough a
- * phone location reading may be. Defaults: 10 m and 20 m. Change them without touching code with
+ * phone location reading may be. Defaults: 30 m and 20 m. Change them without touching code with
  * the RESOLVE_RADIUS_METERS and RESOLVE_MAX_ACCURACY_METERS settings.
  */
 export function resolveRules(): LocationRules {
   return {
-    radiusMeters: readNumber(process.env.RESOLVE_RADIUS_METERS, 10, 1, 1000),
+    radiusMeters: readNumber(process.env.RESOLVE_RADIUS_METERS, 30, 1, 1000),
     maxAccuracyMeters: readNumber(process.env.RESOLVE_MAX_ACCURACY_METERS, 20, 1, 500),
   }
 }
