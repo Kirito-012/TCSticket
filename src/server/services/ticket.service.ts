@@ -55,6 +55,11 @@ export type ListTicketsParams = {
   resolved?: boolean
   /** Only Critical or High priority tickets. */
   urgent?: boolean
+  /**
+   * Only finished tickets that were checked ('verified') or not yet checked ('unverified') after
+   * the cleanup.
+   */
+  verification?: 'verified' | 'unverified'
   /** How long ago the ticket was created: under a day, 1-3 days, 3-7 days, over a week. */
   age?: 'today' | 'd1to3' | 'd3to7' | 'over7'
   /** Created on this local calendar day (YYYY-MM-DD). */
@@ -108,6 +113,18 @@ export async function listTickets(params: ListTicketsParams) {
     }
   }
   if (params.sectorKey) filter.sectorKey = params.sectorKey
+  if (params.verification) {
+    const finished = (await TicketStatusModel.find({ isResolved: true }).select('_id').lean()).map(
+      (s) => s._id,
+    )
+    filter.$and = [
+      ...(filter.$and ?? []),
+      { statusId: { $in: finished } },
+      params.verification === 'verified'
+        ? { 'verification.status': 'verified' }
+        : { 'verification.status': { $ne: 'verified' } },
+    ]
+  }
   if (params.urgent) {
     const urgentIds = (
       await TicketPriorityModel.find({ slug: { $in: ['critical', 'high'] } })
@@ -455,6 +472,8 @@ export async function createTicket(input: {
   tagIds?: string[]
   /** Defaults to 'web' (schema default) — pass 'api' for integration-created tickets. */
   source?: 'web' | 'email' | 'api' | 'public'
+  /** Photos attached when the ticket is made (already uploaded). */
+  photos?: { url: string; publicId: string; width: number; height: number }[]
 }) {
   await dbConnect()
 
@@ -476,6 +495,8 @@ export async function createTicket(input: {
     statusId: status._id,
     tagIds: input.tagIds ?? [],
     source: input.source ?? 'web',
+    sourcePhotos: (input.photos ?? []).map((p) => ({ ...p, uploadedAt: new Date() })),
+    counts: { comments: 0, attachments: input.photos?.length ?? 0 },
     lastActivityAt: new Date(),
   })
 
@@ -533,6 +554,10 @@ export async function updateTicketFields(
   ticket.lastActivityAt = new Date()
   const status = ticket.statusId ? await TicketStatusModel.findById(ticket.statusId).lean() : null
   if (status?.isResolved && !ticket.resolvedAt) ticket.resolvedAt = new Date()
+  // A change of status (finished, or reopened) always starts the check over: not verified.
+  if (events.some((e) => e.field === 'statusId')) {
+    ticket.set('verification', { status: 'not_verified' })
+  }
 
   await ticket.save()
   await TicketEventModel.insertMany(events)
@@ -933,6 +958,43 @@ export async function getDashboardKpis(scope?: TicketScope) {
     doneTotal,
     allTotal,
   }
+}
+
+/**
+ * Sets whether a finished ticket's cleanup has been checked. `source` says who decided: 'manual'
+ * (a lead, for now) or 'drone' (the re-flight, once that is connected). Only finished tickets can
+ * be verified. The change is written on the ticket's history.
+ */
+export async function setTicketVerification(
+  number: number,
+  verified: boolean,
+  actorId: string,
+  source: 'manual' | 'drone' = 'manual',
+) {
+  await dbConnect()
+  const ticket = await TicketModel.findOne({ number, deletedAt: null })
+  if (!ticket) throw new Error('Ticket not found')
+  const status = ticket.statusId ? await TicketStatusModel.findById(ticket.statusId).lean() : null
+  if (!status?.isResolved) throw new Error('Only a finished ticket can be verified.')
+
+  const was = (ticket.get('verification.status') as string | undefined) ?? 'not_verified'
+  const to = verified ? 'verified' : 'not_verified'
+  if (was === to) return ticket
+
+  ticket.set(
+    'verification',
+    verified
+      ? { status: 'verified', verifiedAt: new Date(), verifiedBy: actorId, source }
+      : { status: 'not_verified' },
+  )
+  ticket.lastActivityAt = new Date()
+  await ticket.save()
+  await TicketEventModel.create({
+    ticketId: ticket._id,
+    actorId,
+    action: verified ? 'verified' : 'unverified',
+  })
+  return ticket
 }
 
 /** Stores (or replaces) the detection report PDF on a ticket. */

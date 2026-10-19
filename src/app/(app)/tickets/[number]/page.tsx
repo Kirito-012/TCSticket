@@ -24,6 +24,8 @@ import { TicketTypeModel } from '@/server/db/models/ticket-type.model'
 import * as userService from '@/server/services/user.service'
 import { scopeAllows } from '@/lib/ticket-scope'
 import { localizeIssueHtml } from '@/lib/localize-issue'
+import { VerificationBadge } from '@/components/tickets/VerificationBadge'
+import { VerificationControl } from '@/components/tickets/VerificationControl'
 import { getT } from '@/i18n/server'
 import { toTicketDetailView, toCommentView, toEventView } from '@/lib/ticket-view'
 import { cn } from '@/lib/utils'
@@ -113,6 +115,7 @@ export default async function TicketDetailPage({
                       {t('Urgent')}
                     </span>
                   )}
+                  {done && <VerificationBadge status={ticket.verification} />}
                 </div>
                 <h1 className="mt-3 text-2xl font-bold leading-snug text-foreground [overflow-wrap:anywhere]">
                   {plainTitle(ticket.subject, t)}
@@ -133,7 +136,9 @@ export default async function TicketDetailPage({
                 {ticket.sourcePhotos.length > 0 && (
                   <div className="mt-6 space-y-3">
                     <h2 className="text-xl font-bold text-foreground">
-                      {t('Photo from the drone')}
+                      {ticket.source === 'api'
+                        ? t('Photo from the drone')
+                        : t('Photos of the place')}
                     </h2>
                     <DronePhoto photos={ticket.sourcePhotos} />
                   </div>
@@ -231,10 +236,19 @@ export default async function TicketDetailPage({
                       Urgent
                     </span>
                   )}
+                  {done && <VerificationBadge status={ticket.verification} />}
                 </div>
                 <h1 className="mt-3 text-2xl font-bold leading-snug text-foreground [overflow-wrap:anywhere]">
                   {plainTitle(ticket.subject)}
                 </h1>
+                {done && ticket.verification && canAssign && (
+                  <div className="mt-4">
+                    <VerificationControl
+                      ticketNumber={ticket.number}
+                      status={ticket.verification}
+                    />
+                  </div>
+                )}
                 <div
                   className="mt-3 text-lg leading-relaxed text-muted-strong [&_p]:my-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
                   dangerouslySetInnerHTML={{
@@ -261,7 +275,9 @@ export default async function TicketDetailPage({
                 )}
                 {ticket.sourcePhotos.length > 0 && (
                   <div className="mt-6 space-y-3">
-                    <h2 className="text-xl font-bold text-foreground">Drone photo</h2>
+                    <h2 className="text-xl font-bold text-foreground">
+                      {ticket.source === 'api' ? 'Drone photo' : 'Photos'}
+                    </h2>
                     <DronePhoto photos={ticket.sourcePhotos} showTime />
                   </div>
                 )}

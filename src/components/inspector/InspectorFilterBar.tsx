@@ -176,6 +176,29 @@ export function InspectorFilterBar({
             </label>
           </section>
 
+          {show === 'done' && (
+            <section>
+              <h3 className="mb-2 text-base font-bold text-foreground">{t('Verification')}</h3>
+              <div className="flex flex-wrap gap-2">
+                {(
+                  [
+                    { key: 'any', label: 'Any' },
+                    { key: 'yes', label: 'Verified' },
+                    { key: 'no', label: 'Not verified' },
+                  ] as const
+                ).map((c) => (
+                  <Choice
+                    key={c.key}
+                    active={draft.verified === c.key}
+                    onClick={() => setDraft((d) => ({ ...d, verified: c.key }))}
+                  >
+                    {t(c.label)}
+                  </Choice>
+                ))}
+              </div>
+            </section>
+          )}
+
           <section>
             <h3 className="mb-2 text-base font-bold text-foreground">{t('Only')}</h3>
             <Choice

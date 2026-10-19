@@ -7,6 +7,8 @@
 export type InspectorSort = 'urgent' | 'newest' | 'oldest'
 export type InspectorWhen = 'any' | 'today' | 'week' | 'month'
 export type InspectorShow = 'todo' | 'done'
+/** On the Done list: every ticket, only the checked ones ('yes'), or only the not-yet-checked ('no'). */
+export type InspectorVerified = 'any' | 'yes' | 'no'
 
 /** What an inspector can narrow their list by. The defaults show everything, urgent first. */
 export type InspectorFilters = {
@@ -16,6 +18,8 @@ export type InspectorFilters = {
   /** One exact day, YYYY-MM-DD (wins over `when`). */
   on: string
   urgentOnly: boolean
+  /** Finished tickets only: whether the cleanup has been checked. */
+  verified: InspectorVerified
 }
 
 export const DEFAULT_INSPECTOR_FILTERS: InspectorFilters = {
@@ -23,6 +27,7 @@ export const DEFAULT_INSPECTOR_FILTERS: InspectorFilters = {
   when: 'any',
   on: '',
   urgentOnly: false,
+  verified: 'any',
 }
 
 const SORTS: InspectorSort[] = ['urgent', 'newest', 'oldest']
@@ -36,6 +41,7 @@ export function parseInspectorFilters(get: (key: string) => string | undefined):
     when: WHENS.find((w) => w === get('when')) ?? 'any',
     on: /^\d{4}-\d{2}-\d{2}$/.test(on) ? on : '',
     urgentOnly: get('urgent') === '1',
+    verified: get('verified') === 'yes' ? 'yes' : get('verified') === 'no' ? 'no' : 'any',
   }
 }
 
@@ -47,6 +53,7 @@ export function inspectorHref(show: InspectorShow, filters: InspectorFilters) {
   if (filters.on) params.set('on', filters.on)
   else if (filters.when !== 'any') params.set('when', filters.when)
   if (filters.urgentOnly) params.set('urgent', '1')
+  if (filters.verified !== 'any') params.set('verified', filters.verified)
   const qs = params.toString()
   return qs ? `/tickets?${qs}` : '/tickets'
 }
@@ -56,6 +63,7 @@ export function activeFilterCount(filters: InspectorFilters) {
   return (
     Number(filters.sort !== 'urgent') +
     Number(filters.when !== 'any' || filters.on !== '') +
-    Number(filters.urgentOnly)
+    Number(filters.urgentOnly) +
+    Number(filters.verified !== 'any')
   )
 }

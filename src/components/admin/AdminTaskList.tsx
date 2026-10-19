@@ -69,6 +69,8 @@ export type ListState = {
   page: number
   sector: string
   urgent: boolean
+  /** Finished tickets only: checked after the cleanup ('verified') or not yet ('unverified'). */
+  verify: '' | 'verified' | 'unverified'
   /** One status, by its short name ("open", "pending" ...). */
   status: string
   sort: 'activity' | 'newest' | 'oldest'
@@ -100,6 +102,7 @@ export function listHref(state: ListState) {
   if (state.q) params.set('q', state.q)
   if (state.sector) params.set('sector', state.sector)
   if (state.urgent) params.set('urgent', '1')
+  if (state.verify) params.set('verify', state.verify)
   if (state.status) params.set('status', state.status)
   if (state.age) params.set('age', state.age)
   if (state.day) params.set('day', state.day)
@@ -149,6 +152,7 @@ export function AdminTaskList({
     q ||
     state.sector ||
     state.urgent ||
+    state.verify ||
     state.status ||
     state.age ||
     state.day ||
@@ -205,6 +209,7 @@ export function AdminTaskList({
         {tab !== 'todo' && <input type="hidden" name="show" value={tab} />}
         {state.sector && <input type="hidden" name="sector" value={state.sector} />}
         {state.urgent && <input type="hidden" name="urgent" value="1" />}
+        {state.verify && <input type="hidden" name="verify" value={state.verify} />}
         {state.status && <input type="hidden" name="status" value={state.status} />}
         {state.age && <input type="hidden" name="age" value={state.age} />}
         {state.day && <input type="hidden" name="day" value={state.day} />}
@@ -240,6 +245,8 @@ export function AdminTaskList({
           current={{
             sector: state.sector,
             urgent: state.urgent,
+            verify: state.verify,
+            showVerify: tab === 'done' || tab === 'all',
             status: state.status,
             sort: state.sort,
             view: state.view,
@@ -255,6 +262,8 @@ export function AdminTaskList({
         statuses={statusChoices}
         status={state.status}
         urgent={state.urgent}
+        verify={state.verify}
+        showVerify={tab === 'done' || tab === 'all'}
         sort={state.sort}
         view={state.view}
         from={state.from}
@@ -263,6 +272,7 @@ export function AdminTaskList({
 
       {(state.sector ||
         state.urgent ||
+        state.verify ||
         state.status ||
         state.sort !== 'activity' ||
         state.age ||
@@ -296,6 +306,16 @@ export function AdminTaskList({
               aria-label="Remove filter: Urgent only"
             >
               Urgent only
+              <X className="h-4 w-4" strokeWidth={2.5} />
+            </Link>
+          )}
+          {state.verify && (
+            <Link
+              href={listHref({ ...state, verify: '', page: 1 })}
+              className={CHIP}
+              aria-label="Remove filter: Verification"
+            >
+              {state.verify === 'verified' ? 'Verified' : 'Not verified'}
               <X className="h-4 w-4" strokeWidth={2.5} />
             </Link>
           )}
@@ -355,6 +375,7 @@ export function AdminTaskList({
                 q: '',
                 sector: '',
                 urgent: false,
+                verify: '',
                 status: '',
                 age: '',
                 day: '',

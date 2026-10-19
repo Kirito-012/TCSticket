@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { CheckCircle2, ChevronRight, ClipboardList } from 'lucide-react'
 import { cn, timeAgo } from '@/lib/utils'
+import { VerificationBadge } from '@/components/tickets/VerificationBadge'
 import { isDone, isUrgent, plainStatusLabel, plainTitle } from '@/lib/plain-words'
 import type { TicketListItemView } from '@/lib/ticket-view'
 import { getLocale, getT } from '@/i18n/server'
@@ -62,6 +63,7 @@ export async function TaskCard({ task }: { task: TicketListItemView }) {
             {timeAgo(task.updatedAt, { locale, justNow: t('just now') })}
           </span>
         </div>
+        {done && <VerificationBadge status={task.verification} className="mt-2" />}
       </div>
 
       <ChevronRight className="h-8 w-8 shrink-0 text-muted" strokeWidth={2.5} aria-hidden />

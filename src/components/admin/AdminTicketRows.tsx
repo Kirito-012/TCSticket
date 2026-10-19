@@ -1,5 +1,6 @@
 'use client'
 
+import { VerificationBadge } from '@/components/tickets/VerificationBadge'
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -185,6 +186,12 @@ export function AdminTicketRows({
                       statuses={statuses}
                       disabled={!canUpdate}
                     />
+                    {t.verification && (
+                      <VerificationBadge
+                        status={t.verification}
+                        className="mt-1.5 !py-0.5 !text-sm"
+                      />
+                    )}
                   </div>
                   <div className="min-w-0">
                     <AssigneeDropdown

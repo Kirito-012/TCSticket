@@ -1,3 +1,4 @@
+import { VerificationBadge } from '@/components/tickets/VerificationBadge'
 import Link from 'next/link'
 import { CheckCircle2, ChevronRight, ClipboardList, Clock } from 'lucide-react'
 import { AssigneeDropdown } from '@/components/tickets/AssigneeDropdown'
@@ -79,6 +80,7 @@ export function AdminTaskCard({
             )}
             <span className="text-base text-muted">{timeAgo(task.updatedAt)}</span>
           </div>
+          {done && <VerificationBadge status={task.verification} className="mt-2" />}
         </div>
         <ChevronRight className="mt-3 h-6 w-6 shrink-0 text-muted" strokeWidth={2.5} aria-hidden />
       </Link>

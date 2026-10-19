@@ -2,7 +2,7 @@
 
 import { useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { AlertTriangle, CalendarDays, LayoutGrid, List } from 'lucide-react'
+import { AlertTriangle, CalendarDays, LayoutGrid, List, ShieldCheck } from 'lucide-react'
 import { Select } from '@/components/ui/Select'
 import { DATE_PRESETS, activeDatePreset } from '@/lib/date-presets'
 import { cn } from '@/lib/utils'
@@ -28,6 +28,8 @@ export function AdminTicketFilters({
   statuses,
   status,
   urgent,
+  verify,
+  showVerify,
   sort,
   view,
   from,
@@ -39,6 +41,10 @@ export function AdminTicketFilters({
   statuses: { value: string; label: string }[]
   status: string
   urgent: boolean
+  /** Finished tickets that were checked after the cleanup, or not yet. */
+  verify: '' | 'verified' | 'unverified'
+  /** Only the Done and All tabs have finished tickets to check. */
+  showVerify: boolean
   sort: string
   view: 'cards' | 'list'
   from: string
@@ -100,6 +106,41 @@ export function AdminTicketFilters({
           <AlertTriangle className="h-5 w-5" />
           Urgent only
         </button>
+
+        {showVerify && (
+          <div
+            role="group"
+            aria-label="Verification"
+            className="inline-flex h-12 overflow-hidden rounded-lg border border-border-strong"
+          >
+            <span className="inline-flex items-center gap-2 border-r border-border-strong px-3 text-base font-semibold text-muted-strong">
+              <ShieldCheck className="h-5 w-5" />
+              Verification
+            </span>
+            {(
+              [
+                { key: '', label: 'All' },
+                { key: 'verified', label: 'Verified' },
+                { key: 'unverified', label: 'Not verified' },
+              ] as const
+            ).map(({ key, label }) => (
+              <button
+                key={label}
+                type="button"
+                aria-pressed={verify === key}
+                onClick={() => push({ verify: key || null })}
+                className={cn(
+                  'cursor-pointer px-4 text-base font-semibold transition-colors',
+                  verify === key
+                    ? 'bg-accent text-on-accent'
+                    : 'text-muted-strong hover:bg-surface-hover',
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="w-52">
           <Select

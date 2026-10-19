@@ -1,5 +1,16 @@
 import { extractDroneSevaLink, extractLocation } from '@/lib/droneseva-link'
 
+export type VerificationStatus = 'verified' | 'not_verified'
+
+/** A finished ticket is "verified" once checked, otherwise "not verified"; unfinished has no status. */
+export function verificationOf(t: {
+  statusId?: { isResolved?: boolean } | null
+  verification?: { status?: string } | null
+}): VerificationStatus | null {
+  if (!t.statusId?.isResolved) return null
+  return t.verification?.status === 'verified' ? 'verified' : 'not_verified'
+}
+
 export type PersonView = { id: string; name: string; initials: string } | null
 
 export type TicketListItemView = {
@@ -19,6 +30,8 @@ export type TicketListItemView = {
   createdAt: string
   /** Small picture of the first photo the ticket arrived with, if any. */
   thumbUrl: string | null
+  /** For a finished ticket: whether the cleanup has been checked. Null while it is not finished. */
+  verification: VerificationStatus | null
   updatedAt: string
   comments: number
 }
@@ -61,6 +74,10 @@ export type TicketDetailView = {
   dueDate: string | null
   createdAt: string
   resolvedAt: string | null
+  /** For a finished ticket: whether the cleanup has been checked. Null while it is not finished. */
+  verification: VerificationStatus | null
+  /** Where the ticket came from: 'api' = DroneSeva, 'web' = made by hand. */
+  source: string
   resolutionPhotos: CommentAttachmentView[]
   resolutionNote: string
   /** Photos the ticket arrived with, e.g. the drone image from DroneSeva. */
@@ -126,6 +143,8 @@ export function toTicketDetailView(t: any): TicketDetailView {
     dueDate: t.dueDate ? new Date(t.dueDate).toISOString() : null,
     createdAt: new Date(t.createdAt).toISOString(),
     resolvedAt: t.resolvedAt ? new Date(t.resolvedAt).toISOString() : null,
+    verification: verificationOf(t),
+    source: t.source ?? 'web',
     resolutionNote: t.resolutionNote ?? '',
     report: t.reportPdf?.publicId
       ? {
@@ -272,6 +291,7 @@ export function toTicketListItem(t: any): TicketListItemView {
     })),
     createdAt: new Date(t.createdAt).toISOString(),
     thumbUrl: t.sourcePhotos?.[0]?.url ? cloudinaryThumb(t.sourcePhotos[0].url) : null,
+    verification: verificationOf(t),
     updatedAt: new Date(t.lastActivityAt).toISOString(),
     comments: t.counts?.comments ?? 0,
   }

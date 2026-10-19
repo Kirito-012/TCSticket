@@ -1,10 +1,16 @@
 'use server'
 
+import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { requireAbility, requireTicketScope } from '@/server/auth/session'
 import { sanitizeHtml } from '@/lib/sanitize-html'
-import { createTicketSchema, updateTicketSchema, addCommentSchema } from '@/lib/schemas/ticket'
+import {
+  createTicketSchema,
+  updateTicketSchema,
+  addCommentSchema,
+  ticketPhotosSchema,
+} from '@/lib/schemas/ticket'
 import * as ticketService from '@/server/services/ticket.service'
 import * as userService from '@/server/services/user.service'
 import { scopeAllows, scopeAllowsAssignee, type TicketScope } from '@/lib/ticket-scope'
@@ -15,6 +21,7 @@ import { resolveRules } from '@/server/resolve-rules'
 import { garbageVerdict } from '@/lib/garbage-check'
 import { checkPhotoForGarbage, photoRules } from '@/server/photo-check'
 import { getT } from '@/i18n/server'
+import { sectorNoOf } from '@/lib/zones'
 import type {
   ResolutionPhotoGarbageCheck,
   ResolutionPhotoLocation,
@@ -29,7 +36,8 @@ export async function createTicketAction(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const { user } = await requireAbility({ action: 'create', subject: 'ticket' })
+  const { user, ability, scope, placement } = await requireTicketScope()
+  if (!ability.can('create', 'ticket')) return { error: 'You do not have permission to do that.' }
 
   const parsed = createTicketSchema.safeParse({
     subject: formData.get('subject'),
@@ -41,14 +49,86 @@ export async function createTicketAction(
     return { error: parsed.error.issues[0]?.message ?? 'Invalid input' }
   }
 
+  // Photos were uploaded as they were picked; the form sends back what they came to.
+  let photos: z.infer<typeof ticketPhotosSchema> = []
+  const photosRaw = formData.get('photos')
+  if (typeof photosRaw === 'string' && photosRaw.length > 0) {
+    let json: unknown
+    try {
+      json = JSON.parse(photosRaw)
+    } catch {
+      return { error: 'Invalid photos' }
+    }
+    const checked = ticketPhotosSchema.safeParse(json)
+    if (!checked.success) return { error: checked.error.issues[0]?.message ?? 'Invalid photos' }
+    photos = checked.data
+  }
+
+  // Where the ticket belongs decides who can see it, so it must always be placed:
+  //  - a Surveyor's own ticket goes in their sector and to them;
+  //  - a Nodal Manager's goes in their sector, a Zone Inspector picks one of their zone's sectors;
+  //  - an Admin may pick any sector, or none.
+  // A ticket in a sector goes to that sector's Surveyor, like the ones DroneSeva makes.
+  const askedSector = formData.get('sectorKey')
+  const asked = typeof askedSector === 'string' && askedSector !== '' ? askedSector : null
+  let sectorKey: string | null = null
+  let assigneeId: string | null = null
+  if (scope.kind === 'own') {
+    sectorKey = placement.sectorKey
+    assigneeId = user.id
+  } else if (scope.kind === 'sectors') {
+    sectorKey =
+      asked && scope.sectorKeys.includes(asked)
+        ? asked
+        : scope.sectorKeys.length === 1
+          ? scope.sectorKeys[0]
+          : null
+    if (!sectorKey) return { error: 'Choose a sector for this ticket.' }
+  } else if (asked) {
+    if (sectorNoOf(asked) === null) return { error: 'Choose a valid sector.' }
+    sectorKey = asked
+  }
+  if (sectorKey && scope.kind !== 'own') {
+    const surveyor = await userService.findSectorSurveyor(sectorKey)
+    assigneeId = surveyor ? String(surveyor._id) : null
+  }
+
   const ticket = await ticketService.createTicket({
     ...parsed.data,
     issue: sanitizeHtml(parsed.data.issue),
     ownerId: user.id,
+    sectorKey,
+    assigneeId,
+    photos,
   })
 
   revalidatePath('/tickets')
   redirect(`/tickets/${ticket.number}`)
+}
+
+/**
+ * Marks a finished ticket's cleanup as verified, or not verified. For now a lead (Admin, Zone
+ * Inspector, Nodal Manager) does this by hand; the drone re-flight will do it later. A Surveyor
+ * cannot verify their own work.
+ */
+export async function setVerificationAction(
+  number: number,
+  verified: boolean,
+): Promise<ActionState> {
+  const { user, ability, scope } = await requireTicketScope()
+  if (!ability.can('assign', 'ticket') || scope.kind === 'own') {
+    return { error: 'You do not have permission to do that.' }
+  }
+  const ticket = await ticketService.getTicketByNumber(number)
+  if (!ticket || !ticketInScope(scope, ticket)) return { error: 'Ticket not found.' }
+  try {
+    await ticketService.setTicketVerification(number, verified, user.id, 'manual')
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Could not change the verification.' }
+  }
+  revalidatePath(`/tickets/${number}`)
+  revalidatePath('/tickets')
+  return undefined
 }
 
 /** Whether a ticket (as loaded with its assignee) is one this person's scope allows them to touch. */

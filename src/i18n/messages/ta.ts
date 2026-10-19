@@ -13,6 +13,7 @@ const messages: Messages = {
   Added: 'சேர்க்கப்பட்டது',
   'All done!': 'எல்லாம் முடிந்தது!',
   'Already have an account?': 'ஏற்கனவே கணக்கு உள்ளதா?',
+  Any: 'ஏதேனும்',
   'Any time': 'எப்போது வேண்டுமானாலும்',
   'Anything to tell us?': 'எங்களிடம் ஏதாவது சொல்ல வேண்டுமா?',
   Appliances: 'வீட்டு உபகரணங்கள்',
@@ -108,6 +109,7 @@ const messages: Messages = {
   'No file provided': 'கோப்பு எதுவும் வழங்கப்படவில்லை',
   'No tickets match': 'பொருந்தும் டிக்கெட்டுகள் இல்லை',
   'Nodal Manager': 'நோடல் மேலாளர்',
+  'Not verified': 'சரிபார்க்கப்படவில்லை',
   'Note must be at most {max} characters.':
     'குறிப்பு அதிகபட்சம் {max} எழுத்துகளுக்குள் இருக்க வேண்டும்.',
   'Nothing here yet': 'இங்கே இன்னும் எதுவும் இல்லை',
@@ -127,6 +129,7 @@ const messages: Messages = {
   People: 'மக்கள்',
   'Photo from gallery': 'கேலரியிலிருந்து புகைப்படம்',
   'Photo from the drone': 'ட்ரோனில் எடுத்த புகைப்படம்',
+  'Photos of the place': 'அந்த இடத்தின் புகைப்படங்கள்',
   Plastic: 'பிளாஸ்டிக்',
   'Plastic packaging': 'பிளாஸ்டிக் பேக்கேஜிங்',
   'Please choose a photo (JPG or PNG).':
@@ -201,6 +204,8 @@ const messages: Messages = {
   'Urgent only': 'அவசரமானவை மட்டும்',
   'Urgent tickets': 'அவசர டிக்கெட்டுகள்',
   Vehicles: 'வாகனங்கள்',
+  Verification: 'சரிபார்ப்பு',
+  Verified: 'சரிபார்க்கப்பட்டது',
   'View in DroneSeva': 'DroneSeva-இல் பார்',
   'View photo {n} of {total}': 'புகைப்படம் {n} / {total} ஐப் பார்',
   'View report': 'அறிக்கையைப் பார்',

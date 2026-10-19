@@ -11,6 +11,9 @@ import type { SectorOption } from '@/components/admin/AdminTicketFilters'
 type Draft = {
   sector: string
   urgent: boolean
+  verify: '' | 'verified' | 'unverified'
+  /** Only the Done and All tabs have finished tickets to check. */
+  showVerify: boolean
   status: string
   sort: 'activity' | 'newest' | 'oldest'
   view: 'cards' | 'list'
@@ -82,6 +85,7 @@ export function AdminFilterSheet({
   const activeCount =
     Number(current.sector !== '') +
     Number(current.urgent) +
+    Number(current.verify !== '') +
     Number(current.status !== '') +
     Number(current.sort !== 'activity') +
     Number(current.from !== '' || current.to !== '') +
@@ -98,6 +102,7 @@ export function AdminFilterSheet({
       value ? params.set(key, value) : params.delete(key)
     set('sector', draft.sector || null)
     set('urgent', draft.urgent ? '1' : null)
+    set('verify', draft.verify || null)
     set('status', draft.status || null)
     set('sort', draft.sort === 'activity' ? null : draft.sort)
     set('view', draft.view === 'cards' ? null : draft.view)
@@ -113,6 +118,8 @@ export function AdminFilterSheet({
     setDraft({
       sector: '',
       urgent: false,
+      verify: '',
+      showVerify: current.showVerify,
       status: '',
       sort: 'activity',
       view: 'cards',
@@ -219,6 +226,29 @@ export function AdminFilterSheet({
               Urgent tickets
             </Choice>
           </section>
+
+          {draft.showVerify && (
+            <section>
+              <h3 className="mb-2 text-base font-bold text-foreground">Verification</h3>
+              <div className="flex flex-wrap gap-2">
+                {(
+                  [
+                    { key: '', label: 'All' },
+                    { key: 'verified', label: 'Verified' },
+                    { key: 'unverified', label: 'Not verified' },
+                  ] as const
+                ).map(({ key, label }) => (
+                  <Choice
+                    key={label}
+                    active={draft.verify === key}
+                    onClick={() => setDraft((d) => ({ ...d, verify: key }))}
+                  >
+                    {label}
+                  </Choice>
+                ))}
+              </div>
+            </section>
+          )}
 
           <section>
             <h3 className="mb-2 text-base font-bold text-foreground">Sort</h3>

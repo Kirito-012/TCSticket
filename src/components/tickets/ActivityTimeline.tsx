@@ -20,6 +20,8 @@ const ACTION_LABELS: Record<string, string> = {
   restored: 'restored this ticket',
   photo_added: 'uploaded a resolution photo',
   photo_removed: 'removed a resolution photo',
+  verified: 'marked the cleanup as verified',
+  unverified: 'marked the cleanup as not verified',
 }
 
 function describe(event: EventView) {

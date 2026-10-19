@@ -57,6 +57,12 @@ export default async function TicketsPage({
     page: Math.max(1, Number(get('page')) || 1),
     sector: get('sector') ?? '',
     urgent: get('urgent') === '1',
+    verify:
+      get('verify') === 'verified'
+        ? 'verified'
+        : get('verify') === 'unverified'
+          ? 'unverified'
+          : '',
     status: /^[a-z0-9-]{1,40}$/.test(get('status') ?? '') ? (get('status') ?? '') : '',
     sort: get('sort') === 'newest' ? 'newest' : get('sort') === 'oldest' ? 'oldest' : 'activity',
     view: get('view') === 'list' ? 'list' : 'cards',
@@ -86,6 +92,7 @@ export default async function TicketsPage({
       q: state.q || undefined,
       sectorKey: state.sector || undefined,
       urgent: state.urgent || undefined,
+      verification: state.verify || undefined,
       status: state.status || undefined,
       age: state.age || undefined,
       createdOn: dayParts?.[0] === 'created' ? dayParts[1] : undefined,

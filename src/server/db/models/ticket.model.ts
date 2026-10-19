@@ -112,6 +112,23 @@ const ticketSchema = new Schema(
     // Optional free-text note the surveyor writes when resolving (plain text, max 1000 chars).
     resolutionNote: { type: String, default: '' },
 
+    // Whether the cleanup was checked after the Surveyor finished. Every finished ticket starts as
+    // "not verified"; a later drone re-flight will set it to "verified" (source 'drone'). Until that
+    // exists, a lead can set it by hand (source 'manual'). Tickets from before this field have none,
+    // which counts as "not verified". It goes back to "not verified" if the ticket is reopened.
+    verification: {
+      type: new Schema(
+        {
+          status: { type: String, enum: ['verified', 'not_verified'], default: 'not_verified' },
+          verifiedAt: { type: Date, default: null },
+          verifiedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+          source: { type: String, enum: ['manual', 'drone'], default: null },
+        },
+        { _id: false },
+      ),
+      default: () => ({ status: 'not_verified' }),
+    },
+
     counts: {
       comments: { type: Number, default: 0 },
       attachments: { type: Number, default: 0 },

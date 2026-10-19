@@ -27,6 +27,8 @@ const ACTION_LABEL: Record<string, string> = {
   restored: 'restored ticket',
   commented: 'commented on',
   note_added: 'added a note to',
+  verified: 'verified the cleanup of',
+  unverified: 'marked as not verified',
 }
 
 function labelForEvent(action: string, field?: string | null) {

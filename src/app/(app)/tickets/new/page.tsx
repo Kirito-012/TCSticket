@@ -4,12 +4,16 @@ import { NewTicketForm } from '@/components/tickets/NewTicketForm'
 import { dbConnect } from '@/server/db/connect'
 import { TicketTypeModel } from '@/server/db/models/ticket-type.model'
 import { TicketPriorityModel } from '@/server/db/models/ticket-priority.model'
+import { requireTicketScope } from '@/server/auth/session'
+import { getSectorOptions } from '@/server/services/sector.service'
 
 export default async function NewTicketPage() {
+  const { scope } = await requireTicketScope()
   await dbConnect()
-  const [types, priorities] = await Promise.all([
+  const [types, priorities, sectors] = await Promise.all([
     TicketTypeModel.find({ isActive: true }).sort({ name: 1 }).lean(),
     TicketPriorityModel.find().sort({ order: 1 }).lean(),
+    getSectorOptions(scope),
   ])
 
   return (
@@ -26,6 +30,8 @@ export default async function NewTicketPage() {
               defaultPriorityId: t.defaultPriorityId ? String(t.defaultPriorityId) : null,
             }))}
             priorities={priorities.map((p) => ({ id: String(p._id), name: p.name }))}
+            sectors={sectors}
+            sectorRequired={scope.kind === 'sectors'}
           />
         </Card>
       </main>

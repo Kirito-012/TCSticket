@@ -44,6 +44,13 @@ export async function getInspectorTasks(
     .map(toTicketListItem)
     .filter((t) => arrivedInRange(t.createdAt, filters))
     .filter((t) => !filters.urgentOnly || isUrgent(t.priority))
+    // The verification filter is about finished tickets, so it leaves the unfinished ones alone.
+    .filter(
+      (t) =>
+        filters.verified === 'any' ||
+        !isDone(t.status) ||
+        (filters.verified === 'yes') === (t.verification === 'verified'),
+    )
 
   const byArrival = (dir: 1 | -1) => (a: TicketListItemView, b: TicketListItemView) =>
     dir * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
