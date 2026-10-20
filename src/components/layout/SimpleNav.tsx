@@ -18,7 +18,16 @@ export type NavLink = { label: string; href: string; icon: NavIcon; badge?: numb
  * screen on phones (thumb reach, no hidden menu), and a plain left column on larger screens.
  * Surveyors get Home + My tasks; Admins and Managers get Home + Tasks (+ People).
  */
-export function SimpleNav({ name, links }: { name: string; links: NavLink[] }) {
+export function SimpleNav({
+  name,
+  roleLabel,
+  links,
+}: {
+  name: string
+  /** The role the person is logged in as, e.g. "Zone Inspector". */
+  roleLabel?: string
+  links: NavLink[]
+}) {
   const pathname = usePathname()
   const t = useT()
   const LINKS = links
@@ -69,6 +78,11 @@ export function SimpleNav({ name, links }: { name: string; links: NavLink[] }) {
         <div className="px-6 py-6">
           <p className="text-xl font-bold text-foreground">TheCraftSync</p>
           <p className="mt-1 text-base text-muted">{t('Hello, {name}', { name })}</p>
+          {roleLabel && (
+            <p className="mt-2 inline-block rounded-full bg-accent-soft px-3 py-1 text-sm font-bold text-accent-strong">
+              {roleLabel}
+            </p>
+          )}
         </div>
         <nav aria-label={t('Main menu')} className="flex-1 space-y-2 px-4">
           {LINKS.map((link) => {

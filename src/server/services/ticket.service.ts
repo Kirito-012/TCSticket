@@ -12,6 +12,7 @@ import { TagModel } from '@/server/db/models/tag.model'
 import { UserModel } from '@/server/db/models/user.model'
 import { extractLocation } from '@/lib/droneseva-link'
 import { resolveRules } from '@/server/resolve-rules'
+import { REOPENED_STATUS } from '@/server/reopened-status'
 import { nextSequence } from '@/server/db/models/counter.model'
 import { getRealSectors } from '@/server/sectors'
 import type { TicketScope } from '@/lib/ticket-scope'
@@ -519,6 +520,36 @@ const EDITABLE_FIELDS = [
 ] as const
 type EditableField = (typeof EDITABLE_FIELDS)[number]
 
+/** Moves a finished ticket's proof photos and note aside when it is reopened, so new proof is needed. */
+function archiveResolution(ticket: {
+  get: (path: string) => unknown
+  set: (path: string, value: unknown) => unknown
+}) {
+  const photos = (ticket.get('resolutionPhotos') as Record<string, unknown>[] | undefined) ?? []
+  if (photos.length > 0) {
+    const earlier = (ticket.get('earlierResolutionPhotos') as unknown[] | undefined) ?? []
+    ticket.set('earlierResolutionPhotos', [
+      ...earlier,
+      ...photos.map((p) => {
+        const plain = (p as { toObject?: () => Record<string, unknown> }).toObject?.() ?? p
+        return {
+          url: plain.url,
+          publicId: plain.publicId,
+          width: plain.width,
+          height: plain.height,
+          uploadedAt: plain.uploadedAt ?? null,
+        }
+      }),
+    ])
+    ticket.set('resolutionPhotos', [])
+  }
+  const note = ticket.get('resolutionNote') as string | undefined
+  if (note) {
+    ticket.set('earlierResolutionNote', note)
+    ticket.set('resolutionNote', '')
+  }
+}
+
 export async function updateTicketFields(
   number: number,
   patch: Partial<Record<EditableField, string | Date | null>>,
@@ -554,6 +585,12 @@ export async function updateTicketFields(
   ticket.lastActivityAt = new Date()
   const status = ticket.statusId ? await TicketStatusModel.findById(ticket.statusId).lean() : null
   if (status?.isResolved && !ticket.resolvedAt) ticket.resolvedAt = new Date()
+  // Moving a finished ticket back to unfinished work (reopening it) clears the finished dates.
+  if (status && !status.isResolved && events.some((e) => e.field === 'statusId')) {
+    if (ticket.resolvedAt) archiveResolution(ticket)
+    ticket.set('resolvedAt', null)
+    ticket.set('closedAt', null)
+  }
   // A change of status (finished, or reopened) always starts the check over: not verified.
   if (events.some((e) => e.field === 'statusId')) {
     ticket.set('verification', { status: 'not_verified' })
@@ -798,14 +835,24 @@ export async function getTaskTabCounts(scope?: TicketScope) {
   const base: QueryFilter<Ticket> = { deletedAt: null, ...scopeFilter(scope) }
   const startOfToday = new Date()
   startOfToday.setHours(0, 0, 0, 0)
-  const [todo, done, unassigned, all, doneToday] = await Promise.all([
+  const reopenedStatus = await TicketStatusModel.findOne({ slug: REOPENED_STATUS.slug })
+    .select('_id')
+    .lean()
+  const [todo, done, unassigned, all, doneToday, reopened, verified] = await Promise.all([
     TicketModel.countDocuments({ ...base, statusId: { $nin: resolvedIds } }),
     TicketModel.countDocuments({ ...base, statusId: { $in: resolvedIds } }),
     TicketModel.countDocuments({ ...base, statusId: { $nin: resolvedIds }, assigneeId: null }),
     TicketModel.countDocuments(base),
     TicketModel.countDocuments({ ...base, resolvedAt: { $gte: startOfToday } }),
+    reopenedStatus ? TicketModel.countDocuments({ ...base, statusId: reopenedStatus._id }) : 0,
+    TicketModel.countDocuments({
+      ...base,
+      statusId: { $in: resolvedIds },
+      'verification.status': 'verified',
+    }),
   ])
-  return { todo, done, unassigned, all, doneToday }
+  // Finished tickets whose cleanup has not been checked yet (by a lead or by the drone re-check).
+  return { todo, done, unassigned, all, doneToday, reopened, verified, unverified: done - verified }
 }
 
 /** Assigns (or un-assigns, with null) many tickets at once, recording the change on each ticket's
@@ -995,6 +1042,93 @@ export async function setTicketVerification(
     action: verified ? 'verified' : 'unverified',
   })
   return ticket
+}
+
+/**
+ * The result of flying over a finished ticket's place again (DroneSeva). A clean new photo marks
+ * the cleanup as verified (source 'drone'); a photo that still shows garbage reopens the ticket:
+ * it goes to the "Reopened" status, so it is unfinished again and back on the Surveyor's list.
+ * Only finished tickets can be re-checked.
+ */
+export async function applyDroneRecheck(
+  number: number,
+  outcome: { clean: boolean; detections: number; coveragePercent: number; note?: string },
+  actorId: string,
+) {
+  await dbConnect()
+  const ticket = await TicketModel.findOne({ number, deletedAt: null })
+  if (!ticket) throw new Error('Ticket not found')
+  const status = ticket.statusId ? await TicketStatusModel.findById(ticket.statusId).lean() : null
+  if (!status?.isResolved) throw new Error('Only a finished ticket can be re-checked.')
+
+  if (outcome.clean) {
+    await setTicketVerification(number, true, actorId, 'drone')
+    return { result: 'verified' as const, ticket }
+  }
+
+  const reopened = await TicketStatusModel.findOneAndUpdate(
+    { slug: REOPENED_STATUS.slug },
+    { $setOnInsert: REOPENED_STATUS },
+    { upsert: true, returnDocument: 'after' },
+  )
+  const from = String(ticket.statusId)
+  archiveResolution(ticket)
+  ticket.set('statusId', reopened._id)
+  ticket.set('resolvedAt', null)
+  ticket.set('closedAt', null)
+  ticket.set('verification', { status: 'not_verified' })
+  ticket.lastActivityAt = new Date()
+  await ticket.save()
+  await TicketEventModel.insertMany([
+    {
+      ticketId: ticket._id,
+      actorId,
+      action: 'field_changed',
+      field: 'statusId',
+      from,
+      to: String(reopened._id),
+    },
+    {
+      ticketId: ticket._id,
+      actorId,
+      action: 'reopened',
+      meta: {
+        source: 'drone',
+        detections: outcome.detections,
+        coveragePercent: outcome.coveragePercent,
+        note: outcome.note ?? null,
+      },
+    },
+  ])
+  return { result: 'reopened' as const, ticket }
+}
+
+/**
+ * Stores the photo of a drone re-check on the ticket (replacing the last one). Returns the public id
+ * of the replaced photo ('' if there was none) so it can be deleted, or undefined if no such ticket.
+ */
+export async function setRecheckPhoto(
+  number: number,
+  photo: {
+    url: string
+    publicId: string
+    width: number
+    height: number
+    result: 'clean' | 'dirty'
+    detections: number
+    coveragePercent: number
+  },
+) {
+  await dbConnect()
+  const before = await TicketModel.findOneAndUpdate(
+    { number, deletedAt: null },
+    { $set: { recheckPhoto: { ...photo, takenAt: new Date() } } },
+    { returnDocument: 'before' },
+  )
+    .select('recheckPhoto')
+    .lean()
+  if (!before) return undefined
+  return (before.recheckPhoto as { publicId?: string } | null)?.publicId ?? ''
 }
 
 /** Stores (or replaces) the detection report PDF on a ticket. */

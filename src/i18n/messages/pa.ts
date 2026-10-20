@@ -10,6 +10,7 @@ const messages: Messages = {
   'Add at least one photo first.': 'ਪਹਿਲਾਂ ਘੱਟੋ-ਘੱਟ ਇੱਕ ਫੋਟੋ ਜੋੜੋ।',
   'Add photos': 'ਫੋਟੋਆਂ ਜੋੜੋ',
   Added: 'ਜੋੜਿਆ ਗਿਆ',
+  Admin: 'ਐਡਮਿਨ',
   'All done!': 'ਸਭ ਪੂਰਾ ਹੋ ਗਿਆ!',
   'Already have an account?': 'ਪਹਿਲਾਂ ਹੀ ਖਾਤਾ ਹੈ?',
   Any: 'ਕੋਈ ਵੀ',
@@ -44,6 +45,7 @@ const messages: Messages = {
   Download: 'ਡਾਊਨਲੋਡ',
   'Download the report': 'ਰਿਪੋਰਟ ਡਾਊਨਲੋਡ ਕਰੋ',
   'Drone photo of the place': 'ਉਸ ਥਾਂ ਦੀ ਡਰੋਨ ਫੋਟੋ',
+  'Drone re-check photo': 'ਡ੍ਰੋਨ ਦੁਬਾਰਾ ਜਾਂਚ ਦੀ ਫੋਟੋ',
   'Electronic equipment': 'ਇਲੈਕਟ੍ਰਾਨਿਕ ਸਮਾਨ',
   'Email address': 'ਈਮੇਲ ਪਤਾ',
   'Enlarge photo {n}': 'ਫੋਟੋ {n} ਵੱਡੀ ਕਰੋ',
@@ -135,6 +137,7 @@ const messages: Messages = {
   'Previous image': 'ਪਿਛਲੀ ਫੋਟੋ',
   'Quick views': 'ਜਲਦੀ ਦੇਖੋ',
   'Remove this photo': 'ਇਹ ਫੋਟੋ ਹਟਾਓ',
+  Reopened: 'ਮੁੜ ਖੋਲ੍ਹਿਆ ਗਿਆ',
   'Request access': 'ਪਹੁੰਚ ਲਈ ਬੇਨਤੀ ਕਰੋ',
   'Request an account': 'ਖਾਤੇ ਲਈ ਬੇਨਤੀ ਕਰੋ',
   'Request submitted': 'ਬੇਨਤੀ ਭੇਜ ਦਿੱਤੀ ਗਈ',
@@ -167,6 +170,12 @@ const messages: Messages = {
   Textile: 'ਕੱਪੜਾ',
   'That photo is too big. Please choose a smaller one.':
     'ਉਹ ਫੋਟੋ ਬਹੁਤ ਵੱਡੀ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਛੋਟੀ ਫੋਟੋ ਚੁਣੋ।',
+  'The drone checked this place again and garbage is still there. Clean it up, then upload new photos.':
+    'ਡ੍ਰੋਨ ਨੇ ਇਸ ਥਾਂ ਦੀ ਦੁਬਾਰਾ ਜਾਂਚ ਕੀਤੀ ਅਤੇ ਕੂੜਾ ਅਜੇ ਵੀ ਹੈ। ਇਸਨੂੰ ਸਾਫ਼ ਕਰੋ, ਫਿਰ ਨਵੀਆਂ ਫੋਟੋਆਂ ਅਪਲੋਡ ਕਰੋ।',
+  'The drone checked this place again: garbage is still there.':
+    'ਡ੍ਰੋਨ ਨੇ ਇਸ ਥਾਂ ਦੀ ਦੁਬਾਰਾ ਜਾਂਚ ਕੀਤੀ: ਕੂੜਾ ਅਜੇ ਵੀ ਹੈ।',
+  'The drone checked this place again: no garbage found.':
+    'ਡ੍ਰੋਨ ਨੇ ਇਸ ਥਾਂ ਦੀ ਦੁਬਾਰਾ ਜਾਂਚ ਕੀਤੀ: ਕੋਈ ਕੂੜਾ ਨਹੀਂ ਮਿਲਿਆ।',
   'The garbage is spread over too much of the picture to outline.':
     'ਕੂੜਾ ਤਸਵੀਰ ਵਿੱਚ ਇੰਨਾ ਫੈਲਿਆ ਹੈ ਕਿ ਉਸ ਨੂੰ ਘੇਰਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ।',
   'The original drone photo': 'ਡਰੋਨ ਦੀ ਅਸਲੀ ਫੋਟੋ',
@@ -182,6 +191,7 @@ const messages: Messages = {
     'ਇਹ ਫ਼ੋਨ ਜਾਂ ਬ੍ਰਾਊਜ਼ਰ ਆਪਣੀ ਲੋਕੇਸ਼ਨ ਨਹੀਂ ਦੱਸ ਸਕਦਾ, ਇਸ ਲਈ ਫੋਟੋ ਦੀ ਜਾਂਚ ਨਹੀਂ ਹੋ ਸਕਦੀ। ਕਿਰਪਾ ਕਰਕੇ ਲੋਕੇਸ਼ਨ ਵਾਲਾ ਫ਼ੋਨ ਵਰਤੋ।',
   'This photo was not accepted': 'ਇਹ ਫੋਟੋ ਮਨਜ਼ੂਰ ਨਹੀਂ ਹੋਈ',
   'This ticket is done': 'ਇਹ ਟਿਕਟ ਪੂਰੀ ਹੋ ਗਈ ਹੈ',
+  'This ticket was reopened': 'ਇਹ ਟਿਕਟ ਮੁੜ ਖੋਲ੍ਹੀ ਗਈ ਹੈ',
   'This week': 'ਇਸ ਹਫ਼ਤੇ',
   Ticket: 'ਟਿਕਟ',
   'Ticket not found.': 'ਟਿਕਟ ਨਹੀਂ ਮਿਲੀ।',
@@ -219,6 +229,8 @@ const messages: Messages = {
     'ਅਸੀਂ ਤੁਹਾਡੀ ਥਾਂ ਨਹੀਂ ਪੜ੍ਹ ਸਕੇ। ਫ਼ੋਨ ਦੀ ਸੈਟਿੰਗ ਵਿੱਚ ਲੋਕੇਸ਼ਨ ਚਾਲੂ ਹੈ ਇਹ ਦੇਖੋ, ਫਿਰ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।',
   'We could not read your location. Please allow location for this website, then try again.':
     'ਅਸੀਂ ਤੁਹਾਡੀ ਥਾਂ ਨਹੀਂ ਪੜ੍ਹ ਸਕੇ। ਕਿਰਪਾ ਕਰਕੇ ਇਸ ਵੈੱਬਸਾਈਟ ਨੂੰ ਲੋਕੇਸ਼ਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ, ਫਿਰ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।',
+  'We could only find your location roughly (about {accuracy}). Your device is probably using Wi-Fi or the mobile network instead of GPS. Turn on GPS and High accuracy location, go outside where the sky is open, and try again.':
+    "ਅਸੀਂ ਤੁਹਾਡੀ ਲੋਕੇਸ਼ਨ ਸਿਰਫ਼ ਮੋਟੇ ਤੌਰ 'ਤੇ ਲੱਭ ਸਕੇ (ਲਗਭਗ {accuracy})। ਤੁਹਾਡਾ ਡਿਵਾਈਸ ਸ਼ਾਇਦ GPS ਦੀ ਥਾਂ Wi-Fi ਜਾਂ ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ ਵਰਤ ਰਿਹਾ ਹੈ। GPS ਅਤੇ ਹਾਈ ਐਕੁਰੇਸੀ ਲੋਕੇਸ਼ਨ ਚਾਲੂ ਕਰੋ, ਖੁੱਲ੍ਹੇ ਅਸਮਾਨ ਹੇਠ ਜਾਓ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
   'Welcome back': 'ਵਾਪਸੀ ਤੇ ਸਵਾਗਤ ਹੈ',
   'When did it arrive?': 'ਇਹ ਕਦੋਂ ਆਇਆ?',
   'When your phone asks, please tap Allow for location.':
@@ -228,6 +240,8 @@ const messages: Messages = {
   'Which zone?': 'ਕਿਹੜਾ ਜ਼ੋਨ?',
   Wood: 'ਲੱਕੜ',
   'Write here if you want to add something': 'ਕੁਝ ਜੋੜਨਾ ਹੋਵੇ ਤਾਂ ਇੱਥੇ ਲਿਖੋ',
+  'You are about {distance} from the place, but your location is only accurate to about {accuracy}, so this may be wrong. Turn on GPS, stand in the open, and try again.':
+    'ਤੁਸੀਂ ਉਸ ਥਾਂ ਤੋਂ ਲਗਭਗ {distance} ਦੂਰ ਹੋ, ਪਰ ਤੁਹਾਡੀ ਲੋਕੇਸ਼ਨ ਸਿਰਫ਼ ਲਗਭਗ {accuracy} ਤੱਕ ਸਹੀ ਹੈ, ਇਸ ਲਈ ਇਹ ਗਲਤ ਹੋ ਸਕਦਾ ਹੈ। GPS ਚਾਲੂ ਕਰੋ, ਖੁੱਲ੍ਹੀ ਥਾਂ ਖੜ੍ਹੇ ਹੋਵੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।',
   'You are about {distance} from the place. Go to the marked spot (within {radius} m) and take the photo again. The ticket is not done yet.':
     'ਤੁਸੀਂ ਉਸ ਥਾਂ ਤੋਂ ਲਗਭਗ {distance} ਦੂਰ ਹੋ। ਨਿਸ਼ਾਨ ਵਾਲੀ ਥਾਂ ({radius} ਮੀਟਰ ਦੇ ਅੰਦਰ) ਜਾਓ ਅਤੇ ਦੁਬਾਰਾ ਫੋਟੋ ਲਓ। ਟਿਕਟ ਅਜੇ ਪੂਰੀ ਨਹੀਂ ਹੋਈ।',
   'You are at the place': 'ਤੁਸੀਂ ਉਸ ਥਾਂ ਤੇ ਹੋ',
@@ -237,6 +251,7 @@ const messages: Messages = {
     'ਤੁਹਾਡਾ ਖਾਤਾ ਐਡਮਿਨ ਦੀ ਮਨਜ਼ੂਰੀ ਦੀ ਉਡੀਕ ਵਿੱਚ ਹੈ — ਮਨਜ਼ੂਰੀ ਮਿਲਣ ਤੇ ਤੁਸੀਂ ਸਾਈਨ ਇਨ ਕਰ ਸਕੋਗੇ।',
   'Your account request was not approved. Contact an admin for help.':
     'ਤੁਹਾਡੇ ਖਾਤੇ ਦੀ ਬੇਨਤੀ ਮਨਜ਼ੂਰ ਨਹੀਂ ਹੋਈ। ਮਦਦ ਲਈ ਐਡਮਿਨ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।',
+  'Your earlier photos': 'ਤੁਹਾਡੀਆਂ ਪਹਿਲਾਂ ਦੀਆਂ ਫੋਟੋਆਂ',
   'Your location reading is out of date. Please try again.':
     'ਤੁਹਾਡੀ ਲੋਕੇਸ਼ਨ ਦੀ ਜਾਣਕਾਰੀ ਪੁਰਾਣੀ ਹੋ ਗਈ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।',
   'Your next tickets': 'ਤੁਹਾਡੀਆਂ ਅਗਲੀਆਂ ਟਿਕਟਾਂ',

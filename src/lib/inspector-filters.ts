@@ -20,6 +20,8 @@ export type InspectorFilters = {
   urgentOnly: boolean
   /** Finished tickets only: whether the cleanup has been checked. */
   verified: InspectorVerified
+  /** Only tickets that were reopened after the drone re-check. */
+  reopenedOnly: boolean
 }
 
 export const DEFAULT_INSPECTOR_FILTERS: InspectorFilters = {
@@ -28,6 +30,7 @@ export const DEFAULT_INSPECTOR_FILTERS: InspectorFilters = {
   on: '',
   urgentOnly: false,
   verified: 'any',
+  reopenedOnly: false,
 }
 
 const SORTS: InspectorSort[] = ['urgent', 'newest', 'oldest']
@@ -42,6 +45,7 @@ export function parseInspectorFilters(get: (key: string) => string | undefined):
     on: /^\d{4}-\d{2}-\d{2}$/.test(on) ? on : '',
     urgentOnly: get('urgent') === '1',
     verified: get('verified') === 'yes' ? 'yes' : get('verified') === 'no' ? 'no' : 'any',
+    reopenedOnly: get('reopened') === '1',
   }
 }
 
@@ -54,6 +58,7 @@ export function inspectorHref(show: InspectorShow, filters: InspectorFilters) {
   else if (filters.when !== 'any') params.set('when', filters.when)
   if (filters.urgentOnly) params.set('urgent', '1')
   if (filters.verified !== 'any') params.set('verified', filters.verified)
+  if (filters.reopenedOnly) params.set('reopened', '1')
   const qs = params.toString()
   return qs ? `/tickets?${qs}` : '/tickets'
 }
@@ -64,6 +69,7 @@ export function activeFilterCount(filters: InspectorFilters) {
     Number(filters.sort !== 'urgent') +
     Number(filters.when !== 'any' || filters.on !== '') +
     Number(filters.urgentOnly) +
-    Number(filters.verified !== 'any')
+    Number(filters.verified !== 'any') +
+    Number(filters.reopenedOnly)
   )
 }

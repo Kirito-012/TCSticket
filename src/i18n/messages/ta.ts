@@ -11,6 +11,7 @@ const messages: Messages = {
   'Add at least one photo first.': 'முதலில் குறைந்தது ஒரு புகைப்படத்தைச் சேர்க்கவும்.',
   'Add photos': 'புகைப்படங்களைச் சேர்க்கவும்',
   Added: 'சேர்க்கப்பட்டது',
+  Admin: 'நிர்வாகி',
   'All done!': 'எல்லாம் முடிந்தது!',
   'Already have an account?': 'ஏற்கனவே கணக்கு உள்ளதா?',
   Any: 'ஏதேனும்',
@@ -45,6 +46,7 @@ const messages: Messages = {
   Download: 'பதிவிறக்கு',
   'Download the report': 'அறிக்கையைப் பதிவிறக்கு',
   'Drone photo of the place': 'அந்த இடத்தின் ட்ரோன் புகைப்படம்',
+  'Drone re-check photo': 'ட்ரோன் மீள்சோதனை புகைப்படம்',
   'Electronic equipment': 'மின்னணு சாதனங்கள்',
   'Email address': 'மின்னஞ்சல் முகவரி',
   'Enlarge photo {n}': 'புகைப்படம் {n} ஐப் பெரிதாக்கு',
@@ -137,6 +139,7 @@ const messages: Messages = {
   'Previous image': 'முந்தைய படம்',
   'Quick views': 'விரைவுப் பார்வை',
   'Remove this photo': 'இந்தப் புகைப்படத்தை நீக்கு',
+  Reopened: 'மீண்டும் திறக்கப்பட்டது',
   'Request access': 'அணுகலைக் கோருங்கள்',
   'Request an account': 'கணக்கைக் கோருங்கள்',
   'Request submitted': 'கோரிக்கை அனுப்பப்பட்டது',
@@ -169,6 +172,12 @@ const messages: Messages = {
   Textile: 'துணி',
   'That photo is too big. Please choose a smaller one.':
     'அந்தப் புகைப்படம் மிகப் பெரியது. தயவுசெய்து சிறியதைத் தேர்ந்தெடுக்கவும்.',
+  'The drone checked this place again and garbage is still there. Clean it up, then upload new photos.':
+    'ட்ரோன் இந்த இடத்தை மீண்டும் சோதித்தது, குப்பை இன்னும் உள்ளது. அதை சுத்தம் செய்து, புதிய புகைப்படங்களை பதிவேற்றவும்.',
+  'The drone checked this place again: garbage is still there.':
+    'ட்ரோன் இந்த இடத்தை மீண்டும் சோதித்தது: குப்பை இன்னும் உள்ளது.',
+  'The drone checked this place again: no garbage found.':
+    'ட்ரோன் இந்த இடத்தை மீண்டும் சோதித்தது: குப்பை எதுவும் இல்லை.',
   'The garbage is spread over too much of the picture to outline.':
     'குப்பை படம் முழுவதும் பரவியுள்ளதால் அதைச் சுற்றி வட்டமிட முடியவில்லை.',
   'The original drone photo': 'ட்ரோனின் அசல் புகைப்படம்',
@@ -184,6 +193,7 @@ const messages: Messages = {
     'இந்தத் தொலைபேசி அல்லது உலாவி இருப்பிடத்தைப் பகிர முடியாது, அதனால் புகைப்படத்தைச் சரிபார்க்க முடியாது. இருப்பிட வசதி உள்ள தொலைபேசியைப் பயன்படுத்தவும்.',
   'This photo was not accepted': 'இந்தப் புகைப்படம் ஏற்றுக்கொள்ளப்படவில்லை',
   'This ticket is done': 'இந்த டிக்கெட் முடிந்தது',
+  'This ticket was reopened': 'இந்த டிக்கெட் மீண்டும் திறக்கப்பட்டுள்ளது',
   'This week': 'இந்த வாரம்',
   Ticket: 'டிக்கெட்',
   'Ticket not found.': 'டிக்கெட் கிடைக்கவில்லை.',
@@ -222,6 +232,8 @@ const messages: Messages = {
     'உங்கள் இருப்பிடத்தைப் படிக்க முடியவில்லை. தொலைபேசி அமைப்புகளில் இருப்பிடம் இயக்கத்தில் உள்ளதா என்று பார்த்து, மீண்டும் முயற்சிக்கவும்.',
   'We could not read your location. Please allow location for this website, then try again.':
     'உங்கள் இருப்பிடத்தைப் படிக்க முடியவில்லை. இந்த இணையதளத்துக்கு இருப்பிட அனுமதியை வழங்கி, மீண்டும் முயற்சிக்கவும்.',
+  'We could only find your location roughly (about {accuracy}). Your device is probably using Wi-Fi or the mobile network instead of GPS. Turn on GPS and High accuracy location, go outside where the sky is open, and try again.':
+    'உங்கள் இருப்பிடத்தை தோராயமாக மட்டுமே கண்டறிய முடிந்தது (சுமார் {accuracy}). உங்கள் சாதனம் GPS க்குப் பதிலாக Wi-Fi அல்லது மொபைல் நெட்வொர்க்கைப் பயன்படுத்துகிறது போலும். GPS மற்றும் அதிக துல்லிய இருப்பிடத்தை இயக்கி, திறந்த வானம் தெரியும் இடத்திற்குச் சென்று மீண்டும் முயற்சிக்கவும்.',
   'Welcome back': 'மீண்டும் வருக',
   'When did it arrive?': 'இது எப்போது வந்தது?',
   'When your phone asks, please tap Allow for location.':
@@ -231,6 +243,8 @@ const messages: Messages = {
   'Which zone?': 'எந்த மண்டலம்?',
   Wood: 'மரம்',
   'Write here if you want to add something': 'ஏதாவது சேர்க்க விரும்பினால் இங்கே எழுதவும்',
+  'You are about {distance} from the place, but your location is only accurate to about {accuracy}, so this may be wrong. Turn on GPS, stand in the open, and try again.':
+    'நீங்கள் அந்த இடத்திலிருந்து சுமார் {distance} தொலைவில் இருக்கிறீர்கள், ஆனால் உங்கள் இருப்பிடம் சுமார் {accuracy} வரை மட்டுமே துல்லியம், எனவே இது தவறாக இருக்கலாம். GPS ஐ இயக்கி, திறந்தவெளியில் நின்று மீண்டும் முயற்சிக்கவும்.',
   'You are about {distance} from the place. Go to the marked spot (within {radius} m) and take the photo again. The ticket is not done yet.':
     'நீங்கள் அந்த இடத்திலிருந்து சுமார் {distance} தொலைவில் உள்ளீர்கள். குறிக்கப்பட்ட இடத்துக்கு ({radius} மீ க்குள்) சென்று மீண்டும் புகைப்படம் எடுக்கவும். டிக்கெட் இன்னும் முடியவில்லை.',
   'You are at the place': 'நீங்கள் அந்த இடத்தில் இருக்கிறீர்கள்',
@@ -241,6 +255,7 @@ const messages: Messages = {
     'உங்கள் கணக்கு நிர்வாகியின் அனுமதிக்காகக் காத்திருக்கிறது — அனுமதி கிடைத்ததும் நீங்கள் உள்நுழையலாம்.',
   'Your account request was not approved. Contact an admin for help.':
     'உங்கள் கணக்குக் கோரிக்கை ஏற்கப்படவில்லை. உதவிக்கு நிர்வாகியைத் தொடர்புகொள்ளுங்கள்.',
+  'Your earlier photos': 'உங்கள் முந்தைய புகைப்படங்கள்',
   'Your location reading is out of date. Please try again.':
     'உங்கள் இருப்பிடத் தகவல் பழையதாகிவிட்டது. மீண்டும் முயற்சிக்கவும்.',
   'Your next tickets': 'உங்கள் அடுத்த டிக்கெட்டுகள்',

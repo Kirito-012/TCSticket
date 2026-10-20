@@ -114,7 +114,14 @@ export function SurveyorResolutionPanel({
         onProgress: (accuracy) => setPlace({ kind: 'finding', accuracy }),
       })
       if (!result.ok) {
-        setPlace({ kind: 'problem', message: positionProblemMessage(result.reason, t) })
+        setPlace({
+          kind: 'problem',
+          message: positionProblemMessage(
+            result.reason,
+            t,
+            result.reason === 'rough' ? result.accuracy : undefined,
+          ),
+        })
         return null
       }
       fix = result.fix

@@ -18,14 +18,9 @@ import { uploadCommentImage, deleteCommentImage } from '@/server/cloudinary'
 import { logger } from '@/lib/logger'
 import { evaluateLocation, verdictMessage, type LocationFix } from '@/lib/geo'
 import { resolveRules } from '@/server/resolve-rules'
-import { garbageVerdict } from '@/lib/garbage-check'
-import { checkPhotoForGarbage, photoRules } from '@/server/photo-check'
 import { getT } from '@/i18n/server'
 import { sectorNoOf } from '@/lib/zones'
-import type {
-  ResolutionPhotoGarbageCheck,
-  ResolutionPhotoLocation,
-} from '@/server/services/ticket.service'
+import type { ResolutionPhotoLocation } from '@/server/services/ticket.service'
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024
 const ALLOWED_IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif'])
@@ -282,44 +277,10 @@ export async function uploadResolutionPhotoAction(
     }
   }
 
-  // Does the photo still show garbage? Only photos that are mostly clean are accepted.
-  let garbageCheck: ResolutionPhotoGarbageCheck | null = null
-  const photoCheckRules = photoRules()
-  if (photoCheckRules.enabled) {
-    const checked = await checkPhotoForGarbage(file)
-    if (checked.status === 'ok') {
-      const verdict = garbageVerdict(
-        checked.coveragePercent,
-        photoCheckRules.maxGarbagePercent,
-        checked.detections,
-        photoCheckRules.maxItems,
-        t,
-      )
-      if (!verdict.ok) {
-        return {
-          error: verdict.message,
-          tooMuchGarbage: true,
-          garbagePercent: checked.coveragePercent,
-          garbageBoxes: checked.boxes,
-        }
-      }
-      garbageCheck = {
-        status: 'ok',
-        coveragePercent: checked.coveragePercent,
-        detections: checked.detections,
-      }
-    } else if (photoCheckRules.strict) {
-      return { error: t('We could not check the photo right now. Please try again in a moment.') }
-    } else {
-      // The check service is down: accept the photo, but record that it was not checked.
-      garbageCheck = { status: 'unavailable', coveragePercent: null, detections: null }
-    }
-  }
-
   let image: UploadedImageResult
   try {
     image = await uploadCommentImage(file, 'tcs-ticket/resolutions')
-    await ticketService.addResolutionPhoto(number, image, user.id, location, garbageCheck)
+    await ticketService.addResolutionPhoto(number, image, user.id, location, null)
   } catch (err) {
     logger.error({ err, number }, 'Could not upload or save a resolution photo')
     return { error: t('Upload failed. Please try again.') }
@@ -332,9 +293,6 @@ export async function uploadResolutionPhotoAction(
       ...image,
       locationCheck: location
         ? { withinRadius: true, distanceMeters: location.distanceMeters, method }
-        : undefined,
-      garbageCheck: garbageCheck
-        ? { status: garbageCheck.status, coveragePercent: garbageCheck.coveragePercent }
         : undefined,
     },
   }

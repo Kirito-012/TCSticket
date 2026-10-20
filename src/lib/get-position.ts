@@ -1,19 +1,31 @@
 import type { LocationFix } from '@/lib/geo'
 import { makeTranslate, type Translate } from '../i18n/config'
 
+/** 850 -> "850 m", 3200 -> "3.2 km". */
+export function formatMeters(n: number) {
+  return n >= 1000 ? `${(n / 1000).toFixed(1)} km` : `${Math.max(1, Math.round(n))} m`
+}
+
+/** A reading worse than this (metres) is only a network guess, often kilometres off: never trusted. */
+export const ROUGH_ACCURACY_METERS = 100
+
 export type PositionOutcome =
   | { ok: true; fix: LocationFix }
   | { ok: false; reason: 'denied' | 'unavailable' | 'timeout' | 'unsupported' }
+  // Only a rough reading came in (Wi-Fi / mobile network, not GPS): too poor to say where the person is.
+  | { ok: false; reason: 'rough'; accuracy: number }
 
 /**
  * Asks the phone where it is (this is what makes the browser ask "Allow location?") and keeps
  * listening for a few seconds, because the first reading is usually rough and GPS gets better as the
  * phone finds more satellites. It stops as soon as a reading is good enough, or when time runs out,
- * and then returns the best reading it saw.
+ * and then returns the best reading it saw. A first GPS lock can take 20-40 seconds outdoors, so it
+ * waits up to 40 seconds; if all it ever got was a rough network guess (more than 100 m off) it says
+ * so instead of returning that guess, because such a guess can be kilometres from the real place.
  */
 export function getBestPosition({
   goodEnoughMeters = 8,
-  timeoutMs = 15_000,
+  timeoutMs = 40_000,
   onProgress,
 }: {
   goodEnoughMeters?: number
@@ -50,7 +62,14 @@ export function getBestPosition({
     }
 
     const timer = setTimeout(
-      () => finish(best ? fixFrom(best) : { ok: false, reason: 'timeout' }),
+      () =>
+        finish(
+          !best
+            ? { ok: false, reason: 'timeout' }
+            : best.coords.accuracy > ROUGH_ACCURACY_METERS
+              ? { ok: false, reason: 'rough', accuracy: best.coords.accuracy }
+              : fixFrom(best),
+        ),
       timeoutMs,
     )
 
@@ -62,7 +81,13 @@ export function getBestPosition({
       },
       (error) => {
         if (error.code === error.PERMISSION_DENIED) return finish({ ok: false, reason: 'denied' })
-        if (best) return finish(fixFrom(best)) // a rough reading is better than none
+        if (best) {
+          return finish(
+            best.coords.accuracy > ROUGH_ACCURACY_METERS
+              ? { ok: false, reason: 'rough', accuracy: best.coords.accuracy }
+              : fixFrom(best),
+          )
+        }
         finish({ ok: false, reason: error.code === error.TIMEOUT ? 'timeout' : 'unavailable' })
       },
       { enableHighAccuracy: true, maximumAge: 0, timeout: timeoutMs },
@@ -72,10 +97,16 @@ export function getBestPosition({
 
 /** Plain-words advice for a failed location request. */
 export function positionProblemMessage(
-  reason: 'denied' | 'unavailable' | 'timeout' | 'unsupported',
+  reason: 'denied' | 'unavailable' | 'timeout' | 'unsupported' | 'rough',
   t: Translate = makeTranslate({}),
+  accuracy?: number,
 ) {
   switch (reason) {
+    case 'rough':
+      return t(
+        'We could only find your location roughly (about {accuracy}). Your device is probably using Wi-Fi or the mobile network instead of GPS. Turn on GPS and High accuracy location, go outside where the sky is open, and try again.',
+        { accuracy: formatMeters(accuracy ?? ROUGH_ACCURACY_METERS) },
+      )
     case 'denied':
       return t(
         'Location is turned off for this website. Tap the lock icon next to the web address, set Location to "Allow", then try again.',

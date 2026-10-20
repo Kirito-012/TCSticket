@@ -10,6 +10,7 @@ const messages: Messages = {
   'Add at least one photo first.': 'ಮೊದಲು ಕನಿಷ್ಠ ಒಂದು ಫೋಟೋ ಸೇರಿಸಿ.',
   'Add photos': 'ಫೋಟೋಗಳನ್ನು ಸೇರಿಸಿ',
   Added: 'ಸೇರಿಸಲಾಗಿದೆ',
+  Admin: 'ಅಡ್ಮಿನ್',
   'All done!': 'ಎಲ್ಲವೂ ಮುಗಿದಿದೆ!',
   'Already have an account?': 'ಈಗಾಗಲೇ ಖಾತೆ ಇದೆಯೇ?',
   Any: 'ಯಾವುದೇ',
@@ -44,6 +45,7 @@ const messages: Messages = {
   Download: 'ಡೌನ್‌ಲೋಡ್',
   'Download the report': 'ವರದಿಯನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ',
   'Drone photo of the place': 'ಆ ಸ್ಥಳದ ಡ್ರೋನ್ ಫೋಟೋ',
+  'Drone re-check photo': 'ಡ್ರೋನ್ ಮರು ಪರಿಶೀಲನೆ ಫೋಟೋ',
   'Electronic equipment': 'ಎಲೆಕ್ಟ್ರಾನಿಕ್ ಸಾಧನಗಳು',
   'Email address': 'ಇಮೇಲ್ ವಿಳಾಸ',
   'Enlarge photo {n}': 'ಫೋಟೋ {n} ದೊಡ್ಡದಾಗಿಸಿ',
@@ -135,6 +137,7 @@ const messages: Messages = {
   'Previous image': 'ಹಿಂದಿನ ಚಿತ್ರ',
   'Quick views': 'ತ್ವರಿತ ನೋಟಗಳು',
   'Remove this photo': 'ಈ ಫೋಟೋ ತೆಗೆದುಹಾಕಿ',
+  Reopened: 'ಮತ್ತೆ ತೆರೆಯಲಾಗಿದೆ',
   'Request access': 'ಪ್ರವೇಶಕ್ಕಾಗಿ ವಿನಂತಿಸಿ',
   'Request an account': 'ಖಾತೆಗಾಗಿ ವಿನಂತಿಸಿ',
   'Request submitted': 'ವಿನಂತಿ ಸಲ್ಲಿಸಲಾಗಿದೆ',
@@ -167,6 +170,12 @@ const messages: Messages = {
   Textile: 'ಬಟ್ಟೆ',
   'That photo is too big. Please choose a smaller one.':
     'ಆ ಫೋಟೋ ತುಂಬಾ ದೊಡ್ಡದಾಗಿದೆ. ದಯವಿಟ್ಟು ಚಿಕ್ಕದನ್ನು ಆಯ್ಕೆಮಾಡಿ.',
+  'The drone checked this place again and garbage is still there. Clean it up, then upload new photos.':
+    'ಡ್ರೋನ್ ಈ ಸ್ಥಳವನ್ನು ಮತ್ತೆ ಪರಿಶೀಲಿಸಿತು ಮತ್ತು ಕಸ ಇನ್ನೂ ಇದೆ. ಅದನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ, ನಂತರ ಹೊಸ ಫೋಟೋಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ.',
+  'The drone checked this place again: garbage is still there.':
+    'ಡ್ರೋನ್ ಈ ಸ್ಥಳವನ್ನು ಮತ್ತೆ ಪರಿಶೀಲಿಸಿತು: ಕಸ ಇನ್ನೂ ಇದೆ.',
+  'The drone checked this place again: no garbage found.':
+    'ಡ್ರೋನ್ ಈ ಸ್ಥಳವನ್ನು ಮತ್ತೆ ಪರಿಶೀಲಿಸಿತು: ಕಸ ಕಂಡುಬಂದಿಲ್ಲ.',
   'The garbage is spread over too much of the picture to outline.':
     'ಕಸ ಚಿತ್ರದಲ್ಲಿ ತುಂಬಾ ಹರಡಿರುವುದರಿಂದ ಅದನ್ನು ಗುರುತಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ.',
   'The original drone photo': 'ಡ್ರೋನ್‌ನ ಮೂಲ ಫೋಟೋ',
@@ -182,6 +191,7 @@ const messages: Messages = {
     'ಈ ಫೋನ್ ಅಥವಾ ಬ್ರೌಸರ್ ಸ್ಥಳವನ್ನು ಹಂಚಿಕೊಳ್ಳಲು ಸಾಧ್ಯವಿಲ್ಲ, ಆದ್ದರಿಂದ ಫೋಟೋ ಪರಿಶೀಲಿಸಲಾಗುವುದಿಲ್ಲ. ದಯವಿಟ್ಟು ಸ್ಥಳ ವ್ಯವಸ್ಥೆ ಇರುವ ಫೋನ್ ಬಳಸಿ.',
   'This photo was not accepted': 'ಈ ಫೋಟೋ ಸ್ವೀಕರಿಸಲಾಗಿಲ್ಲ',
   'This ticket is done': 'ಈ ಟಿಕೆಟ್ ಮುಗಿದಿದೆ',
+  'This ticket was reopened': 'ಈ ಟಿಕೆಟ್ ಅನ್ನು ಮತ್ತೆ ತೆರೆಯಲಾಗಿದೆ',
   'This week': 'ಈ ವಾರ',
   Ticket: 'ಟಿಕೆಟ್',
   'Ticket not found.': 'ಟಿಕೆಟ್ ಸಿಗಲಿಲ್ಲ.',
@@ -220,6 +230,8 @@ const messages: Messages = {
     'ನಿಮ್ಮ ಸ್ಥಳವನ್ನು ಓದಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಫೋನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಸ್ಥಳ ಆನ್ ಆಗಿದೆಯೇ ನೋಡಿ, ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
   'We could not read your location. Please allow location for this website, then try again.':
     'ನಿಮ್ಮ ಸ್ಥಳವನ್ನು ಓದಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಈ ವೆಬ್‌ಸೈಟ್‌ಗೆ ಸ್ಥಳದ ಅನುಮತಿ ನೀಡಿ, ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+  'We could only find your location roughly (about {accuracy}). Your device is probably using Wi-Fi or the mobile network instead of GPS. Turn on GPS and High accuracy location, go outside where the sky is open, and try again.':
+    'ನಿಮ್ಮ ಸ್ಥಳವನ್ನು ಸುಮಾರಾಗಿ ಮಾತ್ರ ಪತ್ತೆ ಮಾಡಲಾಯಿತು (ಸುಮಾರು {accuracy}). ನಿಮ್ಮ ಸಾಧನ ಬಹುಶಃ GPS ಬದಲು Wi-Fi ಅಥವಾ ಮೊಬೈಲ್ ನೆಟ್‌ವರ್ಕ್ ಬಳಸುತ್ತಿದೆ. GPS ಮತ್ತು ಹೈ ಅಕ್ಯುರಸಿ ಲೊಕೇಶನ್ ಆನ್ ಮಾಡಿ, ಆಕಾಶ ಕಾಣುವ ಜಾಗಕ್ಕೆ ಹೋಗಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
   'Welcome back': 'ಮರಳಿ ಸ್ವಾಗತ',
   'When did it arrive?': 'ಇದು ಯಾವಾಗ ಬಂತು?',
   'When your phone asks, please tap Allow for location.':
@@ -229,6 +241,8 @@ const messages: Messages = {
   'Which zone?': 'ಯಾವ ವಲಯ?',
   Wood: 'ಮರ',
   'Write here if you want to add something': 'ಏನಾದರೂ ಸೇರಿಸಬೇಕಾದರೆ ಇಲ್ಲಿ ಬರೆಯಿರಿ',
+  'You are about {distance} from the place, but your location is only accurate to about {accuracy}, so this may be wrong. Turn on GPS, stand in the open, and try again.':
+    'ನೀವು ಆ ಸ್ಥಳದಿಂದ ಸುಮಾರು {distance} ದೂರದಲ್ಲಿದ್ದೀರಿ, ಆದರೆ ನಿಮ್ಮ ಸ್ಥಳ ಸುಮಾರು {accuracy} ವರೆಗೆ ಮಾತ್ರ ನಿಖರ, ಆದ್ದರಿಂದ ಇದು ತಪ್ಪಾಗಿರಬಹುದು. GPS ಆನ್ ಮಾಡಿ, ತೆರೆದ ಜಾಗದಲ್ಲಿ ನಿಂತು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
   'You are about {distance} from the place. Go to the marked spot (within {radius} m) and take the photo again. The ticket is not done yet.':
     'ನೀವು ಆ ಸ್ಥಳದಿಂದ ಸುಮಾರು {distance} ದೂರದಲ್ಲಿದ್ದೀರಿ. ಗುರುತಿಸಿದ ಸ್ಥಳಕ್ಕೆ ({radius} ಮೀ ಒಳಗೆ) ಹೋಗಿ ಮತ್ತೆ ಫೋಟೋ ತೆಗೆಯಿರಿ. ಟಿಕೆಟ್ ಇನ್ನೂ ಪೂರ್ಣಗೊಂಡಿಲ್ಲ.',
   'You are at the place': 'ನೀವು ಆ ಸ್ಥಳದಲ್ಲಿದ್ದೀರಿ',
@@ -238,6 +252,7 @@ const messages: Messages = {
     'ನಿಮ್ಮ ಖಾತೆ ನಿರ್ವಾಹಕರ ಅನುಮೋದನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ — ಅನುಮೋದನೆ ಸಿಕ್ಕ ನಂತರ ನೀವು ಸೈನ್ ಇನ್ ಮಾಡಬಹುದು.',
   'Your account request was not approved. Contact an admin for help.':
     'ನಿಮ್ಮ ಖಾತೆಯ ವಿನಂತಿಯನ್ನು ಅನುಮೋದಿಸಲಾಗಿಲ್ಲ. ಸಹಾಯಕ್ಕಾಗಿ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ.',
+  'Your earlier photos': 'ನಿಮ್ಮ ಹಿಂದಿನ ಫೋಟೋಗಳು',
   'Your location reading is out of date. Please try again.':
     'ನಿಮ್ಮ ಸ್ಥಳದ ಮಾಹಿತಿ ಹಳೆಯದಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
   'Your next tickets': 'ನಿಮ್ಮ ಮುಂದಿನ ಟಿಕೆಟ್‌ಗಳು',

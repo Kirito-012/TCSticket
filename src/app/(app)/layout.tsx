@@ -24,6 +24,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const todoCount = ticketCounts.byStatus
     .filter((s) => s.slug !== 'resolved' && s.slug !== 'closed')
     .reduce((sum, s) => sum + s.count, 0)
+  const roleLabel =
+    {
+      agent: t('Surveyor'),
+      zoneinspector: t('Zone Inspector'),
+      manager: t('Nodal Manager'),
+      admin: t('Admin'),
+    }[user.roleKey ?? ''] ?? user.roleName
   const firstName = personShortName(user.name || user.email || '') || 'there'
 
   const links: NavLink[] = isInspector
@@ -50,7 +57,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <SidebarProvider simple light={isInspector}>
       <div className={cn('flex min-h-screen', isInspector && 'simple-ui')}>
         <LiveRefresh />
-        <SimpleNav name={firstName} links={links} />
+        <SimpleNav name={firstName} roleLabel={roleLabel} links={links} />
         <div className="flex min-w-0 flex-1 flex-col pb-24 lg:pb-0 lg:pl-64">{children}</div>
       </div>
     </SidebarProvider>

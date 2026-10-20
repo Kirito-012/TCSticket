@@ -112,6 +112,23 @@ const ticketSchema = new Schema(
     // Optional free-text note the surveyor writes when resolving (plain text, max 1000 chars).
     resolutionNote: { type: String, default: '' },
 
+    // When a finished ticket is reopened (the drone still saw garbage), the proof photos and note of
+    // the earlier cleanup move here, so the Surveyor has to upload new proof and the old photos are
+    // never mistaken for the new work.
+    earlierResolutionPhotos: {
+      type: [
+        {
+          url: { type: String, required: true },
+          publicId: { type: String, required: true },
+          width: { type: Number, required: true },
+          height: { type: Number, required: true },
+          uploadedAt: { type: Date, default: null },
+        },
+      ],
+      default: [],
+    },
+    earlierResolutionNote: { type: String, default: '' },
+
     // Whether the cleanup was checked after the Surveyor finished. Every finished ticket starts as
     // "not verified"; a later drone re-flight will set it to "verified" (source 'drone'). Until that
     // exists, a lead can set it by hand (source 'manual'). Tickets from before this field have none,
@@ -127,6 +144,25 @@ const ticketSchema = new Schema(
         { _id: false },
       ),
       default: () => ({ status: 'not_verified' }),
+    },
+
+    // The photo DroneSeva took when it flew over this place again, and what it showed. Kept when the
+    // ticket is reopened, so the Surveyor can see what the drone saw. Replaced by the next re-check.
+    recheckPhoto: {
+      type: new Schema(
+        {
+          url: { type: String, required: true },
+          publicId: { type: String, required: true },
+          width: { type: Number, required: true },
+          height: { type: Number, required: true },
+          result: { type: String, enum: ['clean', 'dirty'], required: true },
+          detections: { type: Number, default: 0 },
+          coveragePercent: { type: Number, default: 0 },
+          takenAt: { type: Date, default: () => new Date() },
+        },
+        { _id: false },
+      ),
+      default: null,
     },
 
     counts: {

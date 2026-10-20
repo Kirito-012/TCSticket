@@ -10,6 +10,7 @@ const messages: Messages = {
   'Add at least one photo first.': 'पहले कम से कम एक फोटो जोड़ें।',
   'Add photos': 'फोटो जोड़ें',
   Added: 'जोड़ा गया',
+  Admin: 'एडमिन',
   'All done!': 'सब पूरा हो गया!',
   'Already have an account?': 'पहले से खाता है?',
   Any: 'कोई भी',
@@ -44,6 +45,7 @@ const messages: Messages = {
   Download: 'डाउनलोड',
   'Download the report': 'रिपोर्ट डाउनलोड करें',
   'Drone photo of the place': 'उस जगह की ड्रोन फोटो',
+  'Drone re-check photo': 'ड्रोन दोबारा जाँच की फोटो',
   'Electronic equipment': 'इलेक्ट्रॉनिक सामान',
   'Email address': 'ईमेल पता',
   'Enlarge photo {n}': 'फोटो {n} बड़ी करें',
@@ -134,6 +136,7 @@ const messages: Messages = {
   'Previous image': 'पिछली फोटो',
   'Quick views': 'जल्दी देखें',
   'Remove this photo': 'यह फोटो हटाएँ',
+  Reopened: 'फिर से खोला गया',
   'Request access': 'पहुँच माँगें',
   'Request an account': 'खाते के लिए अनुरोध करें',
   'Request submitted': 'अनुरोध भेज दिया गया',
@@ -166,6 +169,12 @@ const messages: Messages = {
   Textile: 'कपड़ा',
   'That photo is too big. Please choose a smaller one.':
     'वह फोटो बहुत बड़ी है। कृपया छोटी फोटो चुनें।',
+  'The drone checked this place again and garbage is still there. Clean it up, then upload new photos.':
+    'ड्रोन ने इस जगह को फिर से जाँचा और कचरा अभी भी है। इसे साफ़ करें, फिर नई फोटो अपलोड करें।',
+  'The drone checked this place again: garbage is still there.':
+    'ड्रोन ने इस जगह को फिर से जाँचा: कचरा अभी भी है।',
+  'The drone checked this place again: no garbage found.':
+    'ड्रोन ने इस जगह को फिर से जाँचा: कोई कचरा नहीं मिला।',
   'The garbage is spread over too much of the picture to outline.':
     'कचरा तस्वीर में इतना फैला है कि उसे घेरा नहीं जा सकता।',
   'The original drone photo': 'ड्रोन की मूल फोटो',
@@ -180,6 +189,7 @@ const messages: Messages = {
     'यह फोन या ब्राउज़र अपनी लोकेशन नहीं बता सकता, इसलिए फोटो की जाँच नहीं हो सकती। कृपया लोकेशन वाला फोन इस्तेमाल करें।',
   'This photo was not accepted': 'यह फोटो स्वीकार नहीं हुई',
   'This ticket is done': 'यह टिकट पूरा हो गया है',
+  'This ticket was reopened': 'यह टिकट फिर से खोला गया है',
   'This week': 'इस हफ़्ते',
   Ticket: 'टिकट',
   'Ticket not found.': 'टिकट नहीं मिला।',
@@ -217,6 +227,8 @@ const messages: Messages = {
     'हम आपकी जगह नहीं पढ़ सके। फोन की सेटिंग में लोकेशन चालू है यह देखें, फिर दोबारा कोशिश करें।',
   'We could not read your location. Please allow location for this website, then try again.':
     'हम आपकी जगह नहीं पढ़ सके। कृपया इस वेबसाइट को लोकेशन की अनुमति दें, फिर दोबारा कोशिश करें।',
+  'We could only find your location roughly (about {accuracy}). Your device is probably using Wi-Fi or the mobile network instead of GPS. Turn on GPS and High accuracy location, go outside where the sky is open, and try again.':
+    'हम आपकी लोकेशन सिर्फ़ मोटे तौर पर ढूँढ पाए (लगभग {accuracy})। आपका डिवाइस शायद GPS की जगह Wi-Fi या मोबाइल नेटवर्क इस्तेमाल कर रहा है। GPS और हाई एक्यूरेसी लोकेशन चालू करें, खुले आसमान वाली जगह पर जाएँ और फिर कोशिश करें।',
   'Welcome back': 'वापसी पर स्वागत है',
   'When did it arrive?': 'यह कब आया?',
   'When your phone asks, please tap Allow for location.':
@@ -226,6 +238,8 @@ const messages: Messages = {
   'Which zone?': 'कौन सा ज़ोन?',
   Wood: 'लकड़ी',
   'Write here if you want to add something': 'कुछ जोड़ना हो तो यहाँ लिखें',
+  'You are about {distance} from the place, but your location is only accurate to about {accuracy}, so this may be wrong. Turn on GPS, stand in the open, and try again.':
+    'आप उस जगह से लगभग {distance} दूर हैं, लेकिन आपकी लोकेशन सिर्फ़ लगभग {accuracy} तक सटीक है, इसलिए यह गलत हो सकता है। GPS चालू करें, खुली जगह में खड़े हों और फिर कोशिश करें।',
   'You are about {distance} from the place. Go to the marked spot (within {radius} m) and take the photo again. The ticket is not done yet.':
     'आप उस जगह से लगभग {distance} दूर हैं। निशान वाली जगह ({radius} मीटर के भीतर) जाएँ और दोबारा फोटो लें। टिकट अभी पूरा नहीं हुआ है।',
   'You are at the place': 'आप उस जगह पर हैं',
@@ -235,6 +249,7 @@ const messages: Messages = {
     'आपका खाता एडमिन की मंज़ूरी का इंतज़ार कर रहा है — मंज़ूरी मिलने पर आप साइन इन कर सकेंगे।',
   'Your account request was not approved. Contact an admin for help.':
     'आपके खाते का अनुरोध मंज़ूर नहीं हुआ। मदद के लिए एडमिन से संपर्क करें।',
+  'Your earlier photos': 'आपकी पहले की फोटो',
   'Your location reading is out of date. Please try again.':
     'आपकी लोकेशन की जानकारी पुरानी है। कृपया दोबारा कोशिश करें।',
   'Your next tickets': 'आपके अगले टिकट',

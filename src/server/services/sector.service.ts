@@ -61,6 +61,10 @@ export type SectorSummary = {
   urgent: number
   /** Open tickets older than a few days. */
   waiting: number
+  /** Tickets reopened because the drone re-check still saw garbage. */
+  reopened: number
+  /** Finished tickets whose cleanup has not been checked yet. */
+  unverified: number
   nodalManagers: string[]
   surveyors: SurveyorSummary[]
 }
@@ -83,7 +87,7 @@ export async function getSectorSummaries(scope: TicketScope): Promise<SectorSumm
   const keys = scope.kind === 'all' ? allKeys : allKeys.filter((k) => scope.sectorKeys.includes(k))
   if (keys.length === 0) return []
 
-  const [names, resolvedStatuses, urgentPriorities, roles] = await Promise.all([
+  const [names, resolvedStatuses, urgentPriorities, roles, reopenedStatus] = await Promise.all([
     getSectorNames(),
     TicketStatusModel.find({ isResolved: true }).select('_id').lean(),
     TicketPriorityModel.find({ slug: { $in: ['critical', 'high'] } })
@@ -92,6 +96,7 @@ export async function getSectorSummaries(scope: TicketScope): Promise<SectorSumm
     RoleModel.find({ key: { $in: ['manager', 'agent'] } })
       .select('key')
       .lean(),
+    TicketStatusModel.findOne({ slug: 'reopened' }).select('_id').lean(),
   ])
   const resolvedIds = resolvedStatuses.map((s) => s._id)
   const urgentIds = urgentPriorities.map((p) => p._id)
@@ -115,6 +120,18 @@ export async function getSectorSummaries(scope: TicketScope): Promise<SectorSumm
           },
           waiting: {
             $sum: { $cond: [{ $and: [isOpen, { $lt: ['$createdAt', waitingBefore] }] }, 1, 0] },
+          },
+          reopened: {
+            $sum: { $cond: [{ $eq: ['$statusId', reopenedStatus?._id ?? null] }, 1, 0] },
+          },
+          unverified: {
+            $sum: {
+              $cond: [
+                { $and: [{ $not: [isOpen] }, { $ne: ['$verification.status', 'verified'] }] },
+                1,
+                0,
+              ],
+            },
           },
         },
       },
@@ -162,6 +179,8 @@ export async function getSectorSummaries(scope: TicketScope): Promise<SectorSumm
       unassigned: (row?.unassigned as number | undefined) ?? 0,
       urgent: (row?.urgent as number | undefined) ?? 0,
       waiting: (row?.waiting as number | undefined) ?? 0,
+      reopened: (row?.reopened as number | undefined) ?? 0,
+      unverified: (row?.unverified as number | undefined) ?? 0,
       nodalManagers: here
         .filter((p) => String(p.roleId) === managerRole)
         .map((p) => shortName(p.fullname)),
@@ -187,6 +206,8 @@ export type ZoneSummary = {
   unassigned: number
   urgent: number
   waiting: number
+  reopened: number
+  unverified: number
   inspectors: string[]
 }
 
@@ -222,6 +243,8 @@ export async function getZoneSummaries(): Promise<ZoneSummary[]> {
       unassigned: sum((s) => s.unassigned),
       urgent: sum((s) => s.urgent),
       waiting: sum((s) => s.waiting),
+      reopened: sum((s) => s.reopened),
+      unverified: sum((s) => s.unverified),
       inspectors: inspectors
         .filter((u) => u.zoneKey === zone.key)
         .map((u) => shortName(u.fullname)),

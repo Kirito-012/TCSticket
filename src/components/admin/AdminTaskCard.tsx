@@ -1,4 +1,5 @@
 import { VerificationBadge } from '@/components/tickets/VerificationBadge'
+import { ReopenedBadge } from '@/components/tickets/ReopenedBadge'
 import Link from 'next/link'
 import { CheckCircle2, ChevronRight, ClipboardList, Clock } from 'lucide-react'
 import { AssigneeDropdown } from '@/components/tickets/AssigneeDropdown'
@@ -24,6 +25,7 @@ export function AdminTaskCard({
 }) {
   const done = isDone(task.status)
   const urgent = !done && isUrgent(task.priority)
+  const reopened = task.status?.slug === 'reopened'
 
   return (
     <div className="flex h-full flex-col gap-4 rounded-2xl border-2 border-border-strong bg-surface p-4 sm:p-5">
@@ -55,20 +57,25 @@ export function AdminTaskCard({
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             {/* Resolved or not — said outright, then the ticket's own status. */}
-            <span
-              className={cn(
-                'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-base font-semibold',
-                done ? 'bg-accent-soft text-accent-strong' : 'bg-warning-soft text-warning',
-              )}
-            >
-              {done ? (
-                <CheckCircle2 className="h-4 w-4" strokeWidth={2.5} />
-              ) : (
-                <Clock className="h-4 w-4" strokeWidth={2.5} />
-              )}
-              {done ? 'Resolved' : 'Not resolved'}
-            </span>
-            {task.status && friendlyStatusName(task.status.name) !== 'Resolved' && (
+            {reopened ? (
+              // A reopened ticket says so once, in red, instead of "Not resolved" plus a second tag.
+              <ReopenedBadge />
+            ) : (
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-base font-semibold',
+                  done ? 'bg-accent-soft text-accent-strong' : 'bg-warning-soft text-warning',
+                )}
+              >
+                {done ? (
+                  <CheckCircle2 className="h-4 w-4" strokeWidth={2.5} />
+                ) : (
+                  <Clock className="h-4 w-4" strokeWidth={2.5} />
+                )}
+                {done ? 'Resolved' : 'Not resolved'}
+              </span>
+            )}
+            {task.status && !reopened && friendlyStatusName(task.status.name) !== 'Resolved' && (
               <span className="rounded-full border border-border-strong px-3 py-1 text-base font-medium text-muted-strong">
                 {friendlyStatusName(task.status.name)}
               </span>

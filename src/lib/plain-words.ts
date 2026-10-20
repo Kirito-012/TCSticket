@@ -11,6 +11,11 @@ export function isDone(status: StatusLike) {
   return Boolean(status?.isResolved) || status?.slug === 'resolved' || status?.slug === 'closed'
 }
 
+/** A finished ticket whose place was flown over again and still showed garbage. */
+export function isReopened(status: StatusLike) {
+  return status?.slug === 'reopened'
+}
+
 export function plainStatusLabel(status: StatusLike, t: (text: string) => string = (s) => s) {
   return isDone(status) ? t('Done') : t('To do')
 }
@@ -40,6 +45,7 @@ const FRIENDLY_STATUS: Record<string, string> = {
   pending: 'Waiting',
   resolved: 'Resolved',
   closed: 'Closed',
+  reopened: 'Reopened',
 }
 
 export function friendlyStatusName(name: string) {

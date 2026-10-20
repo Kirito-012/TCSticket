@@ -22,6 +22,7 @@ const ACTION_LABELS: Record<string, string> = {
   photo_removed: 'removed a resolution photo',
   verified: 'marked the cleanup as verified',
   unverified: 'marked the cleanup as not verified',
+  reopened: 'reopened this ticket: the drone re-check still showed garbage',
 }
 
 function describe(event: EventView) {

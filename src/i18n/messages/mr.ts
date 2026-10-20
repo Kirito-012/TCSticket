@@ -10,6 +10,7 @@ const messages: Messages = {
   'Add at least one photo first.': 'आधी किमान एक फोटो जोडा.',
   'Add photos': 'फोटो जोडा',
   Added: 'जोडले',
+  Admin: 'अ‍ॅडमिन',
   'All done!': 'सर्व पूर्ण झाले!',
   'Already have an account?': 'आधीच खाते आहे?',
   Any: 'कोणतेही',
@@ -44,6 +45,7 @@ const messages: Messages = {
   Download: 'डाउनलोड',
   'Download the report': 'अहवाल डाउनलोड करा',
   'Drone photo of the place': 'त्या ठिकाणाचा ड्रोन फोटो',
+  'Drone re-check photo': 'ड्रोन पुन्हा तपासणीचा फोटो',
   'Electronic equipment': 'इलेक्ट्रॉनिक सामान',
   'Email address': 'ईमेल पत्ता',
   'Enlarge photo {n}': 'फोटो {n} मोठा करा',
@@ -134,6 +136,7 @@ const messages: Messages = {
   'Previous image': 'मागील फोटो',
   'Quick views': 'झटपट पाहा',
   'Remove this photo': 'हा फोटो काढा',
+  Reopened: 'पुन्हा उघडले',
   'Request access': 'प्रवेशाची विनंती करा',
   'Request an account': 'खात्यासाठी विनंती करा',
   'Request submitted': 'विनंती पाठवली',
@@ -166,6 +169,12 @@ const messages: Messages = {
   Textile: 'कापड',
   'That photo is too big. Please choose a smaller one.':
     'तो फोटो खूप मोठा आहे. कृपया लहान फोटो निवडा.',
+  'The drone checked this place again and garbage is still there. Clean it up, then upload new photos.':
+    'ड्रोनने ही जागा पुन्हा तपासली आणि कचरा अजूनही आहे. ती स्वच्छ करा, मग नवीन फोटो अपलोड करा.',
+  'The drone checked this place again: garbage is still there.':
+    'ड्रोनने ही जागा पुन्हा तपासली: कचरा अजूनही आहे.',
+  'The drone checked this place again: no garbage found.':
+    'ड्रोनने ही जागा पुन्हा तपासली: कचरा आढळला नाही.',
   'The garbage is spread over too much of the picture to outline.':
     'कचरा चित्रात इतका पसरला आहे की त्याला वेढा घालता येत नाही.',
   'The original drone photo': 'ड्रोनचा मूळ फोटो',
@@ -180,6 +189,7 @@ const messages: Messages = {
     'हा फोन किंवा ब्राउझर लोकेशन देऊ शकत नाही, त्यामुळे फोटो तपासता येत नाही. कृपया लोकेशन असलेला फोन वापरा.',
   'This photo was not accepted': 'हा फोटो स्वीकारला गेला नाही',
   'This ticket is done': 'हे तिकीट पूर्ण झाले आहे',
+  'This ticket was reopened': 'हे तिकीट पुन्हा उघडले आहे',
   'This week': 'या आठवड्यात',
   Ticket: 'तिकीट',
   'Ticket not found.': 'तिकीट सापडले नाही.',
@@ -217,6 +227,8 @@ const messages: Messages = {
     'आम्ही तुमचे ठिकाण वाचू शकलो नाही. फोनच्या सेटिंग्जमध्ये लोकेशन चालू आहे का ते पाहा आणि पुन्हा प्रयत्न करा.',
   'We could not read your location. Please allow location for this website, then try again.':
     'आम्ही तुमचे ठिकाण वाचू शकलो नाही. कृपया या वेबसाइटला लोकेशनची परवानगी द्या आणि पुन्हा प्रयत्न करा.',
+  'We could only find your location roughly (about {accuracy}). Your device is probably using Wi-Fi or the mobile network instead of GPS. Turn on GPS and High accuracy location, go outside where the sky is open, and try again.':
+    'आम्हाला तुमचे स्थान फक्त अंदाजे सापडले (सुमारे {accuracy}). तुमचे डिव्हाइस कदाचित GPS ऐवजी Wi-Fi किंवा मोबाइल नेटवर्क वापरत आहे. GPS आणि हाय अ‍ॅक्युरसी लोकेशन चालू करा, मोकळ्या आकाशाखाली जा आणि पुन्हा प्रयत्न करा.',
   'Welcome back': 'पुन्हा स्वागत',
   'When did it arrive?': 'हे कधी आले?',
   'When your phone asks, please tap Allow for location.':
@@ -226,6 +238,8 @@ const messages: Messages = {
   'Which zone?': 'कोणता झोन?',
   Wood: 'लाकूड',
   'Write here if you want to add something': 'काही जोडायचे असल्यास येथे लिहा',
+  'You are about {distance} from the place, but your location is only accurate to about {accuracy}, so this may be wrong. Turn on GPS, stand in the open, and try again.':
+    'तुम्ही त्या जागेपासून सुमारे {distance} दूर आहात, पण तुमचे स्थान फक्त सुमारे {accuracy} पर्यंत अचूक आहे, त्यामुळे हे चुकीचे असू शकते. GPS चालू करा, मोकळ्या जागी उभे राहा आणि पुन्हा प्रयत्न करा.',
   'You are about {distance} from the place. Go to the marked spot (within {radius} m) and take the photo again. The ticket is not done yet.':
     'तुम्ही त्या ठिकाणापासून सुमारे {distance} अंतरावर आहात. चिन्हांकित जागी ({radius} मीटरच्या आत) जा आणि पुन्हा फोटो घ्या. तिकीट अजून पूर्ण झालेले नाही.',
   'You are at the place': 'तुम्ही त्या ठिकाणी आहात',
@@ -235,6 +249,7 @@ const messages: Messages = {
     'तुमचे खाते अ‍ॅडमिनच्या मंजुरीची वाट पाहत आहे — मंजुरी मिळाल्यावर तुम्ही साइन इन करू शकाल.',
   'Your account request was not approved. Contact an admin for help.':
     'तुमच्या खात्याची विनंती मंजूर झाली नाही. मदतीसाठी अ‍ॅडमिनशी संपर्क साधा.',
+  'Your earlier photos': 'तुमचे आधीचे फोटो',
   'Your location reading is out of date. Please try again.':
     'तुमचे लोकेशन वाचन जुने झाले आहे. कृपया पुन्हा प्रयत्न करा.',
   'Your next tickets': 'तुमची पुढील तिकिटे',

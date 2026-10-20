@@ -2,7 +2,7 @@ import 'server-only'
 
 import { listTickets } from '@/server/services/ticket.service'
 import { toTicketListItem, type TicketListItemView } from '@/lib/ticket-view'
-import { isDone, isUrgent } from '@/lib/plain-words'
+import { isDone, isReopened, isUrgent } from '@/lib/plain-words'
 import { DEFAULT_INSPECTOR_FILTERS, type InspectorFilters } from '@/lib/inspector-filters'
 
 const MAX_TASKS = 100
@@ -44,6 +44,7 @@ export async function getInspectorTasks(
     .map(toTicketListItem)
     .filter((t) => arrivedInRange(t.createdAt, filters))
     .filter((t) => !filters.urgentOnly || isUrgent(t.priority))
+    .filter((t) => !filters.reopenedOnly || isReopened(t.status))
     // The verification filter is about finished tickets, so it leaves the unfinished ones alone.
     .filter(
       (t) =>
@@ -57,8 +58,11 @@ export async function getInspectorTasks(
   const order = (list: TicketListItemView[]) => {
     if (filters.sort === 'newest') return [...list].sort(byArrival(-1))
     if (filters.sort === 'oldest') return [...list].sort(byArrival(1))
-    // Urgent first; Array.sort is stable, so the rest keep latest-activity-first order.
-    return [...list].sort((a, b) => Number(isUrgent(b.priority)) - Number(isUrgent(a.priority)))
+    // Reopened first (the place was not clean after all), then urgent; Array.sort is stable, so the
+    // rest keep latest-activity-first order.
+    const rank = (x: TicketListItemView) =>
+      Number(isReopened(x.status)) * 2 + Number(isUrgent(x.priority))
+    return [...list].sort((a, b) => rank(b) - rank(a))
   }
 
   return {

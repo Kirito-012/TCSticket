@@ -1,7 +1,8 @@
 import Link from 'next/link'
-import { PartyPopper } from 'lucide-react'
+import { PartyPopper, RotateCcw } from 'lucide-react'
 import { TaskCard } from '@/components/inspector/TaskCard'
 import type { TicketListItemView } from '@/lib/ticket-view'
+import { isReopened } from '@/lib/plain-words'
 import { DEFAULT_INSPECTOR_FILTERS, inspectorHref } from '@/lib/inspector-filters'
 import { getT } from '@/i18n/server'
 import type { Translate } from '@/i18n/config'
@@ -75,10 +76,24 @@ export async function InspectorHome({
 }) {
   const t = await getT()
   const next = todo.slice(0, NEXT_TASKS_SHOWN)
+  const reopened = todo.filter((task) => isReopened(task.status)).length
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6 md:max-w-5xl">
       <TicketsProgress todo={todo.length} done={done.length} t={t} />
+
+      {reopened > 0 && (
+        <Link
+          href={inspectorHref('todo', { ...DEFAULT_INSPECTOR_FILTERS, reopenedOnly: true })}
+          className="flex min-h-14 max-w-xl items-center gap-3 rounded-2xl border-2 border-danger bg-danger-soft px-5 text-lg font-bold text-danger"
+        >
+          <RotateCcw className="h-6 w-6" strokeWidth={2.5} />
+          {t('Reopened')}
+          <span className="ml-auto rounded-full bg-danger px-3 py-0.5 text-base text-white">
+            {reopened}
+          </span>
+        </Link>
+      )}
 
       <section aria-label={t('Quick views')} className="space-y-2">
         <h2 className="text-base font-bold text-muted-strong">{t('Quick views')}</h2>

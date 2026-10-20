@@ -12,6 +12,8 @@ import { AssigneeDropdown } from '@/components/tickets/AssigneeDropdown'
 import { StatusSelect } from '@/components/tickets/StatusSelect'
 import { ResolutionPhotoGrid } from '@/components/tickets/ResolutionPhotoGrid'
 import { DronePhoto } from '@/components/tickets/DronePhoto'
+import { RecheckPhoto } from '@/components/tickets/RecheckPhoto'
+import { ReopenedNotice } from '@/components/tickets/ReopenedNotice'
 import { ReportViewer } from '@/components/tickets/ReportViewer'
 import { SurveyorResolutionPanel } from '@/components/tickets/SurveyorResolutionPanel'
 import { requireTicketScope } from '@/server/auth/session'
@@ -25,6 +27,7 @@ import * as userService from '@/server/services/user.service'
 import { scopeAllows } from '@/lib/ticket-scope'
 import { localizeIssueHtml } from '@/lib/localize-issue'
 import { VerificationBadge } from '@/components/tickets/VerificationBadge'
+import { ReopenedBadge } from '@/components/tickets/ReopenedBadge'
 import { VerificationControl } from '@/components/tickets/VerificationControl'
 import { getT } from '@/i18n/server'
 import { toTicketDetailView, toCommentView, toEventView } from '@/lib/ticket-view'
@@ -102,14 +105,18 @@ export default async function TicketDetailPage({
             <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
               <Card className="p-5 sm:p-6">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className={cn(
-                      'rounded-full px-3 py-1 text-base font-semibold',
-                      done ? 'bg-accent-soft text-accent-strong' : 'bg-warning-soft text-warning',
-                    )}
-                  >
-                    {plainStatusLabel(status, t)}
-                  </span>
+                  {status?.slug === 'reopened' ? (
+                    <ReopenedBadge />
+                  ) : (
+                    <span
+                      className={cn(
+                        'rounded-full px-3 py-1 text-base font-semibold',
+                        done ? 'bg-accent-soft text-accent-strong' : 'bg-warning-soft text-warning',
+                      )}
+                    >
+                      {plainStatusLabel(status, t)}
+                    </span>
+                  )}
                   {!done && isUrgent(priority) && (
                     <span className="rounded-full bg-danger px-3 py-1 text-base font-semibold text-white">
                       {t('Urgent')}
@@ -143,6 +150,7 @@ export default async function TicketDetailPage({
                     <DronePhoto photos={ticket.sourcePhotos} />
                   </div>
                 )}
+                {ticket.recheckPhoto && <RecheckPhoto photo={ticket.recheckPhoto} />}
                 {ticket.report && (
                   <div className="mt-6 space-y-3">
                     <h2 className="text-xl font-bold text-foreground">{t('The report')}</h2>
@@ -180,6 +188,9 @@ export default async function TicketDetailPage({
                 <h2 className="mb-5 text-2xl font-bold text-foreground">
                   {done ? t('Your work') : t('Finish this ticket')}
                 </h2>
+                {status?.slug === 'reopened' && (
+                  <ReopenedNotice earlierPhotos={ticket.earlierResolutionPhotos} />
+                )}
                 <SurveyorResolutionPanel
                   ticketNumber={ticket.number}
                   photos={ticket.resolutionPhotos}
@@ -223,14 +234,18 @@ export default async function TicketDetailPage({
             <div className="space-y-5">
               <Card className="p-5 sm:p-6">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className={cn(
-                      'rounded-full px-3 py-1 text-base font-semibold',
-                      done ? 'bg-accent-soft text-accent-strong' : 'bg-warning-soft text-warning',
-                    )}
-                  >
-                    {plainStatusLabel(status)}
-                  </span>
+                  {status?.slug === 'reopened' ? (
+                    <ReopenedBadge />
+                  ) : (
+                    <span
+                      className={cn(
+                        'rounded-full px-3 py-1 text-base font-semibold',
+                        done ? 'bg-accent-soft text-accent-strong' : 'bg-warning-soft text-warning',
+                      )}
+                    >
+                      {plainStatusLabel(status)}
+                    </span>
+                  )}
                   {!done && isUrgent(priority) && (
                     <span className="rounded-full bg-danger px-3 py-1 text-base font-semibold text-white">
                       Urgent
@@ -281,6 +296,7 @@ export default async function TicketDetailPage({
                     <DronePhoto photos={ticket.sourcePhotos} showTime />
                   </div>
                 )}
+                {ticket.recheckPhoto && <RecheckPhoto photo={ticket.recheckPhoto} />}
                 {ticket.report && (
                   <div className="mt-6 space-y-3">
                     <h2 className="text-xl font-bold text-foreground">Detection report</h2>
@@ -385,7 +401,9 @@ export default async function TicketDetailPage({
                 </div>
               </details>
 
-              {(ticket.resolutionPhotos.length > 0 || ticket.resolutionNote) && (
+              {(ticket.resolutionPhotos.length > 0 ||
+                ticket.resolutionNote ||
+                ticket.earlierResolutionPhotos.length > 0) && (
                 <Card className="p-5 sm:p-6">
                   <h2 className="text-xl font-bold text-foreground">What the inspector did</h2>
                   {ticket.resolutionNote && (
@@ -402,6 +420,22 @@ export default async function TicketDetailPage({
                         Photos ({ticket.resolutionPhotos.length}) — tap one to enlarge
                       </p>
                       <ResolutionPhotoGrid photos={ticket.resolutionPhotos} compact />
+                    </div>
+                  )}
+                  {status?.slug === 'reopened' && ticket.resolutionPhotos.length === 0 && (
+                    <p className="mt-3 rounded-2xl border-2 border-danger bg-danger-soft p-4 text-base font-semibold text-danger">
+                      Reopened: the Surveyor has to clean the place again and upload new photos.
+                    </p>
+                  )}
+                  {ticket.earlierResolutionPhotos.length > 0 && (
+                    <div className="mt-4">
+                      <p className="mb-2 text-base font-semibold text-muted">
+                        Earlier photos, from before the ticket was reopened (
+                        {ticket.earlierResolutionPhotos.length})
+                      </p>
+                      <div className="opacity-70">
+                        <ResolutionPhotoGrid photos={ticket.earlierResolutionPhotos} compact />
+                      </div>
                     </div>
                   )}
                 </Card>

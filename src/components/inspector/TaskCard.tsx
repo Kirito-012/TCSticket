@@ -2,7 +2,8 @@ import Link from 'next/link'
 import { CheckCircle2, ChevronRight, ClipboardList } from 'lucide-react'
 import { cn, timeAgo } from '@/lib/utils'
 import { VerificationBadge } from '@/components/tickets/VerificationBadge'
-import { isDone, isUrgent, plainStatusLabel, plainTitle } from '@/lib/plain-words'
+import { ReopenedBadge } from '@/components/tickets/ReopenedBadge'
+import { isDone, isReopened, isUrgent, plainStatusLabel, plainTitle } from '@/lib/plain-words'
 import type { TicketListItemView } from '@/lib/ticket-view'
 import { getLocale, getT } from '@/i18n/server'
 import { localeTag } from '@/i18n/config'
@@ -46,14 +47,18 @@ export async function TaskCard({ task }: { task: TicketListItemView }) {
           {plainTitle(task.subject, t)}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <span
-            className={cn(
-              'rounded-full px-3 py-1 text-base font-semibold',
-              done ? 'bg-accent-soft text-accent-strong' : 'bg-slate-200 text-slate-700',
-            )}
-          >
-            {plainStatusLabel(task.status, t)}
-          </span>
+          {isReopened(task.status) ? (
+            <ReopenedBadge />
+          ) : (
+            <span
+              className={cn(
+                'rounded-full px-3 py-1 text-base font-semibold',
+                done ? 'bg-accent-soft text-accent-strong' : 'bg-slate-200 text-slate-700',
+              )}
+            >
+              {plainStatusLabel(task.status, t)}
+            </span>
+          )}
           {urgent && (
             <span className="rounded-full bg-danger px-3 py-1 text-base font-semibold text-white">
               {t('Urgent')}

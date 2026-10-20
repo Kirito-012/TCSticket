@@ -105,9 +105,21 @@ export function verdictMessage(
   t: Translate = makeTranslate({}),
 ): string {
   if (verdict.ok) return ''
-  const m = (n: number | undefined) => (n === undefined ? '' : `${Math.max(1, Math.round(n))} m`)
+  const m = (n: number | undefined) =>
+    n === undefined
+      ? ''
+      : n >= 1000
+        ? `${(n / 1000).toFixed(1)} km`
+        : `${Math.max(1, Math.round(n))} m`
   switch (verdict.reason) {
     case 'too-far':
+      // A reading that is itself kilometres off says little about the distance: say so.
+      if ((verdict.accuracyMeters ?? 0) > 100) {
+        return t(
+          'You are about {distance} from the place, but your location is only accurate to about {accuracy}, so this may be wrong. Turn on GPS, stand in the open, and try again.',
+          { distance: m(verdict.distanceMeters), accuracy: m(verdict.accuracyMeters) },
+        )
+      }
       return t(
         'You are about {distance} from the place. Go to the marked spot (within {radius} m) and take the photo again. The ticket is not done yet.',
         { distance: m(verdict.distanceMeters), radius: rules.radiusMeters },

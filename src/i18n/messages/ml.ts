@@ -11,6 +11,7 @@ const messages: Messages = {
   'Add at least one photo first.': 'ആദ്യം കുറഞ്ഞത് ഒരു ഫോട്ടോ ചേർക്കുക.',
   'Add photos': 'ഫോട്ടോകൾ ചേർക്കുക',
   Added: 'ചേർത്തു',
+  Admin: 'അഡ്മിൻ',
   'All done!': 'എല്ലാം കഴിഞ്ഞു!',
   'Already have an account?': 'ഇതിനകം അക്കൗണ്ട് ഉണ്ടോ?',
   Any: 'ഏതും',
@@ -45,6 +46,7 @@ const messages: Messages = {
   Download: 'ഡൗൺലോഡ്',
   'Download the report': 'റിപ്പോർട്ട് ഡൗൺലോഡ് ചെയ്യുക',
   'Drone photo of the place': 'ആ സ്ഥലത്തിന്റെ ഡ്രോൺ ഫോട്ടോ',
+  'Drone re-check photo': 'ഡ്രോൺ വീണ്ടും പരിശോധിച്ച ഫോട്ടോ',
   'Electronic equipment': 'ഇലക്ട്രോണിക് ഉപകരണങ്ങൾ',
   'Email address': 'ഇമെയിൽ വിലാസം',
   'Enlarge photo {n}': 'ഫോട്ടോ {n} വലുതാക്കുക',
@@ -136,6 +138,7 @@ const messages: Messages = {
   'Previous image': 'മുമ്പത്തെ ചിത്രം',
   'Quick views': 'ദ്രുത കാഴ്ചകൾ',
   'Remove this photo': 'ഈ ഫോട്ടോ നീക്കം ചെയ്യുക',
+  Reopened: 'വീണ്ടും തുറന്നു',
   'Request access': 'ആക്സസ് അഭ്യർത്ഥിക്കുക',
   'Request an account': 'അക്കൗണ്ടിനായി അഭ്യർത്ഥിക്കുക',
   'Request submitted': 'അഭ്യർത്ഥന സമർപ്പിച്ചു',
@@ -168,6 +171,12 @@ const messages: Messages = {
   Textile: 'തുണി',
   'That photo is too big. Please choose a smaller one.':
     'ആ ഫോട്ടോ വളരെ വലുതാണ്. ദയവായി ചെറുത് തിരഞ്ഞെടുക്കുക.',
+  'The drone checked this place again and garbage is still there. Clean it up, then upload new photos.':
+    'ഡ്രോൺ ഈ സ്ഥലം വീണ്ടും പരിശോധിച്ചു, മാലിന്യം ഇപ്പോഴും ഉണ്ട്. അത് വൃത്തിയാക്കിയ ശേഷം പുതിയ ഫോട്ടോകൾ അപ്‌ലോഡ് ചെയ്യുക.',
+  'The drone checked this place again: garbage is still there.':
+    'ഡ്രോൺ ഈ സ്ഥലം വീണ്ടും പരിശോധിച്ചു: മാലിന്യം ഇപ്പോഴും ഉണ്ട്.',
+  'The drone checked this place again: no garbage found.':
+    'ഡ്രോൺ ഈ സ്ഥലം വീണ്ടും പരിശോധിച്ചു: മാലിന്യം കണ്ടെത്തിയില്ല.',
   'The garbage is spread over too much of the picture to outline.':
     'മാലിന്യം ചിത്രത്തിൽ വളരെയധികം പരന്നിരിക്കുന്നതിനാൽ അടയാളപ്പെടുത്താൻ കഴിയില്ല.',
   'The original drone photo': 'ഡ്രോണിന്റെ യഥാർത്ഥ ഫോട്ടോ',
@@ -183,6 +192,7 @@ const messages: Messages = {
     'ഈ ഫോണിനോ ബ്രൗസറിനോ ലൊക്കേഷൻ പങ്കിടാൻ കഴിയില്ല, അതിനാൽ ഫോട്ടോ പരിശോധിക്കാൻ കഴിയില്ല. ദയവായി ലൊക്കേഷൻ ഉള്ള ഫോൺ ഉപയോഗിക്കുക.',
   'This photo was not accepted': 'ഈ ഫോട്ടോ അംഗീകരിച്ചില്ല',
   'This ticket is done': 'ഈ ടിക്കറ്റ് പൂർത്തിയായി',
+  'This ticket was reopened': 'ഈ ടിക്കറ്റ് വീണ്ടും തുറന്നിരിക്കുന്നു',
   'This week': 'ഈ ആഴ്ച',
   Ticket: 'ടിക്കറ്റ്',
   'Ticket not found.': 'ടിക്കറ്റ് കണ്ടെത്തിയില്ല.',
@@ -221,6 +231,8 @@ const messages: Messages = {
     'നിങ്ങളുടെ സ്ഥലം വായിക്കാൻ കഴിഞ്ഞില്ല. ഫോൺ ക്രമീകരണത്തിൽ ലൊക്കേഷൻ ഓണാണെന്ന് ഉറപ്പാക്കി വീണ്ടും ശ്രമിക്കുക.',
   'We could not read your location. Please allow location for this website, then try again.':
     'നിങ്ങളുടെ സ്ഥലം വായിക്കാൻ കഴിഞ്ഞില്ല. ദയവായി ഈ വെബ്സൈറ്റിന് ലൊക്കേഷൻ അനുമതി നൽകി വീണ്ടും ശ്രമിക്കുക.',
+  'We could only find your location roughly (about {accuracy}). Your device is probably using Wi-Fi or the mobile network instead of GPS. Turn on GPS and High accuracy location, go outside where the sky is open, and try again.':
+    'നിങ്ങളുടെ ലൊക്കേഷൻ ഏകദേശം മാത്രമേ കണ്ടെത്താനായുള്ളൂ (ഏകദേശം {accuracy}). നിങ്ങളുടെ ഉപകരണം GPS-നു പകരം Wi-Fi അല്ലെങ്കിൽ മൊബൈൽ നെറ്റ്‌വർക്ക് ഉപയോഗിക്കുന്നതായി തോന്നുന്നു. GPS-ഉം ഹൈ അക്യുറസി ലൊക്കേഷനും ഓണാക്കി, ആകാശം കാണുന്ന സ്ഥലത്തേക്ക് പോയി വീണ്ടും ശ്രമിക്കുക.',
   'Welcome back': 'തിരികെ സ്വാഗതം',
   'When did it arrive?': 'ഇത് എപ്പോൾ വന്നു?',
   'When your phone asks, please tap Allow for location.':
@@ -230,6 +242,8 @@ const messages: Messages = {
   'Which zone?': 'ഏത് സോൺ?',
   Wood: 'മരം',
   'Write here if you want to add something': 'എന്തെങ്കിലും ചേർക്കാനുണ്ടെങ്കിൽ ഇവിടെ എഴുതുക',
+  'You are about {distance} from the place, but your location is only accurate to about {accuracy}, so this may be wrong. Turn on GPS, stand in the open, and try again.':
+    'നിങ്ങൾ ആ സ്ഥലത്തു നിന്ന് ഏകദേശം {distance} അകലെയാണ്, പക്ഷേ നിങ്ങളുടെ ലൊക്കേഷൻ ഏകദേശം {accuracy} വരെ മാത്രമേ കൃത്യമായുള്ളൂ, അതിനാൽ ഇത് തെറ്റാകാം. GPS ഓണാക്കി, തുറന്ന സ്ഥലത്ത് നിന്ന് വീണ്ടും ശ്രമിക്കുക.',
   'You are about {distance} from the place. Go to the marked spot (within {radius} m) and take the photo again. The ticket is not done yet.':
     'നിങ്ങൾ ആ സ്ഥലത്തു നിന്ന് ഏകദേശം {distance} അകലെയാണ്. അടയാളപ്പെടുത്തിയ സ്ഥലത്തേക്ക് ({radius} മീറ്ററിനുള്ളിൽ) പോയി വീണ്ടും ഫോട്ടോ എടുക്കുക. ടിക്കറ്റ് ഇതുവരെ പൂർത്തിയായിട്ടില്ല.',
   'You are at the place': 'നിങ്ങൾ ആ സ്ഥലത്താണ്',
@@ -240,6 +254,7 @@ const messages: Messages = {
     'നിങ്ങളുടെ അക്കൗണ്ട് അഡ്മിന്റെ അംഗീകാരത്തിനായി കാത്തിരിക്കുന്നു — അംഗീകാരം ലഭിച്ചാൽ നിങ്ങൾക്ക് സൈൻ ഇൻ ചെയ്യാം.',
   'Your account request was not approved. Contact an admin for help.':
     'നിങ്ങളുടെ അക്കൗണ്ട് അഭ്യർത്ഥന അംഗീകരിച്ചില്ല. സഹായത്തിന് അഡ്മിനുമായി ബന്ധപ്പെടുക.',
+  'Your earlier photos': 'നിങ്ങളുടെ മുൻ ഫോട്ടോകൾ',
   'Your location reading is out of date. Please try again.':
     'നിങ്ങളുടെ ലൊക്കേഷൻ വിവരം പഴയതാണ്. ദയവായി വീണ്ടും ശ്രമിക്കുക.',
   'Your next tickets': 'നിങ്ങളുടെ അടുത്ത ടിക്കറ്റുകൾ',

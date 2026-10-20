@@ -57,11 +57,13 @@ export function SectorGrid({
               </p>
             </div>
 
-            <div className="grid grid-cols-4 gap-2 md:grid-cols-2 2xl:grid-cols-4">
+            <div className="grid grid-cols-3 gap-2 2xl:grid-cols-6">
               <CountPill label="Open" value={sector.open} />
               <CountPill label="Need someone" value={sector.unassigned} tone="warning" />
               <CountPill label="Urgent" value={sector.urgent} tone="danger" />
               <CountPill label="Waiting" value={sector.waiting} tone="warning" />
+              <CountPill label="Reopened" value={sector.reopened} tone="danger" />
+              <CountPill label="Not verified" value={sector.unverified} tone="warning" />
             </div>
 
             <DoneBar done={sector.done} total={sector.total} />

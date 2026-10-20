@@ -201,13 +201,24 @@ export function InspectorFilterBar({
 
           <section>
             <h3 className="mb-2 text-base font-bold text-foreground">{t('Only')}</h3>
-            <Choice
-              active={draft.urgentOnly}
-              onClick={() => setDraft((d) => ({ ...d, urgentOnly: !d.urgentOnly }))}
-            >
-              {draft.urgentOnly && <Check className="h-4 w-4" strokeWidth={3} />}
-              {t('Urgent tickets')}
-            </Choice>
+            <div className="flex flex-wrap gap-2">
+              <Choice
+                active={draft.urgentOnly}
+                onClick={() => setDraft((d) => ({ ...d, urgentOnly: !d.urgentOnly }))}
+              >
+                {draft.urgentOnly && <Check className="h-4 w-4" strokeWidth={3} />}
+                {t('Urgent tickets')}
+              </Choice>
+              {show === 'todo' && (
+                <Choice
+                  active={draft.reopenedOnly}
+                  onClick={() => setDraft((d) => ({ ...d, reopenedOnly: !d.reopenedOnly }))}
+                >
+                  {draft.reopenedOnly && <Check className="h-4 w-4" strokeWidth={3} />}
+                  {t('Reopened')}
+                </Choice>
+              )}
+            </div>
           </section>
         </div>
       </BottomSheet>

@@ -10,6 +10,7 @@ const messages: Messages = {
   'Add at least one photo first.': 'আগে অন্তত একটি ছবি যোগ করুন।',
   'Add photos': 'ছবি যোগ করুন',
   Added: 'যোগ করা হয়েছে',
+  Admin: 'অ্যাডমিন',
   'All done!': 'সব শেষ!',
   'Already have an account?': 'আগে থেকেই অ্যাকাউন্ট আছে?',
   Any: 'যেকোনো',
@@ -44,6 +45,7 @@ const messages: Messages = {
   Download: 'ডাউনলোড',
   'Download the report': 'রিপোর্ট ডাউনলোড করুন',
   'Drone photo of the place': 'জায়গাটির ড্রোন ছবি',
+  'Drone re-check photo': 'ড্রোনের পুনরায় যাচাইয়ের ছবি',
   'Electronic equipment': 'ইলেকট্রনিক সরঞ্জাম',
   'Email address': 'ইমেল ঠিকানা',
   'Enlarge photo {n}': 'ছবি {n} বড় করুন',
@@ -134,6 +136,7 @@ const messages: Messages = {
   'Previous image': 'আগের ছবি',
   'Quick views': 'দ্রুত দেখুন',
   'Remove this photo': 'এই ছবিটি সরান',
+  Reopened: 'পুনরায় খোলা হয়েছে',
   'Request access': 'অ্যাক্সেসের অনুরোধ করুন',
   'Request an account': 'অ্যাকাউন্টের জন্য অনুরোধ করুন',
   'Request submitted': 'অনুরোধ পাঠানো হয়েছে',
@@ -166,6 +169,12 @@ const messages: Messages = {
   Textile: 'কাপড়',
   'That photo is too big. Please choose a smaller one.':
     'ছবিটি অনেক বড়। অনুগ্রহ করে ছোট ছবি বেছে নিন।',
+  'The drone checked this place again and garbage is still there. Clean it up, then upload new photos.':
+    'ড্রোন জায়গাটি আবার যাচাই করেছে এবং আবর্জনা এখনও আছে। এটি পরিষ্কার করুন, তারপর নতুন ছবি আপলোড করুন।',
+  'The drone checked this place again: garbage is still there.':
+    'ড্রোন জায়গাটি আবার যাচাই করেছে: আবর্জনা এখনও আছে।',
+  'The drone checked this place again: no garbage found.':
+    'ড্রোন জায়গাটি আবার যাচাই করেছে: কোনো আবর্জনা পাওয়া যায়নি।',
   'The garbage is spread over too much of the picture to outline.':
     'আবর্জনা ছবির এত বেশি জায়গায় ছড়িয়ে আছে যে ঘিরে দেখানো যায় না।',
   'The original drone photo': 'ড্রোনের মূল ছবি',
@@ -180,6 +189,7 @@ const messages: Messages = {
     'এই ফোন বা ব্রাউজার লোকেশন জানাতে পারে না, তাই ছবি যাচাই করা যাবে না। অনুগ্রহ করে লোকেশন আছে এমন ফোন ব্যবহার করুন।',
   'This photo was not accepted': 'এই ছবিটি গৃহীত হয়নি',
   'This ticket is done': 'এই টিকিটটি সম্পন্ন হয়েছে',
+  'This ticket was reopened': 'এই টিকিটটি আবার খোলা হয়েছে',
   'This week': 'এই সপ্তাহে',
   Ticket: 'টিকিট',
   'Ticket not found.': 'টিকিট পাওয়া যায়নি।',
@@ -217,6 +227,8 @@ const messages: Messages = {
     'আমরা আপনার অবস্থান পড়তে পারিনি। ফোনের সেটিংসে লোকেশন চালু আছে কিনা দেখুন, তারপর আবার চেষ্টা করুন।',
   'We could not read your location. Please allow location for this website, then try again.':
     'আমরা আপনার অবস্থান পড়তে পারিনি। অনুগ্রহ করে এই ওয়েবসাইটকে লোকেশনের অনুমতি দিন, তারপর আবার চেষ্টা করুন।',
+  'We could only find your location roughly (about {accuracy}). Your device is probably using Wi-Fi or the mobile network instead of GPS. Turn on GPS and High accuracy location, go outside where the sky is open, and try again.':
+    'আমরা আপনার অবস্থান শুধু মোটামুটি পেয়েছি (প্রায় {accuracy})। আপনার ডিভাইস সম্ভবত GPS-এর বদলে Wi-Fi বা মোবাইল নেটওয়ার্ক ব্যবহার করছে। GPS ও হাই অ্যাকিউরেসি লোকেশন চালু করুন, খোলা আকাশের নিচে যান এবং আবার চেষ্টা করুন।',
   'Welcome back': 'আবার স্বাগতম',
   'When did it arrive?': 'এটি কবে এসেছিল?',
   'When your phone asks, please tap Allow for location.':
@@ -226,6 +238,8 @@ const messages: Messages = {
   'Which zone?': 'কোন জোন?',
   Wood: 'কাঠ',
   'Write here if you want to add something': 'কিছু যোগ করতে চাইলে এখানে লিখুন',
+  'You are about {distance} from the place, but your location is only accurate to about {accuracy}, so this may be wrong. Turn on GPS, stand in the open, and try again.':
+    'আপনি জায়গাটি থেকে প্রায় {distance} দূরে, তবে আপনার অবস্থান মাত্র প্রায় {accuracy} পর্যন্ত নির্ভুল, তাই এটি ভুল হতে পারে। GPS চালু করুন, খোলা জায়গায় দাঁড়ান এবং আবার চেষ্টা করুন।',
   'You are about {distance} from the place. Go to the marked spot (within {radius} m) and take the photo again. The ticket is not done yet.':
     'আপনি জায়গাটি থেকে প্রায় {distance} দূরে আছেন। চিহ্নিত জায়গায় ({radius} মিটারের মধ্যে) যান এবং আবার ছবি তুলুন। টিকিট এখনও সম্পন্ন হয়নি।',
   'You are at the place': 'আপনি জায়গাটিতে আছেন',
@@ -235,6 +249,7 @@ const messages: Messages = {
     'আপনার অ্যাকাউন্ট অ্যাডমিনের অনুমোদনের অপেক্ষায় আছে — অনুমোদন পেলে আপনি সাইন ইন করতে পারবেন।',
   'Your account request was not approved. Contact an admin for help.':
     'আপনার অ্যাকাউন্টের অনুরোধ অনুমোদিত হয়নি। সাহায্যের জন্য অ্যাডমিনের সঙ্গে যোগাযোগ করুন।',
+  'Your earlier photos': 'আপনার আগের ছবিগুলো',
   'Your location reading is out of date. Please try again.':
     'আপনার লোকেশনের তথ্য পুরনো হয়ে গেছে। অনুগ্রহ করে আবার চেষ্টা করুন।',
   'Your next tickets': 'আপনার পরের টিকিটগুলো',

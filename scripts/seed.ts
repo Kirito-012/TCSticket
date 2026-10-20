@@ -6,6 +6,7 @@ import { randomBytes } from 'node:crypto'
 import { dbConnect } from '../src/server/db/connect'
 import { RoleModel } from '../src/server/db/models/role.model'
 import { UserModel } from '../src/server/db/models/user.model'
+import { REOPENED_STATUS } from '../src/server/reopened-status'
 import { TicketStatusModel } from '../src/server/db/models/ticket-status.model'
 import { TicketPriorityModel } from '../src/server/db/models/ticket-priority.model'
 import { TicketTypeModel } from '../src/server/db/models/ticket-type.model'
@@ -40,6 +41,7 @@ const STATUSES = [
     isResolved: true,
     isDefault: false,
   },
+  REOPENED_STATUS,
 ]
 
 const PRIORITIES = [

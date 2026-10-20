@@ -10,6 +10,7 @@ const messages: Messages = {
   'Add at least one photo first.': 'ముందుగా కనీసం ఒక ఫోటోను జోడించండి.',
   'Add photos': 'ఫోటోలు జోడించండి',
   Added: 'జోడించబడింది',
+  Admin: 'అడ్మిన్',
   'All done!': 'అన్నీ పూర్తయ్యాయి!',
   'Already have an account?': 'ఇప్పటికే ఖాతా ఉందా?',
   Any: 'ఏదైనా',
@@ -44,6 +45,7 @@ const messages: Messages = {
   Download: 'డౌన్‌లోడ్',
   'Download the report': 'నివేదికను డౌన్‌లోడ్ చేయండి',
   'Drone photo of the place': 'ఆ ప్రదేశం యొక్క డ్రోన్ ఫోటో',
+  'Drone re-check photo': 'డ్రోన్ మళ్లీ తనిఖీ ఫోటో',
   'Electronic equipment': 'ఎలక్ట్రానిక్ పరికరాలు',
   'Email address': 'ఈమెయిల్ చిరునామా',
   'Enlarge photo {n}': 'ఫోటో {n} ను పెద్దది చేయండి',
@@ -135,6 +137,7 @@ const messages: Messages = {
   'Previous image': 'మునుపటి ఫోటో',
   'Quick views': 'త్వరిత వీక్షణలు',
   'Remove this photo': 'ఈ ఫోటోను తొలగించండి',
+  Reopened: 'మళ్లీ తెరవబడింది',
   'Request access': 'యాక్సెస్ కోసం అభ్యర్థించండి',
   'Request an account': 'ఖాతా కోసం అభ్యర్థించండి',
   'Request submitted': 'అభ్యర్థన పంపబడింది',
@@ -167,6 +170,12 @@ const messages: Messages = {
   Textile: 'వస్త్రం',
   'That photo is too big. Please choose a smaller one.':
     'ఆ ఫోటో చాలా పెద్దది. దయచేసి చిన్నదాన్ని ఎంచుకోండి.',
+  'The drone checked this place again and garbage is still there. Clean it up, then upload new photos.':
+    'డ్రోన్ ఈ ప్రదేశాన్ని మళ్లీ తనిఖీ చేసింది, చెత్త ఇంకా ఉంది. దాన్ని శుభ్రం చేసి, కొత్త ఫోటోలు అప్‌లోడ్ చేయండి.',
+  'The drone checked this place again: garbage is still there.':
+    'డ్రోన్ ఈ ప్రదేశాన్ని మళ్లీ తనిఖీ చేసింది: చెత్త ఇంకా ఉంది.',
+  'The drone checked this place again: no garbage found.':
+    'డ్రోన్ ఈ ప్రదేశాన్ని మళ్లీ తనిఖీ చేసింది: చెత్త కనబడలేదు.',
   'The garbage is spread over too much of the picture to outline.':
     'చెత్త చిత్రంలో చాలా విస్తరించి ఉండటంతో దానిని గుర్తించలేకపోయాము.',
   'The original drone photo': 'డ్రోన్ అసలు ఫోటో',
@@ -182,6 +191,7 @@ const messages: Messages = {
     'ఈ ఫోన్ లేదా బ్రౌజర్ లొకేషన్‌ను షేర్ చేయలేదు, కాబట్టి ఫోటోను తనిఖీ చేయలేము. దయచేసి లొకేషన్ ఉన్న ఫోన్‌ను ఉపయోగించండి.',
   'This photo was not accepted': 'ఈ ఫోటో ఆమోదించబడలేదు',
   'This ticket is done': 'ఈ టికెట్ పూర్తయింది',
+  'This ticket was reopened': 'ఈ టికెట్ మళ్లీ తెరవబడింది',
   'This week': 'ఈ వారం',
   Ticket: 'టికెట్',
   'Ticket not found.': 'టికెట్ కనుగొనబడలేదు.',
@@ -220,6 +230,8 @@ const messages: Messages = {
     'మీ స్థానాన్ని చదవలేకపోయాము. ఫోన్ సెట్టింగ్స్‌లో లొకేషన్ ఆన్‌లో ఉందో చూసి, మళ్లీ ప్రయత్నించండి.',
   'We could not read your location. Please allow location for this website, then try again.':
     'మీ స్థానాన్ని చదవలేకపోయాము. దయచేసి ఈ వెబ్‌సైట్‌కు లొకేషన్ అనుమతి ఇచ్చి, మళ్లీ ప్రయత్నించండి.',
+  'We could only find your location roughly (about {accuracy}). Your device is probably using Wi-Fi or the mobile network instead of GPS. Turn on GPS and High accuracy location, go outside where the sky is open, and try again.':
+    'మీ లొకేషన్‌ను సుమారుగా మాత్రమే కనుగొనగలిగాం (దాదాపు {accuracy}). మీ పరికరం GPS బదులు Wi-Fi లేదా మొబైల్ నెట్‌వర్క్ వాడుతున్నట్లుంది. GPS మరియు హై అక్యూరసీ లొకేషన్ ఆన్ చేసి, ఆకాశం కనిపించే చోటికి వెళ్లి మళ్లీ ప్రయత్నించండి.',
   'Welcome back': 'మళ్లీ స్వాగతం',
   'When did it arrive?': 'ఇది ఎప్పుడు వచ్చింది?',
   'When your phone asks, please tap Allow for location.':
@@ -229,6 +241,8 @@ const messages: Messages = {
   'Which zone?': 'ఏ జోన్?',
   Wood: 'చెక్క',
   'Write here if you want to add something': 'ఏదైనా జోడించాలంటే ఇక్కడ రాయండి',
+  'You are about {distance} from the place, but your location is only accurate to about {accuracy}, so this may be wrong. Turn on GPS, stand in the open, and try again.':
+    'మీరు ఆ ప్రదేశానికి సుమారు {distance} దూరంలో ఉన్నారు, కానీ మీ లొకేషన్ సుమారు {accuracy} వరకే ఖచ్చితం, కాబట్టి ఇది తప్పు కావచ్చు. GPS ఆన్ చేసి, బహిరంగ ప్రదేశంలో నిలబడి మళ్లీ ప్రయత్నించండి.',
   'You are about {distance} from the place. Go to the marked spot (within {radius} m) and take the photo again. The ticket is not done yet.':
     'మీరు ఆ ప్రదేశం నుండి సుమారు {distance} దూరంలో ఉన్నారు. గుర్తించిన ప్రదేశానికి ({radius} మీ లోపల) వెళ్లి మళ్లీ ఫోటో తీయండి. టికెట్ ఇంకా పూర్తి కాలేదు.',
   'You are at the place': 'మీరు ఆ ప్రదేశంలో ఉన్నారు',
@@ -238,6 +252,7 @@ const messages: Messages = {
     'మీ ఖాతా అడ్మిన్ ఆమోదం కోసం వేచి ఉంది — ఆమోదం లభించాక మీరు సైన్ ఇన్ చేయగలరు.',
   'Your account request was not approved. Contact an admin for help.':
     'మీ ఖాతా అభ్యర్థన ఆమోదించబడలేదు. సహాయం కోసం అడ్మిన్‌ను సంప్రదించండి.',
+  'Your earlier photos': 'మీ ముందటి ఫోటోలు',
   'Your location reading is out of date. Please try again.':
     'మీ లొకేషన్ రీడింగ్ పాతబడింది. దయచేసి మళ్లీ ప్రయత్నించండి.',
   'Your next tickets': 'మీ తదుపరి టికెట్లు',

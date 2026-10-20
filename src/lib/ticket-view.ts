@@ -1,5 +1,16 @@
 import { extractDroneSevaLink, extractLocation } from '@/lib/droneseva-link'
 
+export type RecheckPhotoView = {
+  url: string
+  publicId: string
+  width: number
+  height: number
+  result: 'clean' | 'dirty'
+  detections: number
+  coveragePercent: number
+  takenAt: string
+}
+
 export type VerificationStatus = 'verified' | 'not_verified'
 
 /** A finished ticket is "verified" once checked, otherwise "not verified"; unfinished has no status. */
@@ -80,8 +91,13 @@ export type TicketDetailView = {
   source: string
   resolutionPhotos: CommentAttachmentView[]
   resolutionNote: string
+  /** Proof photos and note from before the ticket was reopened (new proof is needed). */
+  earlierResolutionPhotos: CommentAttachmentView[]
+  earlierResolutionNote: string
   /** Photos the ticket arrived with, e.g. the drone image from DroneSeva. */
   sourcePhotos: CommentAttachmentView[]
+  /** The photo from the latest drone re-check of this place, if there was one. */
+  recheckPhoto: RecheckPhotoView | null
   /** The detection report PDF, if one was attached (opened through /api/tickets/:n/report). */
   report: { name: string; bytes: number; uploadedAt: string | null } | null
 }
@@ -155,6 +171,18 @@ export function toTicketDetailView(t: any): TicketDetailView {
             : null,
         }
       : null,
+    recheckPhoto: t.recheckPhoto?.url
+      ? {
+          url: t.recheckPhoto.url,
+          publicId: t.recheckPhoto.publicId,
+          width: t.recheckPhoto.width,
+          height: t.recheckPhoto.height,
+          result: t.recheckPhoto.result === 'clean' ? 'clean' : 'dirty',
+          detections: t.recheckPhoto.detections ?? 0,
+          coveragePercent: t.recheckPhoto.coveragePercent ?? 0,
+          takenAt: new Date(t.recheckPhoto.takenAt ?? t.updatedAt ?? Date.now()).toISOString(),
+        }
+      : null,
     sourcePhotos: (t.sourcePhotos ?? []).map(
       (a: CommentAttachmentView & { uploadedAt?: Date | string }) => ({
         url: a.url,
@@ -165,6 +193,18 @@ export function toTicketDetailView(t: any): TicketDetailView {
         uploadedAt: new Date(a.uploadedAt ?? t.createdAt).toISOString(),
       }),
     ),
+    earlierResolutionPhotos: (t.earlierResolutionPhotos ?? []).map(
+      (a: CommentAttachmentView & { uploadedAt?: Date | string | null }) => ({
+        url: a.url,
+        publicId: a.publicId,
+        width: a.width,
+        height: a.height,
+        uploadedAt: a.uploadedAt ? new Date(a.uploadedAt).toISOString() : null,
+        locationCheck: null,
+        garbageCheck: null,
+      }),
+    ),
+    earlierResolutionNote: t.earlierResolutionNote ?? '',
     resolutionPhotos: (t.resolutionPhotos ?? []).map(
       (
         a: CommentAttachmentView & {

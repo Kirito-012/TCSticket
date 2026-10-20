@@ -1,5 +1,14 @@
 import Link from 'next/link'
-import { CheckCircle2, ClipboardList, Layers, PartyPopper, UserX } from 'lucide-react'
+import {
+  CheckCircle2,
+  ClipboardList,
+  Layers,
+  PartyPopper,
+  RotateCcw,
+  ShieldCheck,
+  ShieldQuestion,
+  UserX,
+} from 'lucide-react'
 import { AdminTaskCard } from '@/components/admin/AdminTaskCard'
 import { AdminKpis } from '@/components/admin/AdminKpis'
 import type { TicketListItemView } from '@/lib/ticket-view'
@@ -8,7 +17,16 @@ type UserOption = { id: string; name: string }
 
 type Kpis = Parameters<typeof AdminKpis>[0]['kpis']
 
-type Counts = { todo: number; done: number; unassigned: number; all: number; doneToday: number }
+type Counts = {
+  todo: number
+  done: number
+  unassigned: number
+  all: number
+  doneToday: number
+  reopened: number
+  verified: number
+  unverified: number
+}
 
 function Tile({
   href,
@@ -91,6 +109,35 @@ export function AdminHome({
           tone="border-violet bg-violet-soft"
         />
       </div>
+
+      <section aria-label="Drone re-check" className="space-y-2">
+        <h2 className="text-lg font-bold text-foreground">Drone re-check</h2>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Tile
+            href="/tickets?status=reopened"
+            label="Reopened"
+            value={counts.reopened}
+            icon={<RotateCcw className="h-9 w-9 shrink-0 text-danger" strokeWidth={2.25} />}
+            tone="border-danger bg-danger-soft"
+          />
+          <Tile
+            href="/tickets?show=done&verify=unverified"
+            label="Not verified"
+            value={counts.unverified}
+            icon={<ShieldQuestion className="h-9 w-9 shrink-0 text-warning" strokeWidth={2.25} />}
+            tone="border-warning bg-warning-soft"
+          />
+          <Tile
+            href="/tickets?show=done&verify=verified"
+            label="Verified"
+            value={counts.verified}
+            icon={
+              <ShieldCheck className="h-9 w-9 shrink-0 text-accent-strong" strokeWidth={2.25} />
+            }
+            tone="border-accent bg-accent-soft"
+          />
+        </div>
+      </section>
 
       <AdminKpis kpis={kpis} />
 

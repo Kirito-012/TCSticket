@@ -38,11 +38,13 @@ export function ZoneCards({ zones }: { zones: ZoneSummary[] }) {
               </span>
             </div>
 
-            <div className="grid grid-cols-4 gap-2 md:grid-cols-2 2xl:grid-cols-4">
+            <div className="grid grid-cols-3 gap-2 2xl:grid-cols-6">
               <CountPill label="Open" value={zone.open} />
               <CountPill label="Need someone" value={zone.unassigned} tone="warning" />
               <CountPill label="Urgent" value={zone.urgent} tone="danger" />
               <CountPill label="Waiting" value={zone.waiting} tone="warning" />
+              <CountPill label="Reopened" value={zone.reopened} tone="danger" />
+              <CountPill label="Not verified" value={zone.unverified} tone="warning" />
             </div>
 
             <DoneBar done={zone.done} total={zone.total} />
