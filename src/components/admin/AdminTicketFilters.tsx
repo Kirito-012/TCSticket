@@ -2,7 +2,7 @@
 
 import { useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { AlertTriangle, CalendarDays, LayoutGrid, List, Plane, ShieldCheck } from 'lucide-react'
+import { AlertTriangle, CalendarDays, LayoutGrid, List, ShieldCheck } from 'lucide-react'
 import { Select } from '@/components/ui/Select'
 import { DATE_PRESETS, activeDatePreset } from '@/lib/date-presets'
 import { cn } from '@/lib/utils'
@@ -30,7 +30,6 @@ export function AdminTicketFilters({
   status,
   urgent,
   verify,
-  drone,
   showVerify,
   sort,
   view,
@@ -45,8 +44,6 @@ export function AdminTicketFilters({
   urgent: boolean
   /** Finished tickets that were checked after the cleanup, or not yet. */
   verify: '' | 'verified' | 'unverified'
-  /** Finished tickets the drone re-check verified, or not yet. */
-  drone: '' | 'verified' | 'unverified'
   /** Only the Done and All tabs have finished tickets to check. */
   showVerify: boolean
   sort: string
@@ -137,41 +134,6 @@ export function AdminTicketFilters({
                 className={cn(
                   'cursor-pointer px-4 text-base font-semibold transition-colors',
                   verify === key
-                    ? 'bg-accent text-on-accent'
-                    : 'text-muted-strong hover:bg-surface-hover',
-                )}
-              >
-                {t(label)}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {showVerify && (
-          <div
-            role="group"
-            aria-label={t('Drone check')}
-            className="inline-flex h-12 overflow-hidden rounded-lg border border-border-strong"
-          >
-            <span className="inline-flex items-center gap-2 border-r border-border-strong px-3 text-base font-semibold text-muted-strong">
-              <Plane className="h-5 w-5" />
-              {t('Drone check')}
-            </span>
-            {(
-              [
-                { key: '', label: 'All' },
-                { key: 'verified', label: 'Drone verified' },
-                { key: 'unverified', label: 'Not drone verified' },
-              ] as const
-            ).map(({ key, label }) => (
-              <button
-                key={label}
-                type="button"
-                aria-pressed={drone === key}
-                onClick={() => push({ drone: key || null })}
-                className={cn(
-                  'cursor-pointer px-4 text-base font-semibold transition-colors',
-                  drone === key
                     ? 'bg-accent text-on-accent'
                     : 'text-muted-strong hover:bg-surface-hover',
                 )}

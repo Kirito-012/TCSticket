@@ -1,7 +1,6 @@
 'use client'
 
 import { VerificationBadge } from '@/components/tickets/VerificationBadge'
-import { DroneVerificationBadge } from '@/components/tickets/DroneVerificationBadge'
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -203,10 +202,6 @@ export function AdminTicketRows({
                     {t.verification && (
                       <div className="mt-1.5 flex flex-wrap gap-1.5">
                         <VerificationBadge status={t.verification} className="!py-0.5 !text-sm" />
-                        <DroneVerificationBadge
-                          status={t.droneVerification}
-                          className="!py-0.5 !text-sm"
-                        />
                       </div>
                     )}
                   </div>

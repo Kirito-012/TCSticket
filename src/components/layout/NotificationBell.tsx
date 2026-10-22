@@ -127,12 +127,17 @@ export function NotificationBell() {
         aria-haspopup="true"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="relative inline-flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-border text-muted-strong transition-colors hover:bg-white/[0.06] hover:text-foreground sm:h-9 sm:w-9 sm:rounded-lg"
+        className="relative inline-flex h-12 w-16 shrink-0 cursor-pointer items-center justify-center rounded-full border border-border text-muted-strong transition-colors hover:bg-white/[0.06] hover:text-foreground sm:h-10 sm:w-14"
       >
-        <Bell className="h-5 w-5 sm:h-4 sm:w-4" />
+        <Bell
+          className={cn(
+            'h-5 w-5',
+            loaded && unreadCount > 0 && 'animate-bell-ring text-foreground',
+          )}
+        />
         {loaded && unreadCount > 0 && (
-          <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold leading-none text-on-accent shadow-[0_0_6px_1px_rgba(16,185,129,0.8)]">
-            {unreadCount > 9 ? '9+' : unreadCount}
+          <span className="absolute -right-1 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1.5 text-[11px] font-bold leading-none text-on-accent shadow-[0_0_6px_1px_rgba(16,185,129,0.8)]">
+            {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
       </button>

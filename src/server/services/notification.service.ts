@@ -1,5 +1,7 @@
 import 'server-only'
 
+import { Types } from 'mongoose'
+
 import { dbConnect } from '@/server/db/connect'
 import { TicketEventModel } from '@/server/db/models/ticket-event.model'
 import { TicketModel } from '@/server/db/models/ticket.model'
@@ -30,7 +32,7 @@ const ACTION_LABEL: Record<string, string> = {
   verified: 'verified the cleanup of',
   unverified: 'marked as not verified',
   reopened: 'reopened after the drone re-check',
-  drone_verified: 'drone verified the cleanup of',
+  drone_verified: 'verified the cleanup of',
 }
 
 function labelForEvent(action: string, field?: string | null) {
@@ -132,7 +134,30 @@ export async function getNotifications(userId: string, ability: AppAbility, scop
 
   items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   const feed = items.slice(0, FEED_LIMIT)
-  const unreadCount = items.filter((i) => !i.read).length
+
+  // The badge counts every unread notification, not only the ones in the short list above (so it can
+  // honestly show "99+"). Items opened one by one after the cursor are taken off.
+  const openedIds = [...readIds]
+    .map(String)
+    .filter((id) => /^[a-f0-9]{24}$/i.test(id))
+    .map((id) => new Types.ObjectId(id))
+  const [unreadEvents, unreadAccounts] = await Promise.all([
+    TicketEventModel.countDocuments({
+      ...eventMatch,
+      createdAt: { $gt: readAt },
+      actorId: { $ne: new Types.ObjectId(userId) },
+      _id: { $nin: openedIds },
+    }),
+    ability.can('update', 'account')
+      ? UserModel.countDocuments({
+          deletedAt: null,
+          status: 'pending',
+          createdAt: { $gt: readAt },
+          _id: { $nin: openedIds },
+        })
+      : Promise.resolve(0),
+  ])
+  const unreadCount = Math.max(items.filter((i) => !i.read).length, unreadEvents + unreadAccounts)
 
   return { items: feed, unreadCount }
 }

@@ -207,6 +207,7 @@ const messages: Messages = {
     'এই ওয়েবসাইটের জন্য লোকেশন বন্ধ আছে। iPhone-এ: সেটিংস খুলুন, তারপর প্রাইভেসি ও সিকিউরিটি, লোকেশন সার্ভিসেস, Safari ওয়েবসাইট, এবং "অ্যাপ ব্যবহারের সময়" বেছে নিন। Android-এ: ওয়েব ঠিকানার পাশের তালা আইকনে ট্যাপ করুন এবং লোকেশন "অনুমতি দিন" করুন। তারপর আবার চেষ্টা করুন।',
   'Location is turned off for this website. Tap the lock icon next to the web address, set Location to "Allow", then try again.':
     'এই ওয়েবসাইটের জন্য লোকেশন বন্ধ আছে। ওয়েব ঠিকানার পাশে তালার চিহ্নে চাপ দিন, লোকেশন "অনুমতি দিন" করুন, তারপর আবার চেষ্টা করুন।',
+  'Location link copied': 'লোকেশন লিংক কপি হয়েছে',
   'Location not checked': 'অবস্থান যাচাই করা হয়নি',
   'Location only works on a secure page. Please open this website with https:// and try again.':
     'লোকেশন শুধু নিরাপদ পৃষ্ঠায় কাজ করে। অনুগ্রহ করে এই ওয়েবসাইটটি https:// দিয়ে খুলুন এবং আবার চেষ্টা করুন।',
@@ -350,6 +351,7 @@ const messages: Messages = {
   'See the ones that need someone': 'যেগুলোতে কাউকে দরকার সেগুলো দেখুন',
   'Select all tickets on this page': 'এই পৃষ্ঠার সব টিকিট বেছে নিন',
   'Select ticket #{number}': 'টিকিট #{number} বেছে নিন',
+  'Share location': 'লোকেশন শেয়ার করুন',
   'Show me the way': 'পথ দেখান',
   'Show only': 'শুধু দেখান',
   'Show password': 'পাসওয়ার্ড দেখান',

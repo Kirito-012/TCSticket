@@ -146,20 +146,6 @@ const ticketSchema = new Schema(
       default: () => ({ status: 'not_verified' }),
     },
 
-    // The second check, by the drone: set by DroneSeva's re-check of the place (a clean new photo = verified).
-    // Separate from `verification`, which a lead sets by hand. Both go back to "not verified" when the
-    // ticket is reopened. Tickets from before this field have none, which counts as "not verified".
-    droneVerification: {
-      type: new Schema(
-        {
-          status: { type: String, enum: ['verified', 'not_verified'], default: 'not_verified' },
-          verifiedAt: { type: Date, default: null },
-        },
-        { _id: false },
-      ),
-      default: () => ({ status: 'not_verified' }),
-    },
-
     // The photo DroneSeva took when it flew over this place again, and what it showed. Kept when the
     // ticket is reopened, so the Surveyor can see what the drone saw. Replaced by the next re-check.
     recheckPhoto: {

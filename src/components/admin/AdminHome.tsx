@@ -5,7 +5,6 @@ import {
   Layers,
   PartyPopper,
   RotateCcw,
-  Plane,
   ShieldCheck,
   ShieldQuestion,
   UserX,
@@ -28,7 +27,6 @@ type Counts = {
   reopened: number
   verified: number
   unverified: number
-  droneVerified: number
 }
 
 function Tile({
@@ -118,20 +116,13 @@ export async function AdminHome({
 
       <section aria-label={t('Drone re-check')} className="space-y-2">
         <h2 className="text-lg font-bold text-foreground">{t('Drone re-check')}</h2>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <Tile
             href="/tickets?status=reopened"
             label={t('Reopened')}
             value={counts.reopened}
             icon={<RotateCcw className="h-9 w-9 shrink-0 text-danger" strokeWidth={2.25} />}
             tone="border-danger bg-danger-soft"
-          />
-          <Tile
-            href="/tickets?show=done&drone=verified"
-            label={t('Drone verified')}
-            value={counts.droneVerified}
-            icon={<Plane className="h-9 w-9 shrink-0 text-info" strokeWidth={2.25} />}
-            tone="border-info bg-info-soft"
           />
           <Tile
             href="/tickets?show=done&verify=unverified"

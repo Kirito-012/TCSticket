@@ -207,6 +207,7 @@ const messages: Messages = {
     'ఈ వెబ్‌సైట్‌కు లొకేషన్ ఆఫ్‌లో ఉంది. iPhone లో: సెట్టింగ్స్ తెరిచి, ప్రైవసీ & సెక్యూరిటీ, లొకేషన్ సర్వీసెస్, Safari వెబ్‌సైట్స్ లో "యాప్ వాడుతున్నప్పుడు" ఎంచుకోండి. Android లో: వెబ్ చిరునామా పక్కన ఉన్న లాక్ ఐకాన్‌ను తాకి లొకేషన్‌ను "అనుమతించు" కు సెట్ చేయండి. తర్వాత మళ్లీ ప్రయత్నించండి.',
   'Location is turned off for this website. Tap the lock icon next to the web address, set Location to "Allow", then try again.':
     'ఈ వెబ్‌సైట్‌కు లొకేషన్ ఆఫ్‌లో ఉంది. వెబ్ చిరునామా పక్కన ఉన్న తాళం గుర్తును నొక్కి, లొకేషన్‌ను "అనుమతించు" అని సెట్ చేసి, మళ్లీ ప్రయత్నించండి.',
+  'Location link copied': 'లొకేషన్ లింక్ కాపీ అయింది',
   'Location not checked': 'స్థానం తనిఖీ చేయలేదు',
   'Location only works on a secure page. Please open this website with https:// and try again.':
     'లొకేషన్ సురక్షిత పేజీలో మాత్రమే పనిచేస్తుంది. దయచేసి ఈ వెబ్‌సైట్‌ను https:// తో తెరిచి మళ్లీ ప్రయత్నించండి.',
@@ -351,6 +352,7 @@ const messages: Messages = {
   'See the ones that need someone': 'ఎవరైనా కావాల్సినవి చూడండి',
   'Select all tickets on this page': 'ఈ పేజీలోని అన్ని టికెట్లను ఎంచుకోండి',
   'Select ticket #{number}': 'టికెట్ #{number} ఎంచుకోండి',
+  'Share location': 'లొకేషన్ షేర్ చేయండి',
   'Show me the way': 'దారి చూపించండి',
   'Show only': 'మాత్రమే చూపించండి',
   'Show password': 'పాస్‌వర్డ్ చూపించండి',

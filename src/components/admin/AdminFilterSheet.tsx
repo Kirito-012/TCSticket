@@ -13,7 +13,6 @@ type Draft = {
   sector: string
   urgent: boolean
   verify: '' | 'verified' | 'unverified'
-  drone: '' | 'verified' | 'unverified'
   /** Only the Done and All tabs have finished tickets to check. */
   showVerify: boolean
   status: string
@@ -89,7 +88,6 @@ export function AdminFilterSheet({
     Number(current.sector !== '') +
     Number(current.urgent) +
     Number(current.verify !== '') +
-    Number(current.drone !== '') +
     Number(current.status !== '') +
     Number(current.sort !== 'activity') +
     Number(current.from !== '' || current.to !== '') +
@@ -107,7 +105,6 @@ export function AdminFilterSheet({
     set('sector', draft.sector || null)
     set('urgent', draft.urgent ? '1' : null)
     set('verify', draft.verify || null)
-    set('drone', draft.drone || null)
     set('status', draft.status || null)
     set('sort', draft.sort === 'activity' ? null : draft.sort)
     set('view', draft.view === 'cards' ? null : draft.view)
@@ -124,7 +121,6 @@ export function AdminFilterSheet({
       sector: '',
       urgent: false,
       verify: '',
-      drone: '',
       showVerify: current.showVerify,
       status: '',
       sort: 'activity',
@@ -248,29 +244,6 @@ export function AdminFilterSheet({
                     key={label}
                     active={draft.verify === key}
                     onClick={() => setDraft((d) => ({ ...d, verify: key }))}
-                  >
-                    {t(label)}
-                  </Choice>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {draft.showVerify && (
-            <section>
-              <h3 className="mb-2 text-base font-bold text-foreground">{t('Drone check')}</h3>
-              <div className="flex flex-wrap gap-2">
-                {(
-                  [
-                    { key: '', label: 'All' },
-                    { key: 'verified', label: 'Drone verified' },
-                    { key: 'unverified', label: 'Not drone verified' },
-                  ] as const
-                ).map(({ key, label }) => (
-                  <Choice
-                    key={label}
-                    active={draft.drone === key}
-                    onClick={() => setDraft((d) => ({ ...d, drone: key }))}
                   >
                     {t(label)}
                   </Choice>

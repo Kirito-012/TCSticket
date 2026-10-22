@@ -44,12 +44,6 @@ export async function getInspectorTasks(
     .map(toTicketListItem)
     .filter((t) => arrivedInRange(t.createdAt, filters))
     .filter((t) => !filters.urgentOnly || isUrgent(t.priority))
-    .filter(
-      (t) =>
-        filters.drone === 'any' ||
-        !isDone(t.status) ||
-        (filters.drone === 'yes') === (t.droneVerification === 'verified'),
-    )
     .filter((t) => !filters.reopenedOnly || isReopened(t.status))
     // The verification filter is about finished tickets, so it leaves the unfinished ones alone.
     .filter(

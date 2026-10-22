@@ -89,8 +89,6 @@ export type ListState = {
   urgent: boolean
   /** Finished tickets only: checked after the cleanup ('verified') or not yet ('unverified'). */
   verify: '' | 'verified' | 'unverified'
-  /** Finished tickets the drone re-check verified ('verified') or not yet ('unverified'). */
-  drone: '' | 'verified' | 'unverified'
   /** One status, by its short name ("open", "pending" ...). */
   status: string
   sort: 'activity' | 'newest' | 'oldest'
@@ -123,7 +121,6 @@ export function listHref(state: ListState) {
   if (state.sector) params.set('sector', state.sector)
   if (state.urgent) params.set('urgent', '1')
   if (state.verify) params.set('verify', state.verify)
-  if (state.drone) params.set('drone', state.drone)
   if (state.status) params.set('status', state.status)
   if (state.age) params.set('age', state.age)
   if (state.day) params.set('day', state.day)
@@ -176,7 +173,6 @@ export async function AdminTaskList({
     state.sector ||
     state.urgent ||
     state.verify ||
-    state.drone ||
     state.status ||
     state.age ||
     state.day ||
@@ -240,7 +236,6 @@ export async function AdminTaskList({
         {state.sector && <input type="hidden" name="sector" value={state.sector} />}
         {state.urgent && <input type="hidden" name="urgent" value="1" />}
         {state.verify && <input type="hidden" name="verify" value={state.verify} />}
-        {state.drone && <input type="hidden" name="drone" value={state.drone} />}
         {state.status && <input type="hidden" name="status" value={state.status} />}
         {state.age && <input type="hidden" name="age" value={state.age} />}
         {state.day && <input type="hidden" name="day" value={state.day} />}
@@ -277,7 +272,6 @@ export async function AdminTaskList({
             sector: state.sector,
             urgent: state.urgent,
             verify: state.verify,
-            drone: state.drone,
             showVerify: tab === 'done' || tab === 'all',
             status: state.status,
             sort: state.sort,
@@ -295,7 +289,6 @@ export async function AdminTaskList({
         status={state.status}
         urgent={state.urgent}
         verify={state.verify}
-        drone={state.drone}
         showVerify={tab === 'done' || tab === 'all'}
         sort={state.sort}
         view={state.view}
@@ -306,7 +299,6 @@ export async function AdminTaskList({
       {(state.sector ||
         state.urgent ||
         state.verify ||
-        state.drone ||
         state.status ||
         state.sort !== 'activity' ||
         state.age ||
@@ -354,16 +346,6 @@ export async function AdminTaskList({
               aria-label={t('Remove filter: {name}', { name: t('Verification') })}
             >
               {state.verify === 'verified' ? t('Verified') : t('Not verified')}
-              <X className="h-4 w-4" strokeWidth={2.5} />
-            </Link>
-          )}
-          {state.drone && (
-            <Link
-              href={listHref({ ...state, drone: '', page: 1 })}
-              className={CHIP}
-              aria-label={t('Remove filter: {name}', { name: t('Drone check') })}
-            >
-              {state.drone === 'verified' ? t('Drone verified') : t('Not drone verified')}
               <X className="h-4 w-4" strokeWidth={2.5} />
             </Link>
           )}
@@ -428,7 +410,6 @@ export async function AdminTaskList({
                 sector: '',
                 urgent: false,
                 verify: '',
-                drone: '',
                 status: '',
                 age: '',
                 day: '',

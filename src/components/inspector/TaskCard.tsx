@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { CheckCircle2, ChevronRight, ClipboardList } from 'lucide-react'
 import { cn, timeAgo } from '@/lib/utils'
 import { VerificationBadge } from '@/components/tickets/VerificationBadge'
-import { DroneVerificationBadge } from '@/components/tickets/DroneVerificationBadge'
 import { ReopenedBadge } from '@/components/tickets/ReopenedBadge'
 import { isDone, isReopened, isUrgent, plainStatusLabel, plainTitle } from '@/lib/plain-words'
 import type { TicketListItemView } from '@/lib/ticket-view'
@@ -73,10 +72,6 @@ export async function TaskCard({ task }: { task: TicketListItemView }) {
           <div className="mt-2 flex flex-wrap gap-2">
             <VerificationBadge
               status={task.verification}
-              className="max-sm:!px-2.5 max-sm:!py-0.5 max-sm:!text-sm"
-            />
-            <DroneVerificationBadge
-              status={task.droneVerification}
               className="max-sm:!px-2.5 max-sm:!py-0.5 max-sm:!text-sm"
             />
           </div>

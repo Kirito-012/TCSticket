@@ -22,7 +22,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ numb
 
   await dbConnect()
   const ticket = await TicketModel.findOne({ number, deletedAt: null })
-    .select('number subject statusId location verification droneVerification')
+    .select('number subject statusId location verification')
     .lean()
   if (!ticket) return NextResponse.json({ error: 'Ticket not found' }, { status: 404 })
   const status = ticket.statusId
@@ -38,7 +38,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ numb
       status: status?.name ?? null,
       finished: Boolean(status?.isResolved),
       verified: ticket.verification?.status === 'verified',
-      droneVerified: ticket.droneVerification?.status === 'verified',
       location:
         typeof lat === 'number' && typeof lon === 'number'
           ? { latitude: lat, longitude: lon }

@@ -208,6 +208,7 @@ const messages: Messages = {
     'இந்த இணையதளத்துக்கு இருப்பிடம் அணைக்கப்பட்டுள்ளது. iPhone இல்: அமைப்புகளைத் திறந்து, தனியுரிமை & பாதுகாப்பு, இருப்பிட சேவைகள், Safari இணையதளங்கள் என்பதில் "ஆப்பைப் பயன்படுத்தும்போது" என்பதைத் தேர்ந்தெடுக்கவும். Android இல்: இணைய முகவரிக்கு அருகிலுள்ள பூட்டு ஐகானைத் தட்டி இருப்பிடத்தை "அனுமதி" என அமைக்கவும். பிறகு மீண்டும் முயற்சிக்கவும்.',
   'Location is turned off for this website. Tap the lock icon next to the web address, set Location to "Allow", then try again.':
     'இந்த இணையதளத்துக்கு இருப்பிடம் அணைக்கப்பட்டுள்ளது. முகவரிக்கு அருகிலுள்ள பூட்டு படத்தைத் தட்டி, இருப்பிடத்தை "அனுமதி" என அமைத்து, மீண்டும் முயற்சிக்கவும்.',
+  'Location link copied': 'இருப்பிட இணைப்பு நகலெடுக்கப்பட்டது',
   'Location not checked': 'இருப்பிடம் சரிபார்க்கப்படவில்லை',
   'Location only works on a secure page. Please open this website with https:// and try again.':
     'இருப்பிடம் பாதுகாப்பான பக்கத்தில் மட்டுமே செயல்படும். தயவுசெய்து இந்த இணையதளத்தை https:// உடன் திறந்து மீண்டும் முயற்சிக்கவும்.',
@@ -356,6 +357,7 @@ const messages: Messages = {
   'See the ones that need someone': 'ஒருவர் தேவைப்படுபவற்றைப் பார்',
   'Select all tickets on this page': 'இந்தப் பக்கத்தின் அனைத்து டிக்கெட்டுகளையும் தேர்ந்தெடு',
   'Select ticket #{number}': 'டிக்கெட் #{number} ஐத் தேர்ந்தெடு',
+  'Share location': 'இருப்பிடத்தைப் பகிர்',
   'Show me the way': 'வழியைக் காட்டு',
   'Show only': 'மட்டும் காட்டு',
   'Show password': 'கடவுச்சொல்லைக் காட்டு',

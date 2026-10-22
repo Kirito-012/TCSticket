@@ -13,6 +13,7 @@ import { StatusSelect } from '@/components/tickets/StatusSelect'
 import { ResolutionPhotoGrid } from '@/components/tickets/ResolutionPhotoGrid'
 import { DronePhoto } from '@/components/tickets/DronePhoto'
 import { RecheckPhoto } from '@/components/tickets/RecheckPhoto'
+import { ShareLocationButton } from '@/components/tickets/ShareLocationButton'
 import { ReopenedNotice } from '@/components/tickets/ReopenedNotice'
 import { ReportViewer } from '@/components/tickets/ReportViewer'
 import { SurveyorResolutionPanel } from '@/components/tickets/SurveyorResolutionPanel'
@@ -27,7 +28,6 @@ import * as userService from '@/server/services/user.service'
 import { scopeAllows } from '@/lib/ticket-scope'
 import { localizeIssueHtml } from '@/lib/localize-issue'
 import { VerificationBadge } from '@/components/tickets/VerificationBadge'
-import { DroneVerificationBadge } from '@/components/tickets/DroneVerificationBadge'
 import { ReopenedBadge } from '@/components/tickets/ReopenedBadge'
 import { VerificationControl } from '@/components/tickets/VerificationControl'
 import { getT } from '@/i18n/server'
@@ -124,7 +124,6 @@ export default async function TicketDetailPage({
                     </span>
                   )}
                   {done && <VerificationBadge status={ticket.verification} />}
-                  {done && <DroneVerificationBadge status={ticket.droneVerification} />}
                 </div>
                 <h1 className="mt-3 text-2xl font-bold leading-snug text-foreground [overflow-wrap:anywhere]">
                   {plainTitle(ticket.subject, t)}
@@ -132,7 +131,7 @@ export default async function TicketDetailPage({
                 <div
                   className="mt-3 text-lg leading-relaxed text-muted-strong [&_p]:my-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
                   dangerouslySetInnerHTML={{
-                    // "Show me the way" below replaces the ticket's own Google Maps link.
+                    // The "Open in Google Maps" button below replaces the ticket's own Google Maps link.
                     __html: localizeIssueHtml(
                       ticket.issueHtml.replace(
                         /<p>\s*<a[^>]*>\s*Open location in Google Maps\s*<\/a>\s*<\/p>/i,
@@ -142,6 +141,24 @@ export default async function TicketDetailPage({
                     ),
                   }}
                 />
+                {ticket.location && (
+                  <div className="mt-4 grid grid-cols-1 gap-3 min-[420px]:grid-cols-2">
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${ticket.location.latitude},${ticket.location.longitude}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex min-h-14 items-center justify-center gap-3 rounded-2xl bg-accent px-5 text-center text-lg font-bold text-white"
+                    >
+                      <MapPin className="h-6 w-6 shrink-0" strokeWidth={2.5} />
+                      {t('Open in Google Maps')}
+                    </a>
+                    <ShareLocationButton
+                      latitude={ticket.location.latitude}
+                      longitude={ticket.location.longitude}
+                      title={plainTitle(ticket.subject, t)}
+                    />
+                  </div>
+                )}
                 {ticket.sourcePhotos.length > 0 && (
                   <div className="mt-6 space-y-3">
                     <h2 className="text-xl font-bold text-foreground">
@@ -167,15 +184,6 @@ export default async function TicketDetailPage({
                 {ticket.location && (
                   <div className="mt-6 space-y-3">
                     <h2 className="text-xl font-bold text-foreground">{t('Where is it?')}</h2>
-                    <a
-                      href={`https://www.google.com/maps/dir/?api=1&destination=${ticket.location.latitude},${ticket.location.longitude}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex min-h-14 items-center justify-center gap-3 rounded-2xl bg-accent px-5 text-lg font-bold text-white"
-                    >
-                      <MapPin className="h-6 w-6" strokeWidth={2.5} />
-                      {t('Show me the way')}
-                    </a>
                     <iframe
                       title={t('Map of the place')}
                       src={`https://www.openstreetmap.org/export/embed.html?bbox=${ticket.location.longitude - 0.01}%2C${ticket.location.latitude - 0.01}%2C${ticket.location.longitude + 0.01}%2C${ticket.location.latitude + 0.01}&layer=mapnik&marker=${ticket.location.latitude}%2C${ticket.location.longitude}`}
@@ -257,7 +265,6 @@ export default async function TicketDetailPage({
                     </span>
                   )}
                   {done && <VerificationBadge status={ticket.verification} />}
-                  {done && <DroneVerificationBadge status={ticket.droneVerification} />}
                 </div>
                 <h1 className="mt-3 text-2xl font-bold leading-snug text-foreground [overflow-wrap:anywhere]">
                   {plainTitle(ticket.subject, t)}

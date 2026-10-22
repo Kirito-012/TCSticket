@@ -208,6 +208,7 @@ const messages: Messages = {
     'ಈ ವೆಬ್‌ಸೈಟ್‌ಗೆ ಲೊಕೇಶನ್ ಆಫ್ ಆಗಿದೆ. iPhone ನಲ್ಲಿ: ಸೆಟ್ಟಿಂಗ್ಸ್ ತೆರೆದು, ಗೌಪ್ಯತೆ ಮತ್ತು ಭದ್ರತೆ, ಲೊಕೇಶನ್ ಸೇವೆಗಳು, Safari ವೆಬ್‌ಸೈಟ್‌ಗಳಲ್ಲಿ "ಆ್ಯಪ್ ಬಳಸುವಾಗ" ಆಯ್ಕೆಮಾಡಿ. Android ನಲ್ಲಿ: ವೆಬ್ ವಿಳಾಸದ ಪಕ್ಕದ ಲಾಕ್ ಐಕಾನ್ ಟ್ಯಾಪ್ ಮಾಡಿ ಲೊಕೇಶನ್ ಅನ್ನು "ಅನುಮತಿಸಿ" ಎಂದು ಹೊಂದಿಸಿ. ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
   'Location is turned off for this website. Tap the lock icon next to the web address, set Location to "Allow", then try again.':
     'ಈ ವೆಬ್‌ಸೈಟ್‌ಗೆ ಸ್ಥಳ ಆಫ್ ಆಗಿದೆ. ವೆಬ್ ವಿಳಾಸದ ಪಕ್ಕದ ಬೀಗದ ಚಿಹ್ನೆಯನ್ನು ಒತ್ತಿ, ಸ್ಥಳವನ್ನು "ಅನುಮತಿಸು" ಎಂದು ಹೊಂದಿಸಿ, ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+  'Location link copied': 'ಲೊಕೇಶನ್ ಲಿಂಕ್ ನಕಲಿಸಲಾಗಿದೆ',
   'Location not checked': 'ಸ್ಥಳ ಪರಿಶೀಲಿಸಿಲ್ಲ',
   'Location only works on a secure page. Please open this website with https:// and try again.':
     'ಲೊಕೇಶನ್ ಸುರಕ್ಷಿತ ಪುಟದಲ್ಲಿ ಮಾತ್ರ ಕೆಲಸ ಮಾಡುತ್ತದೆ. ದಯವಿಟ್ಟು ಈ ವೆಬ್‌ಸೈಟ್ ಅನ್ನು https:// ನೊಂದಿಗೆ ತೆರೆದು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
@@ -352,6 +353,7 @@ const messages: Messages = {
   'See the ones that need someone': 'ಯಾರಾದರೂ ಬೇಕಾದವುಗಳನ್ನು ನೋಡಿ',
   'Select all tickets on this page': 'ಈ ಪುಟದ ಎಲ್ಲಾ ಟಿಕೆಟ್‌ಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ',
   'Select ticket #{number}': 'ಟಿಕೆಟ್ #{number} ಆಯ್ಕೆಮಾಡಿ',
+  'Share location': 'ಲೊಕೇಶನ್ ಹಂಚಿಕೊಳ್ಳಿ',
   'Show me the way': 'ದಾರಿ ತೋರಿಸಿ',
   'Show only': 'ಮಾತ್ರ ತೋರಿಸಿ',
   'Show password': 'ಪಾಸ್‌ವರ್ಡ್ ತೋರಿಸಿ',

@@ -13,15 +13,6 @@ export type RecheckPhotoView = {
 
 export type VerificationStatus = 'verified' | 'not_verified'
 
-/** The drone's own check: a finished ticket is "drone verified" once a re-check photo of the place was clean. */
-export function droneVerificationOf(t: {
-  statusId?: { isResolved?: boolean } | null
-  droneVerification?: { status?: string } | null
-}): VerificationStatus | null {
-  if (!t.statusId?.isResolved) return null
-  return t.droneVerification?.status === 'verified' ? 'verified' : 'not_verified'
-}
-
 /** A finished ticket is "verified" once checked, otherwise "not verified"; unfinished has no status. */
 export function verificationOf(t: {
   statusId?: { isResolved?: boolean } | null
@@ -52,7 +43,6 @@ export type TicketListItemView = {
   thumbUrl: string | null
   /** For a finished ticket: whether the cleanup has been checked. Null while it is not finished. */
   verification: VerificationStatus | null
-  droneVerification: VerificationStatus | null
   updatedAt: string
   comments: number
 }
@@ -97,7 +87,6 @@ export type TicketDetailView = {
   resolvedAt: string | null
   /** For a finished ticket: whether the cleanup has been checked. Null while it is not finished. */
   verification: VerificationStatus | null
-  droneVerification: VerificationStatus | null
   /** Where the ticket came from: 'api' = DroneSeva, 'web' = made by hand. */
   source: string
   resolutionPhotos: CommentAttachmentView[]
@@ -171,7 +160,6 @@ export function toTicketDetailView(t: any): TicketDetailView {
     createdAt: new Date(t.createdAt).toISOString(),
     resolvedAt: t.resolvedAt ? new Date(t.resolvedAt).toISOString() : null,
     verification: verificationOf(t),
-    droneVerification: droneVerificationOf(t),
     source: t.source ?? 'web',
     resolutionNote: t.resolutionNote ?? '',
     report: t.reportPdf?.publicId
@@ -344,7 +332,6 @@ export function toTicketListItem(t: any): TicketListItemView {
     createdAt: new Date(t.createdAt).toISOString(),
     thumbUrl: t.sourcePhotos?.[0]?.url ? cloudinaryThumb(t.sourcePhotos[0].url) : null,
     verification: verificationOf(t),
-    droneVerification: droneVerificationOf(t),
     updatedAt: new Date(t.lastActivityAt).toISOString(),
     comments: t.counts?.comments ?? 0,
   }
