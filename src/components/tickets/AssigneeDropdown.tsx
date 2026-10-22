@@ -7,6 +7,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { cn, initialsFor } from '@/lib/utils'
 import { usePopoverPosition } from '@/lib/use-popover-position'
 import { updateTicketFieldAction } from '@/server/actions/ticket.actions'
+import { useT } from '@/i18n/client'
 
 type UserOption = { id: string; name: string }
 type PersonView = { id: string; name: string; initials: string } | null
@@ -27,6 +28,7 @@ export function AssigneeDropdown({
   /** Big, full-width button with plain wording — for the simple Admin/Manager screens. */
   large?: boolean
 }) {
+  const t = useT()
   const [current, setCurrent] = useState(assignee)
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -124,9 +126,11 @@ export function AssigneeDropdown({
               : 'max-w-[120px] text-xs text-muted-strong',
           )}
         >
-          {current?.name ?? (large ? 'Choose who does this' : 'Unassigned')}
+          {current?.name ?? (large ? t('Choose who does this') : t('Unassigned'))}
         </span>
-        {large && <span className="shrink-0 text-sm font-semibold text-accent-strong">Change</span>}
+        {large && (
+          <span className="shrink-0 text-sm font-semibold text-accent-strong">{t('Change')}</span>
+        )}
       </button>
 
       {open &&
@@ -143,7 +147,7 @@ export function AssigneeDropdown({
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search people…"
+                placeholder={t('Search people…')}
                 className={cn(
                   large ? 'h-10 text-base' : 'h-8 text-xs',
                   'w-full rounded-md border border-border-strong bg-white/[0.03] pl-8 pr-2 text-foreground placeholder:text-muted/60 outline-none focus:border-accent/50',
@@ -160,10 +164,12 @@ export function AssigneeDropdown({
                 )}
               >
                 <Avatar person={UNASSIGNED} size="sm" />
-                Unassigned
+                {t('Unassigned')}
                 {!current && <Check className="ml-auto h-3.5 w-3.5 text-accent-strong" />}
               </button>
-              {filtered.length === 0 && <p className="px-2 py-2 text-xs text-muted">No matches</p>}
+              {filtered.length === 0 && (
+                <p className="px-2 py-2 text-xs text-muted">{t('No matches')}</p>
+              )}
               {filtered.map((u) => (
                 <button
                   key={u.id}

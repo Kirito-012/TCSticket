@@ -2,8 +2,10 @@ import { Card } from '@/components/ui/Card'
 import { Avatar } from '@/components/ui/Avatar'
 import { ROLE_COLOR } from '@/components/accounts/AccountsTable'
 import { cn, initialsFor, timeAgo } from '@/lib/utils'
+import { getLocale, getT } from '@/i18n/server'
+import { localeTag } from '@/i18n/config'
 
-export function CurrentUserCard({
+export async function CurrentUserCard({
   fullname,
   email,
   roleName,
@@ -16,6 +18,8 @@ export function CurrentUserCard({
   isActive: boolean
   createdAt: string
 }) {
+  const t = await getT()
+  const locale = localeTag(await getLocale())
   const color = ROLE_COLOR[roleName] ?? '#3f3f46'
 
   return (
@@ -27,7 +31,7 @@ export function CurrentUserCard({
             <div className="flex items-center gap-2">
               <p className="font-medium text-foreground">{fullname}</p>
               <span className="rounded-md bg-accent-soft px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-strong">
-                You
+                {t('You')}
               </span>
             </div>
             <p className="text-xs text-muted">{email}</p>
@@ -39,7 +43,7 @@ export function CurrentUserCard({
             className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium"
             style={{ backgroundColor: `${color}22`, color }}
           >
-            {roleName}
+            {t(roleName)}
           </span>
           <span
             className={cn(
@@ -50,9 +54,11 @@ export function CurrentUserCard({
             <span
               className={cn('h-1.5 w-1.5 rounded-full', isActive ? 'bg-accent-strong' : 'bg-muted')}
             />
-            {isActive ? 'Active' : 'Deactivated'}
+            {isActive ? t('Active') : t('Deactivated')}
           </span>
-          <span className="text-xs text-muted">Joined {timeAgo(createdAt)}</span>
+          <span className="text-xs text-muted">
+            {t('Joined {time}', { time: timeAgo(createdAt, { locale, justNow: t('just now') }) })}
+          </span>
         </div>
       </div>
     </Card>

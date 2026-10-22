@@ -7,11 +7,13 @@ import { BottomSheet } from '@/components/ui/BottomSheet'
 import { DATE_PRESETS, activeDatePreset } from '@/lib/date-presets'
 import { cn } from '@/lib/utils'
 import type { SectorOption } from '@/components/admin/AdminTicketFilters'
+import { useT } from '@/i18n/client'
 
 type Draft = {
   sector: string
   urgent: boolean
   verify: '' | 'verified' | 'unverified'
+  drone: '' | 'verified' | 'unverified'
   /** Only the Done and All tabs have finished tickets to check. */
   showVerify: boolean
   status: string
@@ -73,6 +75,7 @@ export function AdminFilterSheet({
   statuses: { value: string; label: string }[]
   current: Draft
 }) {
+  const t = useT()
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -86,6 +89,7 @@ export function AdminFilterSheet({
     Number(current.sector !== '') +
     Number(current.urgent) +
     Number(current.verify !== '') +
+    Number(current.drone !== '') +
     Number(current.status !== '') +
     Number(current.sort !== 'activity') +
     Number(current.from !== '' || current.to !== '') +
@@ -103,6 +107,7 @@ export function AdminFilterSheet({
     set('sector', draft.sector || null)
     set('urgent', draft.urgent ? '1' : null)
     set('verify', draft.verify || null)
+    set('drone', draft.drone || null)
     set('status', draft.status || null)
     set('sort', draft.sort === 'activity' ? null : draft.sort)
     set('view', draft.view === 'cards' ? null : draft.view)
@@ -119,6 +124,7 @@ export function AdminFilterSheet({
       sector: '',
       urgent: false,
       verify: '',
+      drone: '',
       showVerify: current.showVerify,
       status: '',
       sort: 'activity',
@@ -156,7 +162,7 @@ export function AdminFilterSheet({
       <BottomSheet
         open={open}
         onClose={close}
-        title="Filters"
+        title={t('Filters')}
         footer={
           <div className="flex gap-3">
             <button
@@ -164,27 +170,27 @@ export function AdminFilterSheet({
               onClick={clearDraft}
               className="min-h-14 shrink-0 cursor-pointer rounded-2xl border-2 border-border-strong px-5 text-base font-bold text-foreground"
             >
-              Clear all
+              {t('Clear all')}
             </button>
             <button
               type="button"
               onClick={apply}
               className="min-h-14 flex-1 cursor-pointer rounded-2xl bg-accent px-5 text-lg font-bold text-on-accent"
             >
-              Show results
+              {t('Show results')}
             </button>
           </div>
         }
       >
         <div className="space-y-6 px-5 py-4">
           <section>
-            <h3 className="mb-2 text-base font-bold text-foreground">Sector</h3>
+            <h3 className="mb-2 text-base font-bold text-foreground">{t('Sector')}</h3>
             <select
               value={draft.sector}
               onChange={(e) => setDraft((d) => ({ ...d, sector: e.target.value }))}
               className={FIELD}
             >
-              <option value="">All sectors</option>
+              <option value="">{t('All sectors')}</option>
               {sectors.map((s) => (
                 <option key={s.value} value={s.value}>
                   {s.label}
@@ -195,13 +201,13 @@ export function AdminFilterSheet({
 
           {statuses.length > 0 && (
             <section>
-              <h3 className="mb-2 text-base font-bold text-foreground">Status</h3>
+              <h3 className="mb-2 text-base font-bold text-foreground">{t('Status')}</h3>
               <div className="flex flex-wrap gap-2">
                 <Choice
                   active={draft.status === ''}
                   onClick={() => setDraft((d) => ({ ...d, status: '' }))}
                 >
-                  Any status
+                  {t('Any status')}
                 </Choice>
                 {statuses.map((s) => (
                   <Choice
@@ -217,19 +223,19 @@ export function AdminFilterSheet({
           )}
 
           <section>
-            <h3 className="mb-2 text-base font-bold text-foreground">Show only</h3>
+            <h3 className="mb-2 text-base font-bold text-foreground">{t('Show only')}</h3>
             <Choice
               active={draft.urgent}
               onClick={() => setDraft((d) => ({ ...d, urgent: !d.urgent }))}
             >
               {draft.urgent && <Check className="h-4 w-4" strokeWidth={3} />}
-              Urgent tickets
+              {t('Urgent tickets')}
             </Choice>
           </section>
 
           {draft.showVerify && (
             <section>
-              <h3 className="mb-2 text-base font-bold text-foreground">Verification</h3>
+              <h3 className="mb-2 text-base font-bold text-foreground">{t('Verification')}</h3>
               <div className="flex flex-wrap gap-2">
                 {(
                   [
@@ -243,7 +249,30 @@ export function AdminFilterSheet({
                     active={draft.verify === key}
                     onClick={() => setDraft((d) => ({ ...d, verify: key }))}
                   >
-                    {label}
+                    {t(label)}
+                  </Choice>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {draft.showVerify && (
+            <section>
+              <h3 className="mb-2 text-base font-bold text-foreground">{t('Drone check')}</h3>
+              <div className="flex flex-wrap gap-2">
+                {(
+                  [
+                    { key: '', label: 'All' },
+                    { key: 'verified', label: 'Drone verified' },
+                    { key: 'unverified', label: 'Not drone verified' },
+                  ] as const
+                ).map(({ key, label }) => (
+                  <Choice
+                    key={label}
+                    active={draft.drone === key}
+                    onClick={() => setDraft((d) => ({ ...d, drone: key }))}
+                  >
+                    {t(label)}
                   </Choice>
                 ))}
               </div>
@@ -251,7 +280,7 @@ export function AdminFilterSheet({
           )}
 
           <section>
-            <h3 className="mb-2 text-base font-bold text-foreground">Sort</h3>
+            <h3 className="mb-2 text-base font-bold text-foreground">{t('Sort')}</h3>
             <div className="flex flex-wrap gap-2">
               {SORTS.map((s) => (
                 <Choice
@@ -259,7 +288,7 @@ export function AdminFilterSheet({
                   active={draft.sort === s.key}
                   onClick={() => setDraft((d) => ({ ...d, sort: s.key }))}
                 >
-                  {s.label}
+                  {t(s.label)}
                 </Choice>
               ))}
             </div>
@@ -268,14 +297,14 @@ export function AdminFilterSheet({
           <section>
             <h3 className="mb-2 flex items-center gap-2 text-base font-bold text-foreground">
               <CalendarDays className="h-5 w-5 text-muted-strong" />
-              Date
+              {t('Date')}
             </h3>
             <div className="flex flex-wrap gap-2">
               <Choice
                 active={!hasDates}
                 onClick={() => setDraft((d) => ({ ...d, from: '', to: '' }))}
               >
-                Any date
+                {t('Any date')}
               </Choice>
               {DATE_PRESETS.map((p) => (
                 <Choice
@@ -283,13 +312,13 @@ export function AdminFilterSheet({
                   active={preset?.label === p.label}
                   onClick={() => setDraft((d) => ({ ...d, from: p.from(), to: p.to() }))}
                 >
-                  {p.label}
+                  {t(p.label)}
                 </Choice>
               ))}
             </div>
             <div className="mt-3 grid grid-cols-2 gap-3">
               <label className="block text-sm font-semibold text-muted-strong">
-                From
+                {t('From')}
                 <input
                   type="date"
                   value={draft.from}
@@ -299,7 +328,7 @@ export function AdminFilterSheet({
                 />
               </label>
               <label className="block text-sm font-semibold text-muted-strong">
-                To
+                {t('To')}
                 <input
                   type="date"
                   value={draft.to}
@@ -310,26 +339,26 @@ export function AdminFilterSheet({
               </label>
             </div>
             <p className="mt-2 text-sm text-muted">
-              Dates are the day a ticket arrived (on the Done tab, the day it was finished).
+              {t('Dates are the day a ticket arrived (on the Done tab, the day it was finished).')}
             </p>
           </section>
 
           <section>
-            <h3 className="mb-2 text-base font-bold text-foreground">Show tickets as</h3>
+            <h3 className="mb-2 text-base font-bold text-foreground">{t('Show tickets as')}</h3>
             <div className="flex gap-2">
               <Choice
                 active={draft.view === 'cards'}
                 onClick={() => setDraft((d) => ({ ...d, view: 'cards' }))}
               >
                 <LayoutGrid className="h-5 w-5" />
-                Cards
+                {t('Cards')}
               </Choice>
               <Choice
                 active={draft.view === 'list'}
                 onClick={() => setDraft((d) => ({ ...d, view: 'list' }))}
               >
                 <List className="h-5 w-5" />
-                List
+                {t('List')}
               </Choice>
             </div>
           </section>

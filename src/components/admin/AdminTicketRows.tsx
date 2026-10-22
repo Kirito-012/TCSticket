@@ -1,6 +1,7 @@
 'use client'
 
 import { VerificationBadge } from '@/components/tickets/VerificationBadge'
+import { DroneVerificationBadge } from '@/components/tickets/DroneVerificationBadge'
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -9,6 +10,8 @@ import { AssigneeDropdown } from '@/components/tickets/AssigneeDropdown'
 import { StatusSelect } from '@/components/tickets/StatusSelect'
 import { Select } from '@/components/ui/Select'
 import { cn, timeAgo } from '@/lib/utils'
+import { useLocale, useT } from '@/i18n/client'
+import { localeTag } from '@/i18n/config'
 import { isDone, isUrgent, plainTitle } from '@/lib/plain-words'
 import { bulkAssignTicketsAction } from '@/server/actions/ticket.actions'
 import type { TicketListItemView } from '@/lib/ticket-view'
@@ -41,6 +44,8 @@ export function AdminTicketRows({
   canAssign: boolean
   canUpdate: boolean
 }) {
+  const tr = useT()
+  const locale = useLocale()
   const router = useRouter()
   const [selected, setSelected] = useState<Set<number>>(new Set())
   const [person, setPerson] = useState('')
@@ -68,7 +73,9 @@ export function AdminTicketRows({
     if (!person) return
     const numbers = [...selected]
     const label =
-      person === NOBODY ? 'nobody' : (users.find((u) => u.id === person)?.name ?? 'that person')
+      person === NOBODY
+        ? tr('nobody')
+        : (users.find((u) => u.id === person)?.name ?? tr('that person'))
     startTransition(async () => {
       const result = await bulkAssignTicketsAction(numbers, person === NOBODY ? null : person)
       if (result.error) {
@@ -79,7 +86,12 @@ export function AdminTicketRows({
       setPerson('')
       setMessage({
         ok: true,
-        text: `Done — ${result.changed} ticket${result.changed === 1 ? '' : 's'} now assigned to ${label}.`,
+        text: tr(
+          result.changed === 1
+            ? 'Done — {count} ticket is now assigned to {name}.'
+            : 'Done — {count} tickets are now assigned to {name}.',
+          { count: result.changed ?? 0, name: label },
+        ),
       })
       router.refresh()
     })
@@ -113,7 +125,7 @@ export function AdminTicketRows({
           {canAssign ? (
             <input
               type="checkbox"
-              aria-label="Select all tickets on this page"
+              aria-label={tr('Select all tickets on this page')}
               checked={allSelected}
               onChange={toggleAll}
               className="h-5 w-5 cursor-pointer accent-[var(--accent)]"
@@ -122,11 +134,11 @@ export function AdminTicketRows({
             <span />
           )}
           <span>#</span>
-          <span>Ticket</span>
-          <span>Urgency</span>
-          <span>Status</span>
-          <span>Who does this?</span>
-          <span className="text-right">Updated</span>
+          <span>{tr('Ticket')}</span>
+          <span>{tr('Urgency')}</span>
+          <span>{tr('Status')}</span>
+          <span>{tr('Who does this?')}</span>
+          <span className="text-right">{tr('Updated')}</span>
         </div>
 
         <ul className="divide-y divide-border">
@@ -144,7 +156,9 @@ export function AdminTicketRows({
                 <div className="flex items-start gap-3 lg:contents">
                   {canAssign ? (
                     <label className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center lg:h-auto lg:w-auto">
-                      <span className="sr-only">Select ticket #{t.number}</span>
+                      <span className="sr-only">
+                        {tr('Select ticket #{number}', { number: t.number })}
+                      </span>
                       <input
                         type="checkbox"
                         checked={selected.has(t.number)}
@@ -159,7 +173,7 @@ export function AdminTicketRows({
                   <Link href={`/tickets/${t.number}`} className="min-w-0 flex-1 lg:flex-none">
                     <p className="text-base font-semibold text-foreground [overflow-wrap:anywhere]">
                       <span className="font-mono text-sm text-muted lg:hidden">#{t.number} </span>
-                      {plainTitle(t.subject)}
+                      {plainTitle(t.subject, tr)}
                     </p>
                     {t.sectorKey && (
                       <p className="mt-0.5 text-sm text-muted">
@@ -173,7 +187,7 @@ export function AdminTicketRows({
                   <div>
                     {urgent ? (
                       <span className="rounded-full bg-danger px-3 py-1 text-sm font-semibold text-white">
-                        Urgent
+                        {tr('Urgent')}
                       </span>
                     ) : (
                       <span className="hidden text-sm text-muted lg:inline">—</span>
@@ -187,10 +201,13 @@ export function AdminTicketRows({
                       disabled={!canUpdate}
                     />
                     {t.verification && (
-                      <VerificationBadge
-                        status={t.verification}
-                        className="mt-1.5 !py-0.5 !text-sm"
-                      />
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        <VerificationBadge status={t.verification} className="!py-0.5 !text-sm" />
+                        <DroneVerificationBadge
+                          status={t.droneVerification}
+                          className="!py-0.5 !text-sm"
+                        />
+                      </div>
                     )}
                   </div>
                   <div className="min-w-0">
@@ -201,7 +218,9 @@ export function AdminTicketRows({
                       disabled={!canAssign}
                     />
                   </div>
-                  <span className="text-sm text-muted lg:text-right">{timeAgo(t.updatedAt)}</span>
+                  <span className="text-sm text-muted lg:text-right">
+                    {timeAgo(t.updatedAt, { locale: localeTag(locale), justNow: tr('just now') })}
+                  </span>
                 </div>
               </li>
             )
@@ -215,16 +234,16 @@ export function AdminTicketRows({
           <div className="flex flex-wrap items-center gap-3">
             <p className="flex items-center gap-2 text-lg font-bold text-foreground">
               <UserCheck className="h-6 w-6 text-accent-strong" />
-              {selected.size} selected
+              {tr('{count} selected', { count: selected.size })}
             </p>
             <div className="w-full sm:w-72">
               <Select
                 size="lg"
                 value={person}
                 onChange={setPerson}
-                placeholder="Give them to…"
+                placeholder={tr('Give them to…')}
                 options={[
-                  { value: NOBODY, label: 'Nobody (take them off)' },
+                  { value: NOBODY, label: tr('Nobody (take them off)') },
                   ...users.map((u) => ({ value: u.id, label: u.name })),
                 ]}
               />
@@ -240,7 +259,7 @@ export function AdminTicketRows({
               ) : (
                 <CheckCircle2 className="h-5 w-5" strokeWidth={2.5} />
               )}
-              Assign
+              {tr('Assign')}
             </button>
             <button
               type="button"
@@ -248,7 +267,7 @@ export function AdminTicketRows({
               className="inline-flex h-12 cursor-pointer items-center gap-2 rounded-lg border border-border-strong px-4 text-base font-semibold text-muted-strong hover:bg-surface-hover sm:ml-auto"
             >
               <X className="h-5 w-5" />
-              Clear
+              {tr('Clear')}
             </button>
           </div>
         </div>

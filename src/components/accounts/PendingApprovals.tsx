@@ -5,6 +5,7 @@ import { Clock, Check, X } from 'lucide-react'
 import { approveUserAction, rejectUserAction } from '@/server/actions/account.actions'
 import { initialsFor } from '@/lib/utils'
 import { Avatar } from '@/components/ui/Avatar'
+import { useT } from '@/i18n/client'
 
 export type PendingRow = {
   id: string
@@ -15,6 +16,7 @@ export type PendingRow = {
 }
 
 export function PendingApprovals({ users }: { users: PendingRow[] }) {
+  const t = useT()
   const [pending, startTransition] = useTransition()
 
   if (users.length === 0) return null
@@ -47,7 +49,7 @@ export function PendingApprovals({ users }: { users: PendingRow[] }) {
               className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg bg-accent px-3 text-xs font-medium text-on-accent transition-colors hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Check className="h-3.5 w-3.5" />
-              Approve
+              {t('Approve')}
             </button>
             <button
               type="button"
@@ -56,7 +58,7 @@ export function PendingApprovals({ users }: { users: PendingRow[] }) {
               className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg border border-border-strong bg-white/[0.03] px-3 text-xs font-medium text-muted-strong transition-colors hover:bg-white/[0.07] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
             >
               <X className="h-3.5 w-3.5" />
-              Reject
+              {t('Reject')}
             </button>
           </div>
         ))}

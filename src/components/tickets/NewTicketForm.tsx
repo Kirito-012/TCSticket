@@ -10,6 +10,7 @@ import {
   uploadCommentImageAction,
   type ActionState,
 } from '@/server/actions/ticket.actions'
+import { useT } from '@/i18n/client'
 
 // Same limits as the upload itself (server/actions/ticket.actions.ts) and the ticket's photo list.
 const MAX_PHOTOS = 6
@@ -39,6 +40,7 @@ export function NewTicketForm({
   /** A Zone Inspector or Nodal Manager must pick one; an Admin may leave it empty. */
   sectorRequired: boolean
 }) {
+  const t = useT()
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     createTicketAction,
     undefined,
@@ -60,15 +62,15 @@ export function NewTicketForm({
     let room = MAX_PHOTOS - photos.length
     for (const file of Array.from(files)) {
       if (room <= 0) {
-        setPhotoError(`You can add up to ${MAX_PHOTOS} photos.`)
+        setPhotoError(t('You can add up to {n} photos.', { n: MAX_PHOTOS }))
         break
       }
       if (!PHOTO_TYPES.has(file.type)) {
-        setPhotoError('Please choose photos (JPG, PNG, WEBP or GIF).')
+        setPhotoError(t('Please choose photos (JPG, PNG, WEBP or GIF).'))
         continue
       }
       if (file.size > MAX_PHOTO_BYTES) {
-        setPhotoError('A photo is too big (the limit is 8 MB). Please choose a smaller one.')
+        setPhotoError(t('A photo is too big (the limit is 8 MB). Please choose a smaller one.'))
         continue
       }
       room -= 1
@@ -81,10 +83,10 @@ export function NewTicketForm({
           const image = result.image
           setPhotos((prev) => [...prev, image])
         } else {
-          setPhotoError(result?.error ?? 'The photo did not upload. Please try again.')
+          setPhotoError(result?.error ?? t('The photo did not upload. Please try again.'))
         }
       } catch {
-        setPhotoError('The photo did not upload. Please try again.')
+        setPhotoError(t('The photo did not upload. Please try again.'))
       } finally {
         setUploading((n) => n - 1)
       }
@@ -127,7 +129,7 @@ export function NewTicketForm({
 
       <div>
         <label htmlFor="subject" className="mb-1.5 block text-xs font-medium text-muted-strong">
-          Subject
+          {t('Subject')}
         </label>
         <input
           id="subject"
@@ -135,7 +137,7 @@ export function NewTicketForm({
           required
           minLength={3}
           maxLength={200}
-          placeholder="Briefly describe the issue"
+          placeholder={t('Briefly describe the issue')}
           className="h-10 w-full rounded-lg border border-border-strong bg-white/[0.03] px-3 text-sm text-foreground placeholder:text-muted/60 outline-none transition-colors focus:border-accent/50 focus:bg-white/[0.05] focus:ring-2 focus:ring-accent/20"
         />
       </div>
@@ -143,13 +145,13 @@ export function NewTicketForm({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="typeId" className="mb-1.5 block text-xs font-medium text-muted-strong">
-            Type
+            {t('Type')}
           </label>
           <Select
             name="typeId"
             value={typeId}
             onChange={handleTypeChange}
-            options={types.map((t) => ({ value: t.id, label: t.name }))}
+            options={types.map((ty) => ({ value: ty.id, label: t(ty.name) }))}
           />
         </div>
 
@@ -158,13 +160,13 @@ export function NewTicketForm({
             htmlFor="priorityId"
             className="mb-1.5 block text-xs font-medium text-muted-strong"
           >
-            Priority
+            {t('Priority')}
           </label>
           <Select
             name="priorityId"
             value={priorityId}
             onChange={setPriorityId}
-            options={allowedPriorities.map((p) => ({ value: p.id, label: p.name }))}
+            options={allowedPriorities.map((p) => ({ value: p.id, label: t(p.name) }))}
           />
         </div>
       </div>
@@ -183,9 +185,9 @@ export function NewTicketForm({
               size="md"
               value={sectorKey}
               onChange={setSectorKey}
-              placeholder={sectorRequired ? 'Choose a sector' : 'No sector'}
+              placeholder={sectorRequired ? t('Choose a sector') : t('No sector')}
               options={[
-                ...(sectorRequired ? [] : [{ value: '', label: 'No sector' }]),
+                ...(sectorRequired ? [] : [{ value: '', label: t('No sector') }]),
                 ...sectors.map((s) => ({ value: s.value, label: `${s.zone} · ${s.label}` })),
               ]}
             />
@@ -195,18 +197,20 @@ export function NewTicketForm({
       )}
 
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-muted-strong">Description</label>
+        <label className="mb-1.5 block text-xs font-medium text-muted-strong">
+          {t('Description')}
+        </label>
         <RichTextEditor
           content={issue}
           onChange={setIssue}
-          placeholder="Describe the issue in detail…"
+          placeholder={t('Describe the issue in detail…')}
         />
         <input type="hidden" name="issue" value={issue} />
       </div>
 
       <div>
         <label className="mb-1.5 block text-xs font-medium text-muted-strong">
-          Photos <span className="font-normal text-muted">(optional)</span>
+          {t('Photos')} <span className="font-normal text-muted">(optional)</span>
         </label>
         <div className="flex flex-wrap gap-3">
           {photos.map((photo) => (
@@ -221,7 +225,7 @@ export function NewTicketForm({
                 onClick={() =>
                   setPhotos((prev) => prev.filter((p) => p.publicId !== photo.publicId))
                 }
-                aria-label="Remove this photo"
+                aria-label={t('Remove this photo')}
                 className="absolute right-1 top-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-black/75 text-white"
               >
                 <X className="h-3.5 w-3.5" strokeWidth={2.5} />
@@ -239,7 +243,7 @@ export function NewTicketForm({
           {photos.length + uploading < MAX_PHOTOS && (
             <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border-strong text-xs font-medium text-muted-strong transition-colors hover:bg-white/[0.04]">
               <ImagePlus className="h-5 w-5" />
-              Add photos
+              {t('Add photos')}
               <input
                 ref={fileInput}
                 type="file"
@@ -262,7 +266,7 @@ export function NewTicketForm({
 
       <div className="flex items-center justify-end gap-3 border-t border-border pt-5">
         <Button type="submit" size="lg" disabled={pending || uploading > 0}>
-          {pending ? 'Creating…' : uploading > 0 ? 'Uploading photos…' : 'Create ticket'}
+          {pending ? t('Creating…') : uploading > 0 ? t('Uploading photos…') : t('Create ticket')}
         </Button>
       </div>
     </form>

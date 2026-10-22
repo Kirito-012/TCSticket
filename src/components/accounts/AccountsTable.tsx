@@ -12,6 +12,8 @@ import { sectorNoOf } from '@/lib/zones'
 import { cn, initialsFor, timeAgo } from '@/lib/utils'
 import { Avatar } from '@/components/ui/Avatar'
 import { Select } from '@/components/ui/Select'
+import { useLocale, useT } from '@/i18n/client'
+import { localeTag } from '@/i18n/config'
 
 export type AccountRow = {
   id: string
@@ -43,6 +45,7 @@ function AreaCell({
   disabled: boolean
   onChange: (userId: string, value: string) => void
 }) {
+  const t = useT()
   const kind = placementKindOf(user.roleKey)
   if (kind === null) return <span className="text-xs text-muted">—</span>
 
@@ -54,7 +57,7 @@ function AreaCell({
     return label ? (
       <span className="text-xs font-medium text-muted-strong">{label}</span>
     ) : (
-      <span className="text-xs font-medium text-warning">Not placed yet</span>
+      <span className="text-xs font-medium text-warning">{t('Not placed yet')}</span>
     )
   }
   return (
@@ -64,7 +67,7 @@ function AreaCell({
         disabled={disabled}
         onChange={(next) => onChange(user.id, next)}
         size="sm"
-        placeholder={kind === 'sector' ? 'Choose a sector' : 'Choose a zone'}
+        placeholder={kind === 'sector' ? t('Choose a sector') : t('Choose a zone')}
         options={options}
       />
     </div>
@@ -91,6 +94,8 @@ export function AccountsTable({
   canEdit: boolean
   canEditRole: boolean
 }) {
+  const t = useT()
+  const locale = localeTag(useLocale())
   const [pending, startTransition] = useTransition()
 
   function handlePlacementChange(userId: string, value: string) {
@@ -112,7 +117,7 @@ export function AccountsTable({
   if (users.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
-        <p className="text-sm font-medium text-foreground">No accounts yet</p>
+        <p className="text-sm font-medium text-foreground">{t('No accounts yet')}</p>
       </div>
     )
   }
@@ -148,7 +153,7 @@ export function AccountsTable({
                     u.isActive ? 'bg-accent-strong' : 'bg-muted',
                   )}
                 />
-                {u.isActive ? 'Active' : 'Deactivated'}
+                {u.isActive ? t('Active') : t('Deactivated')}
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-3">
@@ -172,7 +177,11 @@ export function AccountsTable({
                 disabled={pending}
                 onChange={handlePlacementChange}
               />
-              <span className="text-xs text-muted">Joined {timeAgo(u.createdAt)}</span>
+              <span className="text-xs text-muted">
+                {t('Joined {time}', {
+                  time: timeAgo(u.createdAt, { locale, justNow: t('just now') }),
+                })}
+              </span>
               {canEdit && (
                 <button
                   type="button"
@@ -180,7 +189,7 @@ export function AccountsTable({
                   onClick={() => handleToggleActive(u.id, !u.isActive)}
                   className="ml-auto cursor-pointer text-xs font-medium text-muted-strong transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {u.isActive ? 'Deactivate' : 'Reactivate'}
+                  {u.isActive ? t('Deactivate') : t('Reactivate')}
                 </button>
               )}
             </div>
@@ -192,11 +201,11 @@ export function AccountsTable({
         <table className="w-full min-w-[720px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-border text-left text-xs text-muted">
-              <th className="px-5 py-3 font-medium">Name</th>
-              <th className="px-3 py-3 font-medium">Role</th>
-              <th className="px-3 py-3 font-medium">Area</th>
-              <th className="px-3 py-3 font-medium">Status</th>
-              <th className="px-3 py-3 font-medium">Joined</th>
+              <th className="px-5 py-3 font-medium">{t('Name')}</th>
+              <th className="px-3 py-3 font-medium">{t('Role')}</th>
+              <th className="px-3 py-3 font-medium">{t('Area')}</th>
+              <th className="px-3 py-3 font-medium">{t('Status')}</th>
+              <th className="px-3 py-3 font-medium">{t('Joined')}</th>
               {canEdit && <th className="px-5 py-3" />}
             </tr>
           </thead>
@@ -264,7 +273,7 @@ export function AccountsTable({
                         u.isActive ? 'bg-accent-strong' : 'bg-muted',
                       )}
                     />
-                    {u.isActive ? 'Active' : 'Deactivated'}
+                    {u.isActive ? t('Active') : t('Deactivated')}
                   </span>
                 </td>
                 <td className="px-3 py-3.5 text-xs text-muted">{timeAgo(u.createdAt)}</td>
@@ -276,7 +285,7 @@ export function AccountsTable({
                       onClick={() => handleToggleActive(u.id, !u.isActive)}
                       className="cursor-pointer text-xs font-medium text-muted-strong transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {u.isActive ? 'Deactivate' : 'Reactivate'}
+                      {u.isActive ? t('Deactivate') : t('Reactivate')}
                     </button>
                   </td>
                 )}

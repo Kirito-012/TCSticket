@@ -1,9 +1,12 @@
 import { VerificationBadge } from '@/components/tickets/VerificationBadge'
+import { DroneVerificationBadge } from '@/components/tickets/DroneVerificationBadge'
 import { ReopenedBadge } from '@/components/tickets/ReopenedBadge'
 import Link from 'next/link'
 import { CheckCircle2, ChevronRight, ClipboardList, Clock } from 'lucide-react'
 import { AssigneeDropdown } from '@/components/tickets/AssigneeDropdown'
 import { cn, timeAgo } from '@/lib/utils'
+import { getLocale, getT } from '@/i18n/server'
+import { localeTag } from '@/i18n/config'
 import { friendlyStatusName, isDone, isUrgent, plainTitle } from '@/lib/plain-words'
 import type { TicketListItemView } from '@/lib/ticket-view'
 
@@ -14,7 +17,7 @@ type UserOption = { id: string; name: string }
  * "who does this" button right on the card, so assigning never needs a trip to another page.
  * Colours come from the theme variables only, so it works in both dark and light.
  */
-export function AdminTaskCard({
+export async function AdminTaskCard({
   task,
   users,
   canAssign,
@@ -23,6 +26,8 @@ export function AdminTaskCard({
   users: UserOption[]
   canAssign: boolean
 }) {
+  const t = await getT()
+  const locale = localeTag(await getLocale())
   const done = isDone(task.status)
   const urgent = !done && isUrgent(task.priority)
   const reopened = task.status?.slug === 'reopened'
@@ -53,7 +58,7 @@ export function AdminTaskCard({
         )}
         <div className="min-w-0 flex-1">
           <p className="text-lg font-bold leading-snug text-foreground [overflow-wrap:anywhere]">
-            {plainTitle(task.subject)}
+            {plainTitle(task.subject, t)}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             {/* Resolved or not — said outright, then the ticket's own status. */}
@@ -72,28 +77,41 @@ export function AdminTaskCard({
                 ) : (
                   <Clock className="h-4 w-4" strokeWidth={2.5} />
                 )}
-                {done ? 'Resolved' : 'Not resolved'}
+                {done ? t('Resolved') : t('Not resolved')}
               </span>
             )}
             {task.status && !reopened && friendlyStatusName(task.status.name) !== 'Resolved' && (
               <span className="rounded-full border border-border-strong px-3 py-1 text-base font-medium text-muted-strong">
-                {friendlyStatusName(task.status.name)}
+                {t(friendlyStatusName(task.status.name))}
               </span>
             )}
             {urgent && (
               <span className="rounded-full bg-danger px-3 py-1 text-base font-semibold text-white">
-                Urgent
+                {t('Urgent')}
               </span>
             )}
-            <span className="text-base text-muted">{timeAgo(task.updatedAt)}</span>
+            <span className="text-base text-muted">
+              {timeAgo(task.updatedAt, { locale, justNow: t('just now') })}
+            </span>
           </div>
-          {done && <VerificationBadge status={task.verification} className="mt-2" />}
+          {done && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              <VerificationBadge
+                status={task.verification}
+                className="max-sm:!px-2.5 max-sm:!py-0.5 max-sm:!text-sm"
+              />
+              <DroneVerificationBadge
+                status={task.droneVerification}
+                className="max-sm:!px-2.5 max-sm:!py-0.5 max-sm:!text-sm"
+              />
+            </div>
+          )}
         </div>
         <ChevronRight className="mt-3 h-6 w-6 shrink-0 text-muted" strokeWidth={2.5} aria-hidden />
       </Link>
 
       <div className="mt-auto">
-        <p className="mb-1.5 text-sm font-semibold text-muted">Who does this?</p>
+        <p className="mb-1.5 text-sm font-semibold text-muted">{t('Who does this?')}</p>
         <AssigneeDropdown
           ticketNumber={task.number}
           assignee={task.assignee}

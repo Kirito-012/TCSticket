@@ -9,9 +9,11 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
+import { useT } from '@/i18n/client'
 export type VolumePoint = { day: string; created: number; resolved: number }
 
 export function VolumeChart({ data }: { data: VolumePoint[] }) {
+  const t = useT()
   return (
     <div className="h-48 w-full sm:h-64">
       <ResponsiveContainer width="100%" height="100%">
@@ -55,7 +57,7 @@ export function VolumeChart({ data }: { data: VolumePoint[] }) {
           <Area
             type="monotone"
             dataKey="created"
-            name="Created"
+            name={t('Created')}
             stroke="#34d399"
             strokeWidth={2}
             fill="url(#created)"
@@ -63,7 +65,7 @@ export function VolumeChart({ data }: { data: VolumePoint[] }) {
           <Area
             type="monotone"
             dataKey="resolved"
-            name="Resolved"
+            name={t('Resolved')}
             stroke="#818cf8"
             strokeWidth={2}
             fill="url(#resolved)"

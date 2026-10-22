@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { Ticket as TicketIcon } from 'lucide-react'
 import { timeAgo } from '@/lib/utils'
+import { getLocale, getT } from '@/i18n/server'
+import { localeTag } from '@/i18n/config'
 
 export type ActivityItem = {
   id: string
@@ -21,11 +23,13 @@ const ACTION_LABEL: Record<string, string> = {
   due_date_changed: 'set a due date on',
 }
 
-export function ActivityFeed({ items }: { items: ActivityItem[] }) {
+export async function ActivityFeed({ items }: { items: ActivityItem[] }) {
+  const t = await getT()
+  const locale = localeTag(await getLocale())
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center gap-2 px-5 py-10 text-center">
-        <p className="text-sm text-muted">No activity yet.</p>
+        <p className="text-sm text-muted">{t('No activity yet.')}</p>
       </div>
     )
   }
@@ -45,7 +49,7 @@ export function ActivityFeed({ items }: { items: ActivityItem[] }) {
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm text-muted-strong">
               <span className="font-medium text-foreground">{item.actorName}</span>{' '}
-              {ACTION_LABEL[item.action] ?? item.action}{' '}
+              {t(ACTION_LABEL[item.action] ?? item.action)}{' '}
               {item.ticketNumber && (
                 <span className="font-medium text-foreground">
                   #{item.ticketNumber} {item.ticketSubject}
@@ -53,7 +57,9 @@ export function ActivityFeed({ items }: { items: ActivityItem[] }) {
               )}
             </p>
           </div>
-          <span className="shrink-0 text-xs text-muted">{timeAgo(item.createdAt)}</span>
+          <span className="shrink-0 text-xs text-muted">
+            {timeAgo(item.createdAt, { locale, justNow: t('just now') })}
+          </span>
         </Link>
       ))}
     </div>

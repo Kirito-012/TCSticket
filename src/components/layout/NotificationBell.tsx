@@ -12,6 +12,8 @@ import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { Bell, CheckCheck, Ticket as TicketIcon, UserPlus } from 'lucide-react'
 import { cn, timeAgo } from '@/lib/utils'
+import { useLocale } from '@/i18n/client'
+import { localeTag } from '@/i18n/config'
 import { usePopoverPosition } from '@/lib/use-popover-position'
 import { BottomSheet } from '@/components/ui/BottomSheet'
 import {
@@ -20,6 +22,7 @@ import {
   markNotificationReadAction,
 } from '@/server/actions/notification.actions'
 import type { NotificationItem } from '@/server/services/notification.service'
+import { useT } from '@/i18n/client'
 
 const POLL_INTERVAL_MS = 30_000
 const MENU_MIN_WIDTH = 360
@@ -35,6 +38,8 @@ function subscribePhone(onChange: () => void) {
 const isPhoneNow = () => window.matchMedia(PHONE_QUERY).matches
 
 export function NotificationBell() {
+  const t = useT()
+  const locale = localeTag(useLocale())
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [items, setItems] = useState<NotificationItem[]>([])
@@ -118,7 +123,7 @@ export function NotificationBell() {
       <button
         ref={triggerRef}
         type="button"
-        aria-label="Notifications"
+        aria-label={t('Notifications')}
         aria-haspopup="true"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
@@ -143,7 +148,7 @@ export function NotificationBell() {
             className="z-50 flex flex-col overflow-hidden rounded-xl border border-border bg-background-elevated shadow-lg"
           >
             <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-3.5 py-2.5">
-              <p className="text-sm font-semibold text-foreground">Notifications</p>
+              <p className="text-sm font-semibold text-foreground">{t('Notifications')}</p>
               <button
                 type="button"
                 disabled={isPending || unreadCount === 0}
@@ -151,7 +156,7 @@ export function NotificationBell() {
                 className="inline-flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-muted-strong transition-colors hover:bg-white/[0.06] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <CheckCheck className="h-3.5 w-3.5" />
-                Mark all as read
+                {t('Mark all as read')}
               </button>
             </div>
 
@@ -160,7 +165,7 @@ export function NotificationBell() {
                 <div className="flex flex-col items-center gap-2 px-5 py-10 text-center">
                   <Bell className="h-5 w-5 text-muted" />
                   <p className="text-sm text-muted">
-                    {loaded ? "You're all caught up." : 'Loading…'}
+                    {loaded ? t("You're all caught up.") : t('Loading…')}
                   </p>
                 </div>
               ) : (
@@ -193,7 +198,9 @@ export function NotificationBell() {
                         <p className="truncate text-xs text-muted">{item.subtitle}</p>
                       </div>
                       <div className="flex shrink-0 flex-col items-end gap-1.5 pt-0.5">
-                        <span className="text-[11px] text-muted">{timeAgo(item.createdAt)}</span>
+                        <span className="text-[11px] text-muted">
+                          {timeAgo(item.createdAt, { locale, justNow: t('just now') })}
+                        </span>
                         {!item.read && (
                           <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
                         )}
@@ -211,7 +218,7 @@ export function NotificationBell() {
         <BottomSheet
           open={open}
           onClose={() => setOpen(false)}
-          title="Notifications"
+          title={t('Notifications')}
           titleRight={
             <button
               type="button"
@@ -220,7 +227,7 @@ export function NotificationBell() {
               className="inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-xl border-2 border-border-strong px-3 text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-40"
             >
               <CheckCheck className="h-4 w-4" />
-              Mark all read
+              {t('Mark all read')}
             </button>
           }
         >
@@ -264,9 +271,14 @@ export function NotificationBell() {
                       </p>
                     </div>
                     <div className="flex shrink-0 flex-col items-end gap-2 pt-1">
-                      <span className="text-sm text-muted">{timeAgo(item.createdAt)}</span>
+                      <span className="text-sm text-muted">
+                        {timeAgo(item.createdAt, { locale, justNow: t('just now') })}
+                      </span>
                       {!item.read && (
-                        <span className="h-2.5 w-2.5 rounded-full bg-accent" aria-label="Unread" />
+                        <span
+                          className="h-2.5 w-2.5 rounded-full bg-accent"
+                          aria-label={t('Unread')}
+                        />
                       )}
                     </div>
                   </Link>

@@ -11,6 +11,7 @@ import { getZoneSummaries } from '@/server/services/sector.service'
 import { toTicketListItem } from '@/lib/ticket-view'
 import { zoneByKey } from '@/lib/zones'
 import type { TicketScope } from '@/lib/ticket-scope'
+import { getT } from '@/i18n/server'
 
 export type DashboardView =
   { kind: 'admin' } | { kind: 'zone'; zoneKey: string } | { kind: 'sector'; sectorKey: string }
@@ -36,9 +37,10 @@ export async function ScopedDashboard({
   backHref?: string
 }) {
   const data = await loadScopedDashboard(scope, canAssign)
+  const t = await getT()
 
-  let title = 'Dashboard'
-  let description = 'What needs your attention today'
+  let title = t('Dashboard')
+  let description = t('What needs your attention today')
   let extra: React.ReactNode = null
 
   if (view.kind === 'admin') {
@@ -46,13 +48,17 @@ export async function ScopedDashboard({
     extra = <ZoneCards zones={zones} />
   } else if (view.kind === 'zone') {
     const zone = zoneByKey(view.zoneKey)
-    title = zone?.name ?? 'Zone'
-    description = `${data.sectors.length} sectors · what needs your attention today`
-    extra = <SectorGrid sectors={data.sectors} title={`Sectors in ${title}`} />
+    title = zone?.name ?? t('Zone')
+    description = t('{count} sectors · what needs your attention today', {
+      count: data.sectors.length,
+    })
+    extra = <SectorGrid sectors={data.sectors} title={t('Sectors in {name}', { name: title })} />
   } else {
     const sector = data.sectors.find((s) => s.key === view.sectorKey)
-    title = sector?.name ?? 'Sector'
-    description = sector ? `Sector ${sector.sectorNo} · what needs your attention today` : 'Sector'
+    title = sector?.name ?? t('Sector')
+    description = sector
+      ? t('Sector {n} · what needs your attention today', { n: sector.sectorNo })
+      : t('Sector')
     extra = sector ? <SectorTeam sector={sector} /> : null
   }
 
@@ -61,7 +67,7 @@ export async function ScopedDashboard({
       <Topbar
         title={title}
         description={description}
-        primaryAction={canCreate ? { label: 'New ticket', href: '/tickets/new' } : undefined}
+        primaryAction={canCreate ? { label: t('New ticket'), href: '/tickets/new' } : undefined}
       />
       <main className="flex-1 px-4 py-6 animate-fade-in sm:px-8">
         {backHref && (
@@ -71,7 +77,7 @@ export async function ScopedDashboard({
               className="inline-flex min-h-11 items-center gap-2 rounded-xl border-2 border-border-strong bg-surface px-4 text-base font-bold text-foreground"
             >
               <ArrowLeft className="h-5 w-5" strokeWidth={2.5} />
-              Back
+              {t('Back')}
             </Link>
           </div>
         )}

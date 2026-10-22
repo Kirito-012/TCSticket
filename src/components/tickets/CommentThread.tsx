@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/Button'
 import { ImageLightbox } from '@/components/ui/ImageLightbox'
 import { RichTextEditor } from '@/components/editor/RichTextEditor'
 import { cn, timeAgo } from '@/lib/utils'
+import { useLocale } from '@/i18n/client'
+import { localeTag } from '@/i18n/config'
 import {
   addCommentAction,
   uploadCommentImageAction,
@@ -14,6 +16,7 @@ import {
   type ActionState,
 } from '@/server/actions/ticket.actions'
 import type { CommentView } from '@/lib/ticket-view'
+import { useT } from '@/i18n/client'
 
 type PendingImage = {
   id: string
@@ -42,6 +45,8 @@ export function CommentThread({
   canNote: boolean
   canDeleteComment: boolean
 }) {
+  const t = useT()
+  const locale = localeTag(useLocale())
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     addCommentAction,
     undefined,
@@ -88,14 +93,19 @@ export function CommentThread({
       if (file.size > MAX_IMAGE_BYTES) {
         setImages((prev) => [
           ...prev,
-          { id, previewUrl, status: 'error', error: 'Image must be under 8MB' },
+          { id, previewUrl, status: 'error', error: t('Image must be under 8MB') },
         ])
         continue
       }
       if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
         setImages((prev) => [
           ...prev,
-          { id, previewUrl, status: 'error', error: 'Only PNG, JPEG, WEBP, and GIF are allowed' },
+          {
+            id,
+            previewUrl,
+            status: 'error',
+            error: t('Only PNG, JPEG, WEBP, and GIF are allowed'),
+          },
         ])
         continue
       }
@@ -112,14 +122,16 @@ export function CommentThread({
               img.id === id
                 ? result?.image
                   ? { ...img, status: 'done', uploaded: result.image }
-                  : { ...img, status: 'error', error: result?.error ?? 'Upload failed' }
+                  : { ...img, status: 'error', error: result?.error ?? t('Upload failed') }
                 : img,
             ),
           )
         } catch {
           setImages((prev) =>
             prev.map((img) =>
-              img.id === id ? { ...img, status: 'error', error: 'Image must be under 8MB' } : img,
+              img.id === id
+                ? { ...img, status: 'error', error: t('Image must be under 8MB') }
+                : img,
             ),
           )
         }
@@ -148,7 +160,7 @@ export function CommentThread({
         onClose={() => setLightbox(null)}
       />
       {visibleComments.length === 0 && (
-        <p className="text-sm text-muted">No comments yet — be the first to reply.</p>
+        <p className="text-sm text-muted">{t('No comments yet — be the first to reply.')}</p>
       )}
 
       {visibleComments.map((c) => (
@@ -169,38 +181,44 @@ export function CommentThread({
           />
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-medium text-foreground">{c.author?.name ?? 'Unknown'}</p>
+              <p className="text-sm font-medium text-foreground">
+                {c.author?.name ?? t('Unknown')}
+              </p>
               {c.isInternal && (
                 <span className="flex items-center gap-1 rounded-md bg-warning-soft px-1.5 py-0.5 text-[10px] font-medium text-warning">
-                  <Lock className="h-2.5 w-2.5" /> Internal note
+                  <Lock className="h-2.5 w-2.5" /> {t('Internal note')}
                 </span>
               )}
-              <span className="text-[11px] text-muted">{timeAgo(c.createdAt)}</span>
+              <span className="text-[11px] text-muted">
+                {timeAgo(c.createdAt, { locale, justNow: t('just now') })}
+              </span>
               {canDeleteComment && (
                 <div className="ml-auto flex items-center gap-2 opacity-0 transition-opacity group-hover/comment:opacity-100">
                   {confirmDeleteId === c.id ? (
                     <>
-                      <span className="text-[11px] text-muted-strong">Delete this comment?</span>
+                      <span className="text-[11px] text-muted-strong">
+                        {t('Delete this comment?')}
+                      </span>
                       <button
                         type="button"
                         onClick={() => handleDelete(c.id)}
                         className="text-[11px] font-medium text-danger hover:underline"
                       >
-                        Confirm
+                        {t('Confirm')}
                       </button>
                       <button
                         type="button"
                         onClick={() => setConfirmDeleteId(null)}
                         className="text-[11px] text-muted hover:text-foreground"
                       >
-                        Cancel
+                        {t('Cancel')}
                       </button>
                     </>
                   ) : (
                     <button
                       type="button"
                       onClick={() => setConfirmDeleteId(c.id)}
-                      aria-label="Delete comment"
+                      aria-label={t('Delete comment')}
                       className="text-muted hover:text-danger"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -222,13 +240,16 @@ export function CommentThread({
                     key={a.publicId}
                     type="button"
                     onClick={() => setLightbox({ images: c.attachments, index: i })}
-                    aria-label={`View image ${i + 1} of ${c.attachments.length}`}
+                    aria-label={t('View image {n} of {total}', {
+                      n: i + 1,
+                      total: c.attachments.length,
+                    })}
                     className="block cursor-zoom-in overflow-hidden rounded-lg border border-border-strong"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={a.url}
-                      alt="Comment attachment"
+                      alt={t('Comment attachment')}
                       className="h-24 w-24 object-cover transition-opacity hover:opacity-90 sm:h-28 sm:w-28"
                     />
                   </button>
@@ -257,7 +278,7 @@ export function CommentThread({
             key={editorKey}
             content={body}
             onChange={setBody}
-            placeholder={isInternal ? 'Write an internal note…' : 'Write a reply…'}
+            placeholder={isInternal ? t('Write an internal note…') : t('Write a reply…')}
           />
 
           {images.length > 0 && (
@@ -280,7 +301,7 @@ export function CommentThread({
                     <button
                       type="button"
                       onClick={() => removeImage(img.id)}
-                      aria-label="Remove image"
+                      aria-label={t('Remove image')}
                       className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100"
                     >
                       <X className="h-3 w-3" />
@@ -296,8 +317,8 @@ export function CommentThread({
             </div>
           )}
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               {canNote ? (
                 <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-strong">
                   <input
@@ -306,14 +327,14 @@ export function CommentThread({
                     onChange={(e) => setIsInternal(e.target.checked)}
                     className="h-3.5 w-3.5 cursor-pointer rounded border-border-strong bg-transparent accent-amber-500"
                   />
-                  Internal note (not visible to the requester)
+                  {t('Internal note (not visible to the requester)')}
                 </label>
               ) : (
                 <span />
               )}
               <label className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-strong hover:text-foreground">
                 <ImagePlus className="h-4 w-4" />
-                Add image
+                {t('Add image')}
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -331,7 +352,7 @@ export function CommentThread({
                 pending || hasUploadingImages || (!body.trim() && uploadedAttachments.length === 0)
               }
             >
-              {pending ? 'Posting…' : isInternal ? 'Add note' : 'Reply'}
+              {pending ? t('Posting…') : isInternal ? t('Add note') : t('Reply')}
             </Button>
           </div>
         </form>

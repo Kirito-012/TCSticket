@@ -13,7 +13,7 @@ const MAX_RADIUS_METERS = 500
 /**
  * GET /api/v1/tickets/to-verify?latitude=..&longitude=..&radius=..  (metres, default 30)
  *
- * The finished garbage tickets that are not verified yet and are within `radius` metres of a point.
+ * The finished garbage tickets that are not drone verified yet and are within `radius` metres of a point.
  * DroneSeva asks this after a new photo of an area is checked, to know which tickets that photo can
  * verify (clean photo) or reopen (garbage still there). Same `x-api-key` auth as /api/v1/tickets.
  */
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
     typeId: type._id,
     deletedAt: null,
     statusId: { $in: finished.map((s) => s._id) },
-    'verification.status': { $ne: 'verified' },
+    'droneVerification.status': { $ne: 'verified' },
     'location.latitude': { $gte: latitude - dLat, $lte: latitude + dLat },
     'location.longitude': { $gte: longitude - dLon, $lte: longitude + dLon },
   })

@@ -2,18 +2,20 @@ import Link from 'next/link'
 import { ChevronRight, HardHat, UserCog } from 'lucide-react'
 import { CountPill, DoneBar } from '@/components/zones/Counts'
 import type { SectorSummary } from '@/server/services/sector.service'
+import { getT } from '@/i18n/server'
 
 /**
  * The sectors of a zone as cards: who looks after each one (Nodal Manager and Surveyors) and how
  * much is open, waiting for someone, urgent or old. Tapping one opens that sector's dashboard.
  */
-export function SectorGrid({
+export async function SectorGrid({
   sectors,
   title = 'Sectors',
 }: {
   sectors: SectorSummary[]
   title?: string
 }) {
+  const t = await getT()
   if (sectors.length === 0) return null
   return (
     <section className="space-y-3" aria-labelledby="sectors-heading">
@@ -30,7 +32,7 @@ export function SectorGrid({
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <p className="truncate text-xl font-bold text-foreground">{sector.name}</p>
-                <p className="text-sm text-muted">Sector {sector.sectorNo}</p>
+                <p className="text-sm text-muted">{t('Sector {n}', { n: sector.sectorNo })}</p>
               </div>
               <ChevronRight
                 className="mt-1 h-5 w-5 shrink-0 text-muted group-hover:text-accent-strong"
@@ -44,7 +46,7 @@ export function SectorGrid({
                 <span className="truncate">
                   {sector.nodalManagers.length > 0
                     ? sector.nodalManagers.join(', ')
-                    : 'No Nodal Manager yet'}
+                    : t('No Nodal Manager yet')}
                 </span>
               </p>
               <p className="flex items-center gap-2">
@@ -52,18 +54,18 @@ export function SectorGrid({
                 <span className="truncate">
                   {sector.surveyors.length > 0
                     ? sector.surveyors.map((s) => s.name).join(', ')
-                    : 'No Surveyor yet'}
+                    : t('No Surveyor yet')}
                 </span>
               </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 2xl:grid-cols-6">
-              <CountPill label="Open" value={sector.open} />
-              <CountPill label="Need someone" value={sector.unassigned} tone="warning" />
-              <CountPill label="Urgent" value={sector.urgent} tone="danger" />
-              <CountPill label="Waiting" value={sector.waiting} tone="warning" />
-              <CountPill label="Reopened" value={sector.reopened} tone="danger" />
-              <CountPill label="Not verified" value={sector.unverified} tone="warning" />
+            <div className="grid grid-cols-2 gap-2 min-[420px]:grid-cols-3 2xl:grid-cols-6">
+              <CountPill label={t('Open')} value={sector.open} />
+              <CountPill label={t('Need someone')} value={sector.unassigned} tone="warning" />
+              <CountPill label={t('Urgent')} value={sector.urgent} tone="danger" />
+              <CountPill label={t('Waiting')} value={sector.waiting} tone="warning" />
+              <CountPill label={t('Reopened')} value={sector.reopened} tone="danger" />
+              <CountPill label={t('Not verified')} value={sector.unverified} tone="warning" />
             </div>
 
             <DoneBar done={sector.done} total={sector.total} />

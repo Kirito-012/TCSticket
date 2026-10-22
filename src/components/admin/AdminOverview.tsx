@@ -6,6 +6,7 @@ import { WorkloadByAssignee } from '@/components/dashboard/WorkloadByAssignee'
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed'
 import { GarbageHeatmap } from '@/components/dashboard/GarbageHeatmap'
 import type { getDashboardData } from '@/server/services/ticket.service'
+import { getT } from '@/i18n/server'
 
 type DashboardData = Awaited<ReturnType<typeof getDashboardData>>
 
@@ -14,14 +15,21 @@ type DashboardData = Awaited<ReturnType<typeof getDashboardData>>
  * and sector counts), how tickets are flowing, how urgent they are, who is carrying the load and
  * what just happened. Sits below the numbers and the "needs someone" list.
  */
-export function AdminOverview({ data, canFilter }: { data: DashboardData; canFilter: boolean }) {
+export async function AdminOverview({
+  data,
+  canFilter,
+}: {
+  data: DashboardData
+  canFilter: boolean
+}) {
+  const t = await getT()
   return (
     <div className="space-y-4 sm:space-y-6">
       <Card>
         <CardHeader
           icon={<Flame className="h-4 w-4" />}
-          title="Garbage hotspots"
-          subtitle="Tickets by sector — tap a sector on the map"
+          title={t('Garbage hotspots')}
+          subtitle={t('Tickets by sector — tap a sector on the map')}
         />
         <div className="pt-4">
           <GarbageHeatmap sectors={data.sectors} canFilter={canFilter} />
@@ -32,15 +40,15 @@ export function AdminOverview({ data, canFilter }: { data: DashboardData; canFil
         <Card className="xl:col-span-2">
           <CardHeader
             icon={<TrendingUp className="h-4 w-4" />}
-            title="Ticket volume"
-            subtitle="Created vs. resolved, last 7 days"
+            title={t('Ticket volume')}
+            subtitle={t('Created vs. resolved, last 7 days')}
             action={
               <div className="flex items-center gap-4 pt-1 text-xs">
                 <span className="flex items-center gap-1.5 text-muted-strong">
-                  <span className="h-2 w-2 rounded-full bg-accent-strong" /> Created
+                  <span className="h-2 w-2 rounded-full bg-accent-strong" /> {t('Created')}
                 </span>
                 <span className="flex items-center gap-1.5 text-muted-strong">
-                  <span className="h-2 w-2 rounded-full bg-violet" /> Resolved
+                  <span className="h-2 w-2 rounded-full bg-violet" /> {t('Resolved')}
                 </span>
               </div>
             }
@@ -53,8 +61,8 @@ export function AdminOverview({ data, canFilter }: { data: DashboardData; canFil
         <Card>
           <CardHeader
             icon={<AlertTriangle className="h-4 w-4" />}
-            title="How urgent"
-            subtitle="Open tickets by priority"
+            title={t('How urgent')}
+            subtitle={t('Open tickets by priority')}
           />
           <div className="px-5 pb-5 pt-4">
             <PriorityBreakdown data={data.priorityBreakdown} />
@@ -66,8 +74,8 @@ export function AdminOverview({ data, canFilter }: { data: DashboardData; canFil
         <Card className="xl:col-span-2">
           <CardHeader
             icon={<Inbox className="h-4 w-4" />}
-            title="Recent activity"
-            subtitle="What just happened"
+            title={t('Recent activity')}
+            subtitle={t('What just happened')}
           />
           <div className="mt-3">
             <ActivityFeed items={data.recentActivity} />
@@ -77,8 +85,8 @@ export function AdminOverview({ data, canFilter }: { data: DashboardData; canFil
         <Card>
           <CardHeader
             icon={<Users2 className="h-4 w-4" />}
-            title="Who has how many"
-            subtitle="Open tickets per person"
+            title={t('Who has how many')}
+            subtitle={t('Open tickets per person')}
           />
           <div className="px-5 pb-5 pt-4">
             <WorkloadByAssignee data={data.workloadByAssignee} />

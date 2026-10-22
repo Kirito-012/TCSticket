@@ -1,5 +1,7 @@
 import { Activity } from 'lucide-react'
 import { timeAgo } from '@/lib/utils'
+import { getLocale, getT } from '@/i18n/server'
+import { localeTag } from '@/i18n/config'
 import type { EventView } from '@/lib/ticket-view'
 
 const FIELD_LABELS: Record<string, string> = {
@@ -23,21 +25,27 @@ const ACTION_LABELS: Record<string, string> = {
   verified: 'marked the cleanup as verified',
   unverified: 'marked the cleanup as not verified',
   reopened: 'reopened this ticket: the drone re-check still showed garbage',
+  drone_verified: 'marked the cleanup as drone verified',
 }
 
-function describe(event: EventView) {
+function describe(
+  event: EventView,
+  t: (text: string, params?: Record<string, string | number>) => string,
+) {
   if (event.action === 'field_changed' && event.field) {
     const label = FIELD_LABELS[event.field] ?? event.field
     if (event.field === 'assigneeId') {
-      return event.to ? `assigned this ticket` : 'unassigned this ticket'
+      return event.to ? t('assigned this ticket') : t('unassigned this ticket')
     }
-    return `changed ${label}`
+    return t('changed {field}', { field: t(label) })
   }
-  return ACTION_LABELS[event.action] ?? event.action
+  return t(ACTION_LABELS[event.action] ?? event.action)
 }
 
-export function ActivityTimeline({ events }: { events: EventView[] }) {
-  if (events.length === 0) return <p className="text-sm text-muted">No activity yet.</p>
+export async function ActivityTimeline({ events }: { events: EventView[] }) {
+  const t = await getT()
+  const locale = localeTag(await getLocale())
+  if (events.length === 0) return <p className="text-sm text-muted">{t('No activity yet.')}</p>
 
   return (
     <ol className="space-y-3">
@@ -47,9 +55,11 @@ export function ActivityTimeline({ events }: { events: EventView[] }) {
             <Activity className="h-2.5 w-2.5" />
           </div>
           <p className="text-muted-strong">
-            <span className="font-medium text-foreground">{e.actor?.name ?? 'Someone'}</span>{' '}
-            {describe(e)}
-            <span className="ml-1.5 text-muted">· {timeAgo(e.createdAt)}</span>
+            <span className="font-medium text-foreground">{e.actor?.name ?? t('Someone')}</span>{' '}
+            {describe(e, t)}
+            <span className="ml-1.5 text-muted">
+              · {timeAgo(e.createdAt, { locale, justNow: t('just now') })}
+            </span>
           </p>
         </li>
       ))}

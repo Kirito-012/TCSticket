@@ -7,6 +7,7 @@ import { StatusSelect } from '@/components/tickets/StatusSelect'
 import { AssigneeDropdown } from '@/components/tickets/AssigneeDropdown'
 import { updateTicketFieldAction } from '@/server/actions/ticket.actions'
 import { timeAgo } from '@/lib/utils'
+import { useT } from '@/i18n/client'
 
 type Option = { id: string; name: string }
 type ColoredOption = { id: string; name: string; color: string }
@@ -43,6 +44,7 @@ export function TicketDetailSidebar({
   /** Hide status and assignee — the simple task page already shows them up top. */
   compact?: boolean
 }) {
+  const t = useT()
   const [values, setValues] = useState({ priorityId, typeId, dueDate })
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
@@ -54,7 +56,7 @@ export function TicketDetailSidebar({
       try {
         await updateTicketFieldAction(ticketNumber, { [field]: value })
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to update')
+        setError(err instanceof Error ? err.message : t('Failed to update'))
       }
     })
   }
@@ -64,13 +66,13 @@ export function TicketDetailSidebar({
       {error && <p className="text-xs text-danger">{error}</p>}
       {pending && (
         <p className="flex items-center gap-1.5 text-xs text-muted">
-          <Loader2 className="h-3 w-3 animate-spin" /> Saving…
+          <Loader2 className="h-3 w-3 animate-spin" /> {t('Saving…')}
         </p>
       )}
 
       {!compact && (
         <>
-          <Field label="Status">
+          <Field label={t('Status')}>
             <StatusSelect
               ticketNumber={ticketNumber}
               statusId={statusId}
@@ -79,7 +81,7 @@ export function TicketDetailSidebar({
             />
           </Field>
 
-          <Field label="Assignee">
+          <Field label={t('Assignee')}>
             <AssigneeDropdown
               ticketNumber={ticketNumber}
               assignee={assignee}
@@ -90,28 +92,28 @@ export function TicketDetailSidebar({
         </>
       )}
 
-      <Field label="Priority">
+      <Field label={t('Priority')}>
         <Select
           value={values.priorityId ?? ''}
           disabled={!canUpdate}
           onChange={(v) => update('priorityId', v)}
           variant="pill"
           size={compact ? 'lg' : 'sm'}
-          options={priorities.map((p) => ({ value: p.id, label: p.name, color: p.color }))}
+          options={priorities.map((p) => ({ value: p.id, label: t(p.name), color: p.color }))}
         />
       </Field>
 
-      <Field label="Type">
+      <Field label={t('Type')}>
         <Select
           value={values.typeId ?? ''}
           disabled={!canUpdate}
           onChange={(v) => update('typeId', v)}
           size={compact ? 'lg' : 'sm'}
-          options={types.map((t) => ({ value: t.id, label: t.name }))}
+          options={types.map((ty) => ({ value: ty.id, label: t(ty.name) }))}
         />
       </Field>
 
-      <Field label="Due date">
+      <Field label={t('Due date')}>
         <input
           type="date"
           disabled={!canUpdate}

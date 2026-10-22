@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
 import { PlacementField, type SectorChoice } from '@/components/accounts/PlacementField'
 import { createAccountAction, type ActionState } from '@/server/actions/account.actions'
+import { useT } from '@/i18n/client'
 
 type RoleOption = { id: string; key: string; name: string }
 
@@ -16,6 +17,7 @@ export function NewAccountForm({
   roles: RoleOption[]
   sectors: SectorChoice[]
 }) {
+  const t = useT()
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     createAccountAction,
     undefined,
@@ -33,21 +35,21 @@ export function NewAccountForm({
 
       <div>
         <label htmlFor="fullname" className="mb-1.5 block text-xs font-medium text-muted-strong">
-          Full name
+          {t('Full name')}
         </label>
         <input
           id="fullname"
           name="fullname"
           required
           maxLength={120}
-          placeholder="Jane Doe"
+          placeholder={t('Jane Doe')}
           className="h-10 w-full rounded-lg border border-border-strong bg-white/[0.03] px-3 text-sm text-foreground placeholder:text-muted/60 outline-none transition-colors focus:border-accent/50 focus:bg-white/[0.05] focus:ring-2 focus:ring-accent/20"
         />
       </div>
 
       <div>
         <label htmlFor="email" className="mb-1.5 block text-xs font-medium text-muted-strong">
-          Email
+          {t('Email')}
         </label>
         <input
           id="email"
@@ -61,7 +63,7 @@ export function NewAccountForm({
 
       <div>
         <label htmlFor="password" className="mb-1.5 block text-xs font-medium text-muted-strong">
-          Temporary password
+          {t('Temporary password')}
         </label>
         <input
           id="password"
@@ -69,14 +71,14 @@ export function NewAccountForm({
           type="password"
           required
           minLength={8}
-          placeholder="At least 8 characters"
+          placeholder={t('At least 8 characters')}
           className="h-10 w-full rounded-lg border border-border-strong bg-white/[0.03] px-3 text-sm text-foreground placeholder:text-muted/60 outline-none transition-colors focus:border-accent/50 focus:bg-white/[0.05] focus:ring-2 focus:ring-accent/20"
         />
       </div>
 
       <div>
         <label htmlFor="roleId" className="mb-1.5 block text-xs font-medium text-muted-strong">
-          Role
+          {t('Role')}
         </label>
         <Select
           name="roleId"
@@ -94,7 +96,7 @@ export function NewAccountForm({
 
       <div className="flex items-center justify-end gap-3 border-t border-border pt-5">
         <Button type="submit" size="lg" disabled={pending}>
-          {pending ? 'Creating…' : 'Create account'}
+          {pending ? t('Creating…') : t('Create account')}
         </Button>
       </div>
     </form>

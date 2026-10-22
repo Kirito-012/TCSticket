@@ -48,12 +48,14 @@ export function SimpleNav({
               key={link.href}
               href={link.href}
               className={cn(
-                'relative flex min-h-[68px] flex-col items-center justify-center gap-1 text-base font-semibold',
+                'relative flex min-h-[68px] min-w-0 flex-col items-center justify-center gap-1 text-sm font-semibold sm:text-base',
                 active ? 'bg-accent-soft text-accent-strong' : 'text-muted-strong',
               )}
             >
               <Icon className="h-6 w-6" strokeWidth={2.25} />
-              {link.label}
+              <span className="max-w-full px-1 text-center leading-tight [overflow-wrap:anywhere]">
+                {link.label}
+              </span>
               {link.badge ? (
                 <span className="absolute right-[22%] top-2 rounded-full bg-danger px-1.5 text-xs font-bold text-white">
                   {link.badge}
@@ -65,10 +67,12 @@ export function SimpleNav({
         <form action={logout} className="contents">
           <button
             type="submit"
-            className="flex min-h-[68px] cursor-pointer flex-col items-center justify-center gap-1 text-base font-semibold text-muted-strong"
+            className="flex min-h-[68px] min-w-0 cursor-pointer flex-col items-center justify-center gap-1 text-sm font-semibold text-muted-strong sm:text-base"
           >
             <LogOut className="h-6 w-6" strokeWidth={2.25} />
-            {t('Log out')}
+            <span className="max-w-full px-1 text-center leading-tight [overflow-wrap:anywhere]">
+              {t('Log out')}
+            </span>
           </button>
         </form>
       </nav>

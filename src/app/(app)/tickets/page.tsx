@@ -63,6 +63,8 @@ export default async function TicketsPage({
         : get('verify') === 'unverified'
           ? 'unverified'
           : '',
+    drone:
+      get('drone') === 'verified' ? 'verified' : get('drone') === 'unverified' ? 'unverified' : '',
     status: /^[a-z0-9-]{1,40}$/.test(get('status') ?? '') ? (get('status') ?? '') : '',
     sort: get('sort') === 'newest' ? 'newest' : get('sort') === 'oldest' ? 'oldest' : 'activity',
     view: get('view') === 'list' ? 'list' : 'cards',
@@ -93,6 +95,7 @@ export default async function TicketsPage({
       sectorKey: state.sector || undefined,
       urgent: state.urgent || undefined,
       verification: state.verify || undefined,
+      droneVerification: state.drone || undefined,
       status: state.status || undefined,
       age: state.age || undefined,
       createdOn: dayParts?.[0] === 'created' ? dayParts[1] : undefined,

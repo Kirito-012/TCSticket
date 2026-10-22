@@ -30,6 +30,7 @@ const ACTION_LABEL: Record<string, string> = {
   verified: 'verified the cleanup of',
   unverified: 'marked as not verified',
   reopened: 'reopened after the drone re-check',
+  drone_verified: 'drone verified the cleanup of',
 }
 
 function labelForEvent(action: string, field?: string | null) {

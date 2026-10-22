@@ -2,16 +2,18 @@ import Link from 'next/link'
 import { ChevronRight, UserCheck } from 'lucide-react'
 import { CountPill, DoneBar } from '@/components/zones/Counts'
 import type { ZoneSummary } from '@/server/services/sector.service'
+import { getT } from '@/i18n/server'
 
 /**
  * The Admin's first look at the whole Kumbh: the four zones side by side, with who inspects each
  * one and where the work is piling up. Tapping a zone opens that zone's own dashboard.
  */
-export function ZoneCards({ zones }: { zones: ZoneSummary[] }) {
+export async function ZoneCards({ zones }: { zones: ZoneSummary[] }) {
+  const t = await getT()
   return (
     <section className="space-y-3" aria-labelledby="zones-heading">
       <h2 id="zones-heading" className="text-xl font-bold text-foreground">
-        The four zones
+        {t('The four zones')}
       </h2>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {zones.map((zone) => (
@@ -28,23 +30,23 @@ export function ZoneCards({ zones }: { zones: ZoneSummary[] }) {
                   <span className="truncate">
                     {zone.inspectors.length > 0
                       ? zone.inspectors.join(', ')
-                      : 'No Zone Inspector yet'}
+                      : t('No Zone Inspector yet')}
                   </span>
                 </p>
               </div>
               <span className="flex shrink-0 items-center gap-1 text-base font-semibold text-muted group-hover:text-accent-strong">
-                {zone.sectorCount} sectors
+                {t('{count} sectors', { count: zone.sectorCount })}
                 <ChevronRight className="h-5 w-5" strokeWidth={2.5} />
               </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 2xl:grid-cols-6">
-              <CountPill label="Open" value={zone.open} />
-              <CountPill label="Need someone" value={zone.unassigned} tone="warning" />
-              <CountPill label="Urgent" value={zone.urgent} tone="danger" />
-              <CountPill label="Waiting" value={zone.waiting} tone="warning" />
-              <CountPill label="Reopened" value={zone.reopened} tone="danger" />
-              <CountPill label="Not verified" value={zone.unverified} tone="warning" />
+            <div className="grid grid-cols-2 gap-2 min-[420px]:grid-cols-3 2xl:grid-cols-6">
+              <CountPill label={t('Open')} value={zone.open} />
+              <CountPill label={t('Need someone')} value={zone.unassigned} tone="warning" />
+              <CountPill label={t('Urgent')} value={zone.urgent} tone="danger" />
+              <CountPill label={t('Waiting')} value={zone.waiting} tone="warning" />
+              <CountPill label={t('Reopened')} value={zone.reopened} tone="danger" />
+              <CountPill label={t('Not verified')} value={zone.unverified} tone="warning" />
             </div>
 
             <DoneBar done={zone.done} total={zone.total} />

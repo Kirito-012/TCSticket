@@ -1,9 +1,11 @@
 'use client'
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
+import { useT } from '@/i18n/client'
 export type PriorityBreakdownEntry = { name: string; slug: string; color: string; value: number }
 
 export function PriorityBreakdown({ data: priorityBreakdown }: { data: PriorityBreakdownEntry[] }) {
+  const t = useT()
   const total = priorityBreakdown.reduce((sum, d) => sum + d.value, 0)
 
   return (
@@ -37,7 +39,7 @@ export function PriorityBreakdown({ data: priorityBreakdown }: { data: PriorityB
         </ResponsiveContainer>
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-xl font-semibold text-foreground">{total}</span>
-          <span className="text-[10px] text-muted">open</span>
+          <span className="text-[10px] text-muted">{t('open')}</span>
         </div>
       </div>
 
@@ -50,7 +52,7 @@ export function PriorityBreakdown({ data: priorityBreakdown }: { data: PriorityB
                 style={{ backgroundColor: entry.color }}
                 aria-hidden
               />
-              <span className="text-muted-strong">{entry.name}</span>
+              <span className="text-muted-strong">{t(entry.name)}</span>
             </div>
             <span className="font-medium text-foreground">{entry.value}</span>
           </div>

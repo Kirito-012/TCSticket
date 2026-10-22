@@ -2,10 +2,11 @@
 
 import { useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { AlertTriangle, CalendarDays, LayoutGrid, List, ShieldCheck } from 'lucide-react'
+import { AlertTriangle, CalendarDays, LayoutGrid, List, Plane, ShieldCheck } from 'lucide-react'
 import { Select } from '@/components/ui/Select'
 import { DATE_PRESETS, activeDatePreset } from '@/lib/date-presets'
 import { cn } from '@/lib/utils'
+import { useT } from '@/i18n/client'
 
 export type SectorOption = { value: string; label: string }
 
@@ -29,6 +30,7 @@ export function AdminTicketFilters({
   status,
   urgent,
   verify,
+  drone,
   showVerify,
   sort,
   view,
@@ -43,6 +45,8 @@ export function AdminTicketFilters({
   urgent: boolean
   /** Finished tickets that were checked after the cleanup, or not yet. */
   verify: '' | 'verified' | 'unverified'
+  /** Finished tickets the drone re-check verified, or not yet. */
+  drone: '' | 'verified' | 'unverified'
   /** Only the Done and All tabs have finished tickets to check. */
   showVerify: boolean
   sort: string
@@ -50,6 +54,7 @@ export function AdminTicketFilters({
   from: string
   to: string
 }) {
+  const t = useT()
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -77,8 +82,8 @@ export function AdminTicketFilters({
             size="lg"
             value={sector}
             onChange={(v) => push({ sector: v || null })}
-            placeholder="All sectors"
-            options={[{ value: '', label: 'All sectors' }, ...sectors]}
+            placeholder={t('All sectors')}
+            options={[{ value: '', label: t('All sectors') }, ...sectors]}
           />
         </div>
 
@@ -87,8 +92,8 @@ export function AdminTicketFilters({
             size="lg"
             value={status}
             onChange={(v) => push({ status: v || null })}
-            placeholder="All statuses"
-            options={[{ value: '', label: 'All statuses' }, ...statuses]}
+            placeholder={t('All statuses')}
+            options={[{ value: '', label: t('All statuses') }, ...statuses]}
           />
         </div>
 
@@ -104,18 +109,18 @@ export function AdminTicketFilters({
           )}
         >
           <AlertTriangle className="h-5 w-5" />
-          Urgent only
+          {t('Urgent only')}
         </button>
 
         {showVerify && (
           <div
             role="group"
-            aria-label="Verification"
+            aria-label={t('Verification')}
             className="inline-flex h-12 overflow-hidden rounded-lg border border-border-strong"
           >
             <span className="inline-flex items-center gap-2 border-r border-border-strong px-3 text-base font-semibold text-muted-strong">
               <ShieldCheck className="h-5 w-5" />
-              Verification
+              {t('Verification')}
             </span>
             {(
               [
@@ -136,7 +141,42 @@ export function AdminTicketFilters({
                     : 'text-muted-strong hover:bg-surface-hover',
                 )}
               >
-                {label}
+                {t(label)}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {showVerify && (
+          <div
+            role="group"
+            aria-label={t('Drone check')}
+            className="inline-flex h-12 overflow-hidden rounded-lg border border-border-strong"
+          >
+            <span className="inline-flex items-center gap-2 border-r border-border-strong px-3 text-base font-semibold text-muted-strong">
+              <Plane className="h-5 w-5" />
+              {t('Drone check')}
+            </span>
+            {(
+              [
+                { key: '', label: 'All' },
+                { key: 'verified', label: 'Drone verified' },
+                { key: 'unverified', label: 'Not drone verified' },
+              ] as const
+            ).map(({ key, label }) => (
+              <button
+                key={label}
+                type="button"
+                aria-pressed={drone === key}
+                onClick={() => push({ drone: key || null })}
+                className={cn(
+                  'cursor-pointer px-4 text-base font-semibold transition-colors',
+                  drone === key
+                    ? 'bg-accent text-on-accent'
+                    : 'text-muted-strong hover:bg-surface-hover',
+                )}
+              >
+                {t(label)}
               </button>
             ))}
           </div>
@@ -147,13 +187,13 @@ export function AdminTicketFilters({
             size="lg"
             value={sort}
             onChange={(v) => push({ sort: v === 'activity' ? null : v })}
-            options={SORTS}
+            options={SORTS.map((s) => ({ ...s, label: t(s.label) }))}
           />
         </div>
 
         <div
           role="group"
-          aria-label="How to show tickets"
+          aria-label={t('How to show tickets')}
           className="ml-auto inline-flex h-12 overflow-hidden rounded-lg border border-border-strong"
         >
           {(
@@ -175,16 +215,20 @@ export function AdminTicketFilters({
               )}
             >
               <Icon className="h-5 w-5" />
-              {label}
+              {t(label)}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter by date">
+      <div
+        className="flex flex-wrap items-center gap-2"
+        role="group"
+        aria-label={t('Filter by date')}
+      >
         <span className="mr-1 inline-flex items-center gap-2 text-base font-semibold text-muted-strong">
           <CalendarDays className="h-5 w-5" />
-          Date
+          {t('Date')}
         </span>
 
         <button
@@ -198,7 +242,7 @@ export function AdminTicketFilters({
               : 'border-border-strong text-muted-strong hover:bg-surface-hover',
           )}
         >
-          Any date
+          {t('Any date')}
         </button>
 
         {DATE_PRESETS.map((p) => (
@@ -214,12 +258,12 @@ export function AdminTicketFilters({
                 : 'border-border-strong text-muted-strong hover:bg-surface-hover',
             )}
           >
-            {p.label}
+            {t(p.label)}
           </button>
         ))}
 
         <label className="flex items-center gap-2 text-base font-semibold text-muted-strong">
-          From
+          {t('From')}
           <input
             type="date"
             value={from}
@@ -229,7 +273,7 @@ export function AdminTicketFilters({
           />
         </label>
         <label className="flex items-center gap-2 text-base font-semibold text-muted-strong">
-          To
+          {t('To')}
           <input
             type="date"
             value={to}

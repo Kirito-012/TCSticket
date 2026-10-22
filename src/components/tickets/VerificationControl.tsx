@@ -6,6 +6,7 @@ import { AlertCircle, ShieldCheck, ShieldQuestion } from 'lucide-react'
 import { setVerificationAction } from '@/server/actions/ticket.actions'
 import { cn } from '@/lib/utils'
 import type { VerificationStatus } from '@/lib/ticket-view'
+import { useT } from '@/i18n/client'
 
 /**
  * For leads (Admin, Zone Inspector, Nodal Manager) on a finished ticket: say by hand whether the
@@ -18,6 +19,7 @@ export function VerificationControl({
   ticketNumber: number
   status: VerificationStatus
 }) {
+  const t = useT()
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -33,10 +35,10 @@ export function VerificationControl({
 
   return (
     <div className="space-y-2">
-      <p className="text-sm font-semibold text-muted">Was the cleanup checked?</p>
+      <p className="text-sm font-semibold text-muted">{t('Was the cleanup checked?')}</p>
       <div
         role="group"
-        aria-label="Verification"
+        aria-label={t('Verification')}
         className="inline-flex overflow-hidden rounded-2xl border-2 border-border-strong"
       >
         {(
@@ -63,13 +65,13 @@ export function VerificationControl({
               )}
             >
               <Icon className="h-5 w-5" strokeWidth={2.25} />
-              {label}
+              {t(label)}
             </button>
           )
         })}
       </div>
       <p className="text-sm text-muted">
-        Set by hand for now. A drone re-flight will do this automatically later.
+        {t('A drone re-check sets this automatically. You can also set it by hand here.')}
       </p>
       {error && (
         <p className="flex items-center gap-2 text-base font-semibold text-danger" role="alert">

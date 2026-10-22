@@ -3,6 +3,7 @@
 import { MapContainer, Polygon, Popup, TileLayer } from 'react-leaflet'
 import Link from 'next/link'
 import 'leaflet/dist/leaflet.css'
+import { useT } from '@/i18n/client'
 
 type Sector = {
   key: string
@@ -43,6 +44,7 @@ function sectorLabel(sector: Sector) {
 }
 
 export function HrdaSectorMap({ sectors, canFilter }: { sectors: Sector[]; canFilter: boolean }) {
+  const t = useT()
   return (
     <MapContainer
       center={[29.945, 78.16]}
@@ -68,26 +70,26 @@ export function HrdaSectorMap({ sectors, canFilter }: { sectors: Sector[]; canFi
           <Popup>
             <div className="hrda-sector-popup">
               <div className="hrda-sector-popup__heading">
-                <span className="hrda-sector-popup__eyebrow">HRDA SECTOR</span>
+                <span className="hrda-sector-popup__eyebrow">{t('HRDA SECTOR')}</span>
                 <strong>{sectorLabel(sector)}</strong>
               </div>
               <div className="hrda-sector-popup__kpis">
                 <div>
-                  <span>Total</span>
+                  <span>{t('Total')}</span>
                   <strong>{sector.count}</strong>
                 </div>
                 <div>
-                  <span>Open</span>
+                  <span>{t('Open')}</span>
                   <strong className="is-open">{sector.openCount}</strong>
                 </div>
                 <div>
-                  <span>Resolved</span>
+                  <span>{t('Resolved')}</span>
                   <strong className="is-done">{sector.count - sector.openCount}</strong>
                 </div>
               </div>
               <div className="hrda-sector-popup__progress">
                 <div className="hrda-sector-popup__progress-label">
-                  <span>Resolution progress</span>
+                  <span>{t('Resolution progress')}</span>
                   <strong>
                     {sector.count
                       ? Math.round(((sector.count - sector.openCount) / sector.count) * 100)
@@ -108,11 +110,11 @@ export function HrdaSectorMap({ sectors, canFilter }: { sectors: Sector[]; canFi
                 href={`/tickets?sector=${encodeURIComponent(sector.key)}`}
                 className="hrda-sector-popup__link"
               >
-                View area tickets <span aria-hidden>→</span>
+                {t('View area tickets')} <span aria-hidden>→</span>
               </Link>
               {!canFilter && (
                 <span className="hrda-sector-popup__note">
-                  Surveyor view is limited to your assigned tickets.
+                  {t('Surveyor view is limited to your assigned tickets.')}
                 </span>
               )}
             </div>

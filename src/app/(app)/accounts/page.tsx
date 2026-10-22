@@ -6,8 +6,10 @@ import { CurrentUserCard } from '@/components/accounts/CurrentUserCard'
 import { requireAbility } from '@/server/auth/session'
 import * as userService from '@/server/services/user.service'
 import { getSectorChoices } from '@/server/services/sector.service'
+import { getT } from '@/i18n/server'
 
 export default async function AccountsPage() {
+  const t = await getT()
   const { user: sessionUser, ability } = await requireAbility({
     action: 'read',
     subject: 'account',
@@ -58,9 +60,9 @@ export default async function AccountsPage() {
   return (
     <>
       <Topbar
-        title="Accounts"
-        description={`${users.length} people in your workspace`}
-        primaryAction={canEdit ? { label: 'New account', href: '/accounts/new' } : undefined}
+        title={t('Accounts')}
+        description={t('{count} people in your workspace', { count: users.length })}
+        primaryAction={canEdit ? { label: t('New account'), href: '/accounts/new' } : undefined}
       />
 
       <main className="flex-1 px-4 py-6 sm:px-8 animate-fade-in">

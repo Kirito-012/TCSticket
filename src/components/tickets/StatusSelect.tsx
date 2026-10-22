@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { Select } from '@/components/ui/Select'
 import { updateTicketFieldAction } from '@/server/actions/ticket.actions'
 import { friendlyStatusName } from '@/lib/plain-words'
+import { useT } from '@/i18n/client'
 
 type StatusOption = { id: string; name: string; color: string }
 
@@ -21,6 +22,7 @@ export function StatusSelect({
   /** Big, full-width selector — for the simple Admin/Manager screens. */
   large?: boolean
 }) {
+  const t = useT()
   const [value, setValue] = useState(statusId)
   const [pending, startTransition] = useTransition()
   const current = statuses.find((s) => s.id === value)
@@ -47,7 +49,7 @@ export function StatusSelect({
           style={{ backgroundColor: current.color }}
           aria-hidden
         />
-        {friendlyStatusName(current.name)}
+        {t(friendlyStatusName(current.name))}
       </span>
     ) : null
   }
@@ -62,7 +64,7 @@ export function StatusSelect({
         size={large ? 'lg' : 'sm'}
         options={statuses.map((s) => ({
           value: s.id,
-          label: friendlyStatusName(s.name),
+          label: t(friendlyStatusName(s.name)),
           color: s.color,
         }))}
       />

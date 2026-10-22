@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, ChevronDown, ExternalLink, MapPin } from 'lucide-react'
+import { ArrowLeft, ChevronDown, MapPin, ScanSearch } from 'lucide-react'
 import { Topbar } from '@/components/layout/Topbar'
 import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
@@ -27,6 +27,7 @@ import * as userService from '@/server/services/user.service'
 import { scopeAllows } from '@/lib/ticket-scope'
 import { localizeIssueHtml } from '@/lib/localize-issue'
 import { VerificationBadge } from '@/components/tickets/VerificationBadge'
+import { DroneVerificationBadge } from '@/components/tickets/DroneVerificationBadge'
 import { ReopenedBadge } from '@/components/tickets/ReopenedBadge'
 import { VerificationControl } from '@/components/tickets/VerificationControl'
 import { getT } from '@/i18n/server'
@@ -123,6 +124,7 @@ export default async function TicketDetailPage({
                     </span>
                   )}
                   {done && <VerificationBadge status={ticket.verification} />}
+                  {done && <DroneVerificationBadge status={ticket.droneVerification} />}
                 </div>
                 <h1 className="mt-3 text-2xl font-bold leading-snug text-foreground [overflow-wrap:anywhere]">
                   {plainTitle(ticket.subject, t)}
@@ -218,7 +220,10 @@ export default async function TicketDetailPage({
   const statusOptions = statuses.map((s) => ({ id: String(s._id), name: s.name, color: s.color }))
   return (
     <>
-      <Topbar title={`Ticket #${ticket.number}`} description={plainTitle(ticket.subject)} />
+      <Topbar
+        title={t('Ticket #{number}', { number: ticket.number })}
+        description={plainTitle(ticket.subject, t)}
+      />
 
       <main className="flex-1 px-4 py-6 animate-fade-in sm:px-8">
         <div className="mx-auto max-w-6xl space-y-5">
@@ -227,7 +232,7 @@ export default async function TicketDetailPage({
             className="inline-flex min-h-12 items-center gap-2 rounded-2xl border-2 border-border-strong bg-surface px-5 text-lg font-bold text-foreground hover:bg-surface-hover"
           >
             <ArrowLeft className="h-6 w-6" strokeWidth={2.5} />
-            Back to tickets
+            {t('Back to tickets')}
           </Link>
 
           <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[1fr_380px]">
@@ -243,18 +248,19 @@ export default async function TicketDetailPage({
                         done ? 'bg-accent-soft text-accent-strong' : 'bg-warning-soft text-warning',
                       )}
                     >
-                      {plainStatusLabel(status)}
+                      {plainStatusLabel(status, t)}
                     </span>
                   )}
                   {!done && isUrgent(priority) && (
                     <span className="rounded-full bg-danger px-3 py-1 text-base font-semibold text-white">
-                      Urgent
+                      {t('Urgent')}
                     </span>
                   )}
                   {done && <VerificationBadge status={ticket.verification} />}
+                  {done && <DroneVerificationBadge status={ticket.droneVerification} />}
                 </div>
                 <h1 className="mt-3 text-2xl font-bold leading-snug text-foreground [overflow-wrap:anywhere]">
-                  {plainTitle(ticket.subject)}
+                  {plainTitle(ticket.subject, t)}
                 </h1>
                 {done && ticket.verification && canAssign && (
                   <div className="mt-4">
@@ -267,31 +273,52 @@ export default async function TicketDetailPage({
                 <div
                   className="mt-3 text-lg leading-relaxed text-muted-strong [&_p]:my-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
                   dangerouslySetInnerHTML={{
-                    // The "Open the map" button below replaces the ticket's own Maps link.
-                    __html: ticket.issueHtml.replace(
-                      /<p>\s*<a[^>]*>\s*Open location in Google Maps\s*<\/a>\s*<\/p>/i,
-                      '',
+                    // The "Open in Google Maps" button below replaces the ticket's own Maps link.
+                    __html: localizeIssueHtml(
+                      ticket.issueHtml.replace(
+                        /<p>\s*<a[^>]*>\s*Open location in Google Maps\s*<\/a>\s*<\/p>/i,
+                        '',
+                      ),
+                      t,
                     ),
                   }}
                 />
-                {ticket.droneSevaUrl && (
-                  <a
-                    href={ticket.droneSevaUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={cn(
-                      buttonVariants({ variant: 'secondary', size: 'md' }),
-                      'mt-4 border-accent/30 bg-accent-soft text-accent-strong',
+                {(ticket.location || ticket.droneSevaUrl) && (
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    {ticket.location && (
+                      <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${ticket.location.latitude},${ticket.location.longitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn(
+                          buttonVariants({ variant: 'secondary', size: 'md' }),
+                          'h-auto min-h-10 whitespace-normal border-accent/30 bg-accent-soft py-2 text-center text-accent-strong',
+                        )}
+                      >
+                        <MapPin className="h-4 w-4" />
+                        {t('Open in Google Maps')}
+                      </a>
                     )}
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    View in DroneSeva
-                  </a>
+                    {ticket.droneSevaUrl && (
+                      <a
+                        href={`${new URL(ticket.droneSevaUrl).origin}/rechecks?ticket=${ticket.number}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn(
+                          buttonVariants({ variant: 'secondary', size: 'md' }),
+                          'h-auto min-h-10 whitespace-normal border-accent/30 bg-accent-soft py-2 text-center text-accent-strong',
+                        )}
+                      >
+                        <ScanSearch className="h-4 w-4" />
+                        {t('Re-check in DroneSeva')}
+                      </a>
+                    )}
+                  </div>
                 )}
                 {ticket.sourcePhotos.length > 0 && (
                   <div className="mt-6 space-y-3">
                     <h2 className="text-xl font-bold text-foreground">
-                      {ticket.source === 'api' ? 'Drone photo' : 'Photos'}
+                      {ticket.source === 'api' ? t('Drone photo') : t('Photos')}
                     </h2>
                     <DronePhoto photos={ticket.sourcePhotos} showTime />
                   </div>
@@ -299,7 +326,7 @@ export default async function TicketDetailPage({
                 {ticket.recheckPhoto && <RecheckPhoto photo={ticket.recheckPhoto} />}
                 {ticket.report && (
                   <div className="mt-6 space-y-3">
-                    <h2 className="text-xl font-bold text-foreground">Detection report</h2>
+                    <h2 className="text-xl font-bold text-foreground">{t('Detection report')}</h2>
                     <ReportViewer
                       number={ticket.number}
                       name={ticket.report.name}
@@ -310,18 +337,9 @@ export default async function TicketDetailPage({
                 )}
                 {ticket.location && (
                   <div className="mt-6 space-y-3">
-                    <h2 className="text-xl font-bold text-foreground">Where is it?</h2>
-                    <a
-                      href={`https://www.google.com/maps/dir/?api=1&destination=${ticket.location.latitude},${ticket.location.longitude}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex min-h-14 items-center justify-center gap-3 rounded-2xl bg-accent px-5 text-lg font-bold text-on-accent"
-                    >
-                      <MapPin className="h-6 w-6" strokeWidth={2.5} />
-                      Open the map
-                    </a>
+                    <h2 className="text-xl font-bold text-foreground">{t('Where is it?')}</h2>
                     <iframe
-                      title="Map of the place"
+                      title={t('Map of the place')}
                       src={`https://www.openstreetmap.org/export/embed.html?bbox=${ticket.location.longitude - 0.01}%2C${ticket.location.latitude - 0.01}%2C${ticket.location.longitude + 0.01}%2C${ticket.location.latitude + 0.01}&layer=mapnik&marker=${ticket.location.latitude}%2C${ticket.location.longitude}`}
                       className="h-56 w-full rounded-2xl border-2 border-border-strong"
                       loading="lazy"
@@ -331,7 +349,7 @@ export default async function TicketDetailPage({
               </Card>
 
               <Card className="p-5 sm:p-6">
-                <h2 className="mb-4 text-xl font-bold text-foreground">Messages</h2>
+                <h2 className="mb-4 text-xl font-bold text-foreground">{t('Messages')}</h2>
                 <CommentThread
                   ticketNumber={ticket.number}
                   comments={comments}
@@ -344,9 +362,11 @@ export default async function TicketDetailPage({
 
             <div className="space-y-5">
               <Card className="space-y-5 p-5 sm:p-6">
-                <h2 className="text-xl font-bold text-foreground">Handle this ticket</h2>
+                <h2 className="text-xl font-bold text-foreground">{t('Handle this ticket')}</h2>
                 <div>
-                  <p className="mb-1.5 text-base font-semibold text-muted-strong">Who does this?</p>
+                  <p className="mb-1.5 text-base font-semibold text-muted-strong">
+                    {t('Who does this?')}
+                  </p>
                   <AssigneeDropdown
                     ticketNumber={ticket.number}
                     assignee={ticket.assignee}
@@ -357,7 +377,7 @@ export default async function TicketDetailPage({
                 </div>
                 <div>
                   <p className="mb-1.5 text-base font-semibold text-muted-strong">
-                    How is it going?
+                    {t('How is it going?')}
                   </p>
                   <StatusSelect
                     ticketNumber={ticket.number}
@@ -371,7 +391,7 @@ export default async function TicketDetailPage({
 
               <details className="group rounded-2xl border-2 border-border-strong bg-surface">
                 <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between px-5 text-lg font-bold text-foreground [&::-webkit-details-marker]:hidden">
-                  More options
+                  {t('More options')}
                   <ChevronDown className="h-6 w-6 text-muted transition-transform group-open:rotate-180" />
                 </summary>
                 <div className="space-y-6 border-t-2 border-border p-5">
@@ -395,7 +415,7 @@ export default async function TicketDetailPage({
                     canAssign={canAssign}
                   />
                   <div>
-                    <h3 className="mb-3 text-base font-bold text-foreground">History</h3>
+                    <h3 className="mb-3 text-base font-bold text-foreground">{t('History')}</h3>
                     <ActivityTimeline events={events} />
                   </div>
                 </div>
@@ -405,10 +425,12 @@ export default async function TicketDetailPage({
                 ticket.resolutionNote ||
                 ticket.earlierResolutionPhotos.length > 0) && (
                 <Card className="p-5 sm:p-6">
-                  <h2 className="text-xl font-bold text-foreground">What the inspector did</h2>
+                  <h2 className="text-xl font-bold text-foreground">
+                    {t('What the inspector did')}
+                  </h2>
                   {ticket.resolutionNote && (
                     <div className="mt-3 rounded-2xl border-2 border-border bg-surface-hover p-4">
-                      <p className="mb-1 text-base font-semibold text-muted">Their note</p>
+                      <p className="mb-1 text-base font-semibold text-muted">{t('Their note')}</p>
                       <p className="whitespace-pre-wrap text-lg text-foreground">
                         {ticket.resolutionNote}
                       </p>
@@ -417,21 +439,26 @@ export default async function TicketDetailPage({
                   {ticket.resolutionPhotos.length > 0 && (
                     <div className="mt-4">
                       <p className="mb-2 text-base font-semibold text-muted">
-                        Photos ({ticket.resolutionPhotos.length}) — tap one to enlarge
+                        {t('Photos ({count}) — tap one to enlarge', {
+                          count: ticket.resolutionPhotos.length,
+                        })}
                       </p>
                       <ResolutionPhotoGrid photos={ticket.resolutionPhotos} compact />
                     </div>
                   )}
                   {status?.slug === 'reopened' && ticket.resolutionPhotos.length === 0 && (
                     <p className="mt-3 rounded-2xl border-2 border-danger bg-danger-soft p-4 text-base font-semibold text-danger">
-                      Reopened: the Surveyor has to clean the place again and upload new photos.
+                      {t(
+                        'Reopened: the Surveyor has to clean the place again and upload new photos.',
+                      )}
                     </p>
                   )}
                   {ticket.earlierResolutionPhotos.length > 0 && (
                     <div className="mt-4">
                       <p className="mb-2 text-base font-semibold text-muted">
-                        Earlier photos, from before the ticket was reopened (
-                        {ticket.earlierResolutionPhotos.length})
+                        {t('Earlier photos, from before the ticket was reopened ({count})', {
+                          count: ticket.earlierResolutionPhotos.length,
+                        })}
                       </p>
                       <div className="opacity-70">
                         <ResolutionPhotoGrid photos={ticket.earlierResolutionPhotos} compact />

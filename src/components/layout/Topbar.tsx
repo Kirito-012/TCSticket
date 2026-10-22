@@ -26,28 +26,33 @@ export function Topbar({
   // bar), no search, no bell, no "New ticket".
   if (simple) {
     return (
-      <header className="sticky top-0 z-30 flex min-h-16 items-center gap-3 border-b-2 border-border bg-surface px-4 py-3 sm:px-8">
-        <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-bold leading-tight text-foreground sm:text-2xl">{title}</h1>
+      <header className="z-30 flex min-h-16 flex-wrap items-center gap-x-3 gap-y-2 border-b-2 border-border bg-surface px-4 py-3 sm:sticky sm:top-0 sm:flex-nowrap sm:px-8">
+        <div className="min-w-0 basis-full sm:basis-0 sm:flex-1">
+          <h1 className="text-xl font-bold leading-tight text-foreground sm:text-2xl">
+            {t(title)}
+          </h1>
           {description && (
-            <p className="mt-0.5 text-base text-muted [overflow-wrap:anywhere]">{description}</p>
+            <p className="mt-0.5 text-base text-muted [overflow-wrap:anywhere]">{t(description)}</p>
           )}
         </div>
         {/* The light (Surveyor) look keeps just the title. Admins and Managers also get the
             notification bell and one big action button. */}
         {/* Phones have no side column, so the language picker lives in the header there. */}
-        <LanguageSwitcher className="lg:hidden" />
-        {!light && <ThemeToggle />}
-        {!light && <NotificationBell />}
-        {!light && primaryAction?.href && (
-          <Link
-            href={primaryAction.href}
-            className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-base font-bold text-on-accent sm:px-5"
-          >
-            <Plus className="h-5 w-5" strokeWidth={2.5} />
-            <span className="max-sm:sr-only">{primaryAction.label}</span>
-          </Link>
-        )}
+        <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:gap-3">
+          <LanguageSwitcher className="min-w-0 max-sm:flex-1 lg:hidden [&>select]:max-sm:w-full" />
+          {!light && <ThemeToggle />}
+          {!light && <NotificationBell />}
+          {!light && primaryAction?.href && (
+            <Link
+              href={primaryAction.href}
+              aria-label={t(primaryAction.label)}
+              className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-base font-bold text-on-accent sm:px-5"
+            >
+              <Plus className="h-5 w-5" strokeWidth={2.5} />
+              <span className="max-sm:sr-only">{t(primaryAction.label)}</span>
+            </Link>
+          )}
+        </div>
       </header>
     )
   }
@@ -64,8 +69,8 @@ export function Topbar({
       </button>
 
       <div className="min-w-0 flex-1">
-        <h1 className="truncate text-[15px] font-semibold text-foreground">{title}</h1>
-        {description && <p className="truncate text-xs text-muted">{description}</p>}
+        <h1 className="truncate text-[15px] font-semibold text-foreground">{t(title)}</h1>
+        {description && <p className="truncate text-xs text-muted">{t(description)}</p>}
       </div>
 
       <label className="relative hidden w-72 shrink-0 sm:block">

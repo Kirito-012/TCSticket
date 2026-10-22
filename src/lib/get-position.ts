@@ -12,6 +12,8 @@ export const ROUGH_ACCURACY_METERS = 100
 export type PositionOutcome =
   | { ok: true; fix: LocationFix }
   | { ok: false; reason: 'denied' | 'unavailable' | 'timeout' | 'unsupported' }
+  // The page is not served over https, where browsers (iPhones above all) never ask for location.
+  | { ok: false; reason: 'insecure' }
   // Only a rough reading came in (Wi-Fi / mobile network, not GPS): too poor to say where the person is.
   | { ok: false; reason: 'rough'; accuracy: number }
 
@@ -35,6 +37,10 @@ export function getBestPosition({
 } = {}): Promise<PositionOutcome> {
   if (typeof navigator === 'undefined' || !('geolocation' in navigator)) {
     return Promise.resolve({ ok: false, reason: 'unsupported' })
+  }
+  // Safari on iPhone (and every other browser) only shares location with a secure page (https or localhost).
+  if (typeof window !== 'undefined' && window.isSecureContext === false) {
+    return Promise.resolve({ ok: false, reason: 'insecure' })
   }
 
   return new Promise((resolve) => {
@@ -97,11 +103,15 @@ export function getBestPosition({
 
 /** Plain-words advice for a failed location request. */
 export function positionProblemMessage(
-  reason: 'denied' | 'unavailable' | 'timeout' | 'unsupported' | 'rough',
+  reason: 'denied' | 'unavailable' | 'timeout' | 'unsupported' | 'rough' | 'insecure',
   t: Translate = makeTranslate({}),
   accuracy?: number,
 ) {
   switch (reason) {
+    case 'insecure':
+      return t(
+        'Location only works on a secure page. Please open this website with https:// and try again.',
+      )
     case 'rough':
       return t(
         'We could only find your location roughly (about {accuracy}). Your device is probably using Wi-Fi or the mobile network instead of GPS. Turn on GPS and High accuracy location, go outside where the sky is open, and try again.',
@@ -109,7 +119,7 @@ export function positionProblemMessage(
       )
     case 'denied':
       return t(
-        'Location is turned off for this website. Tap the lock icon next to the web address, set Location to "Allow", then try again.',
+        'Location is turned off for this website. On iPhone: open Settings, then Privacy & Security, Location Services, Safari Websites, and choose While Using the App. On Android: tap the lock icon next to the web address and set Location to "Allow". Then try again.',
       )
     case 'unsupported':
       return t(

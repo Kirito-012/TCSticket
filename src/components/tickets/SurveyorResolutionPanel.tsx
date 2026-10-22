@@ -37,6 +37,11 @@ const ALLOWED_IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'i
 
 type UploadingPhoto = { id: string; previewUrl: string }
 type PhotoMethod = 'camera' | 'gallery'
+
+/** A location reading this young is reused for the photos instead of waiting for a new one. */
+const FRESH_FIX_MS = 2 * 60 * 1000
+/** After a reading this young, the photo buttons open the camera straight away. */
+const LOCATION_KNOWN_MS = 10 * 60 * 1000
 type RefusedPhoto = {
   previewUrl: string
   boxes: [number, number, number, number][]
@@ -73,6 +78,8 @@ export function SurveyorResolutionPanel({
   const t = useT()
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const galleryInputRef = useRef<HTMLInputElement>(null)
+  // The latest good location reading, so it is asked for once (on a tap) and reused for the photos.
+  const lastFixRef = useRef<LocationFix | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [note, setNote] = useState('')
   const [place, setPlace] = useState<PlaceState>({ kind: 'idle' })
@@ -125,6 +132,7 @@ export function SurveyorResolutionPanel({
         return null
       }
       fix = result.fix
+      lastFixRef.current = fix
     }
     const verdict = target ? evaluateLocation(target, fix, rules) : null
     setPlace(
@@ -194,6 +202,20 @@ export function SurveyorResolutionPanel({
     })
   }
 
+  /**
+   * iPhones only show the "Allow location?" question when the person taps something; asked after the
+   * camera or the photo picker closes, Safari often never shows it. So when the location is not known
+   * yet, the first tap on a photo button asks for it (and does not open the camera); the second tap
+   * opens the camera with the permission already given.
+   */
+  function askLocationFirst(event: React.MouseEvent) {
+    if (!target || manualFix) return
+    const last = lastFixRef.current
+    if (last && Date.now() - last.capturedAt < LOCATION_KNOWN_MS) return
+    event.preventDefault()
+    void locate()
+  }
+
   async function handleFiles(files: FileList | null, method: PhotoMethod) {
     if (!files || files.length === 0) return
     setError(null)
@@ -202,9 +224,25 @@ export function SurveyorResolutionPanel({
     if (cameraInputRef.current) cameraInputRef.current.value = ''
     if (galleryInputRef.current) galleryInputRef.current.value = ''
 
-    // Where is the person right now? Without a location, a photo cannot be accepted.
-    const located = await locate()
+    // Where is the person right now? Without a location, a photo cannot be accepted. The reading taken
+    // when the photo button was tapped is reused while it is fresh, so there is no second wait.
+    const earlier = lastFixRef.current
+    const fresh = earlier && Date.now() - earlier.capturedAt < FRESH_FIX_MS ? earlier : null
+    const located = fresh
+      ? { fix: fresh, verdict: target ? evaluateLocation(target, fresh, rules) : null }
+      : await locate()
     if (!located) return
+    if (fresh) {
+      setPlace(
+        located.verdict
+          ? {
+              kind: 'result',
+              verdict: located.verdict,
+              message: verdictMessage(located.verdict, rules, t),
+            }
+          : { kind: 'idle' },
+      )
+    }
     // The page already tells them they are too far, so no photo is sent that will be refused.
     // (The server checks again — this is only to save a wasted upload.)
     if (located.verdict && !located.verdict.ok) return
@@ -346,6 +384,7 @@ export function SurveyorResolutionPanel({
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label
+            onClick={askLocationFirst}
             className={cn(
               'flex min-h-14 cursor-pointer items-center justify-center gap-3 rounded-2xl bg-accent px-5 text-lg font-bold text-on-accent active:opacity-90',
               busy && 'pointer-events-none opacity-50',
@@ -363,6 +402,7 @@ export function SurveyorResolutionPanel({
             />
           </label>
           <label
+            onClick={askLocationFirst}
             className={cn(
               'flex min-h-14 cursor-pointer items-center justify-center gap-3 rounded-2xl border-2 border-border-strong bg-surface px-5 text-lg font-bold text-foreground active:bg-surface-hover',
               busy && 'pointer-events-none opacity-50',
@@ -381,7 +421,8 @@ export function SurveyorResolutionPanel({
           </label>
         </div>
         <p className="text-base text-muted">
-          {t('When your phone asks, please tap Allow for location.')}
+          {t('When your phone asks, please tap Allow for location.')}{' '}
+          {target && t('The first tap finds your location; tap the button again to add the photo.')}
         </p>
       </section>
 

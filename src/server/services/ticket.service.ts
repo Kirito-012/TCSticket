@@ -61,6 +61,8 @@ export type ListTicketsParams = {
    * the cleanup.
    */
   verification?: 'verified' | 'unverified'
+  /** Finished tickets the drone re-check has verified, or not. */
+  droneVerification?: 'verified' | 'unverified'
   /** How long ago the ticket was created: under a day, 1-3 days, 3-7 days, over a week. */
   age?: 'today' | 'd1to3' | 'd3to7' | 'over7'
   /** Created on this local calendar day (YYYY-MM-DD). */
@@ -124,6 +126,18 @@ export async function listTickets(params: ListTicketsParams) {
       params.verification === 'verified'
         ? { 'verification.status': 'verified' }
         : { 'verification.status': { $ne: 'verified' } },
+    ]
+  }
+  if (params.droneVerification) {
+    const finished = (await TicketStatusModel.find({ isResolved: true }).select('_id').lean()).map(
+      (s) => s._id,
+    )
+    filter.$and = [
+      ...(filter.$and ?? []),
+      { statusId: { $in: finished } },
+      params.droneVerification === 'verified'
+        ? { 'droneVerification.status': 'verified' }
+        : { 'droneVerification.status': { $ne: 'verified' } },
     ]
   }
   if (params.urgent) {
@@ -594,6 +608,7 @@ export async function updateTicketFields(
   // A change of status (finished, or reopened) always starts the check over: not verified.
   if (events.some((e) => e.field === 'statusId')) {
     ticket.set('verification', { status: 'not_verified' })
+    ticket.set('droneVerification', { status: 'not_verified' })
   }
 
   await ticket.save()
@@ -838,21 +853,37 @@ export async function getTaskTabCounts(scope?: TicketScope) {
   const reopenedStatus = await TicketStatusModel.findOne({ slug: REOPENED_STATUS.slug })
     .select('_id')
     .lean()
-  const [todo, done, unassigned, all, doneToday, reopened, verified] = await Promise.all([
-    TicketModel.countDocuments({ ...base, statusId: { $nin: resolvedIds } }),
-    TicketModel.countDocuments({ ...base, statusId: { $in: resolvedIds } }),
-    TicketModel.countDocuments({ ...base, statusId: { $nin: resolvedIds }, assigneeId: null }),
-    TicketModel.countDocuments(base),
-    TicketModel.countDocuments({ ...base, resolvedAt: { $gte: startOfToday } }),
-    reopenedStatus ? TicketModel.countDocuments({ ...base, statusId: reopenedStatus._id }) : 0,
-    TicketModel.countDocuments({
-      ...base,
-      statusId: { $in: resolvedIds },
-      'verification.status': 'verified',
-    }),
-  ])
+  const [todo, done, unassigned, all, doneToday, reopened, verified, droneVerified] =
+    await Promise.all([
+      TicketModel.countDocuments({ ...base, statusId: { $nin: resolvedIds } }),
+      TicketModel.countDocuments({ ...base, statusId: { $in: resolvedIds } }),
+      TicketModel.countDocuments({ ...base, statusId: { $nin: resolvedIds }, assigneeId: null }),
+      TicketModel.countDocuments(base),
+      TicketModel.countDocuments({ ...base, resolvedAt: { $gte: startOfToday } }),
+      reopenedStatus ? TicketModel.countDocuments({ ...base, statusId: reopenedStatus._id }) : 0,
+      TicketModel.countDocuments({
+        ...base,
+        statusId: { $in: resolvedIds },
+        'verification.status': 'verified',
+      }),
+      TicketModel.countDocuments({
+        ...base,
+        statusId: { $in: resolvedIds },
+        'droneVerification.status': 'verified',
+      }),
+    ])
   // Finished tickets whose cleanup has not been checked yet (by a lead or by the drone re-check).
-  return { todo, done, unassigned, all, doneToday, reopened, verified, unverified: done - verified }
+  return {
+    todo,
+    done,
+    unassigned,
+    all,
+    doneToday,
+    reopened,
+    verified,
+    unverified: done - verified,
+    droneVerified,
+  }
 }
 
 /** Assigns (or un-assigns, with null) many tickets at once, recording the change on each ticket's
@@ -1062,7 +1093,18 @@ export async function applyDroneRecheck(
   if (!status?.isResolved) throw new Error('Only a finished ticket can be re-checked.')
 
   if (outcome.clean) {
-    await setTicketVerification(number, true, actorId, 'drone')
+    // A clean new photo marks the "drone verified" tag; the manual Verified tag is left to the leads.
+    if (ticket.get('droneVerification.status') !== 'verified') {
+      ticket.set('droneVerification', { status: 'verified', verifiedAt: new Date() })
+      ticket.lastActivityAt = new Date()
+      await ticket.save()
+      await TicketEventModel.create({
+        ticketId: ticket._id,
+        actorId,
+        action: 'drone_verified',
+        meta: { detections: outcome.detections, coveragePercent: outcome.coveragePercent },
+      })
+    }
     return { result: 'verified' as const, ticket }
   }
 
@@ -1077,6 +1119,7 @@ export async function applyDroneRecheck(
   ticket.set('resolvedAt', null)
   ticket.set('closedAt', null)
   ticket.set('verification', { status: 'not_verified' })
+  ticket.set('droneVerification', { status: 'not_verified' })
   ticket.lastActivityAt = new Date()
   await ticket.save()
   await TicketEventModel.insertMany([
