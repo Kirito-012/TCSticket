@@ -144,6 +144,8 @@ const messages: Messages = {
   'Finished up to {date}': '{date} വരെ പൂർത്തിയായത്',
   'Finished {from} – {to}': '{from} – {to} ഇടയിൽ പൂർത്തിയായത്',
   'Finished?': 'പണി കഴിഞ്ഞോ?',
+  'For a better reading, stand outside in the open and make sure Precise Location is on for Safari (iPhone) or Location is set to High accuracy (Android).':
+    'മികച്ച റീഡിംഗിനായി തുറസ്സായ സ്ഥലത്ത് പുറത്ത് നിൽക്കുക, Safari-ക്ക് കൃത്യമായ ലൊക്കേഷൻ ഓണാണെന്ന് (iPhone) അല്ലെങ്കിൽ ലൊക്കേഷൻ ഉയർന്ന കൃത്യതയിലാണെന്ന് (Android) ഉറപ്പാക്കുക.',
   'Forgot password?': 'പാസ്‌വേഡ് മറന്നോ?',
   Foundry: 'ഫൗണ്ടറി മാലിന്യം',
   From: 'മുതൽ',
@@ -294,6 +296,7 @@ const messages: Messages = {
   Password: 'പാസ്‌വേഡ്',
   Pending: 'തീർപ്പാക്കാത്തത്',
   People: 'ആളുകൾ',
+  'Phone GPS accuracy: about {meters} m': 'ഫോൺ GPS കൃത്യത: ഏകദേശം {meters} മീ',
   'Photo from gallery': 'ഗാലറിയിൽ നിന്നുള്ള ഫോട്ടോ',
   'Photo from the drone': 'ഡ്രോൺ എടുത്ത ഫോട്ടോ',
   Photos: 'ഫോട്ടോകൾ',
@@ -345,6 +348,7 @@ const messages: Messages = {
   'See all my tickets': 'എന്റെ എല്ലാ ടിക്കറ്റുകളും കാണുക',
   'See all {count} that need someone': 'ആരെയെങ്കിലും വേണ്ട എല്ലാ {count} ഉം കാണുക',
   'See finished tickets': 'പൂർത്തിയായ ടിക്കറ്റുകൾ കാണുക',
+  'See on the map': 'മാപ്പിൽ കാണുക',
   'See the finished tickets': 'പൂർത്തിയായ ടിക്കറ്റുകൾ കാണുക',
   'See the newest tickets': 'ഏറ്റവും പുതിയ ടിക്കറ്റുകൾ കാണുക',
   'See the ones that need someone': 'ആരെയെങ്കിലും വേണ്ടവ കാണുക',
@@ -511,9 +515,11 @@ const messages: Messages = {
     'നിങ്ങളുടെ അക്കൗണ്ട് അഡ്മിന്റെ അംഗീകാരത്തിനായി കാത്തിരിക്കുന്നു — അംഗീകാരം ലഭിച്ചാൽ നിങ്ങൾക്ക് സൈൻ ഇൻ ചെയ്യാം.',
   'Your account request was not approved. Contact an admin for help.':
     'നിങ്ങളുടെ അക്കൗണ്ട് അഭ്യർത്ഥന അംഗീകരിച്ചില്ല. സഹായത്തിന് അഡ്മിനുമായി ബന്ധപ്പെടുക.',
+  'Your coordinates': 'നിങ്ങളുടെ കോർഡിനേറ്റുകൾ',
   'Your earlier photos': 'നിങ്ങളുടെ മുൻ ഫോട്ടോകൾ',
   'Your location reading is out of date. Please try again.':
     'നിങ്ങളുടെ ലൊക്കേഷൻ വിവരം പഴയതാണ്. ദയവായി വീണ്ടും ശ്രമിക്കുക.',
+  'Your location was found': 'നിങ്ങളുടെ ലൊക്കേഷൻ കണ്ടെത്തി',
   'Your next tickets': 'നിങ്ങളുടെ അടുത്ത ടിക്കറ്റുകൾ',
   'Your note': 'നിങ്ങളുടെ കുറിപ്പ്',
   "Your phone's location is not accurate enough yet (about {accuracy}). Stand outside in the open for a moment, then try again.":

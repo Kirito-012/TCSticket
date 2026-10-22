@@ -141,6 +141,8 @@ const messages: Messages = {
   'Finished up to {date}': '{date} వరకు పూర్తయినవి',
   'Finished {from} – {to}': '{from} – {to} మధ్య పూర్తయినవి',
   'Finished?': 'పని పూర్తయిందా?',
+  'For a better reading, stand outside in the open and make sure Precise Location is on for Safari (iPhone) or Location is set to High accuracy (Android).':
+    'మెరుగైన రీడింగ్ కోసం బహిరంగ ప్రదేశంలో బయట నిలబడి, Safari కు ఖచ్చితమైన లొకేషన్ ఆన్‌లో ఉందని (iPhone) లేదా లొకేషన్ అధిక ఖచ్చితత్వంలో ఉందని (Android) నిర్ధారించుకోండి.',
   'Forgot password?': 'పాస్‌వర్డ్ మర్చిపోయారా?',
   Foundry: 'ఫౌండ్రీ వ్యర్థాలు',
   From: 'నుండి',
@@ -291,6 +293,7 @@ const messages: Messages = {
   Password: 'పాస్‌వర్డ్',
   Pending: 'పెండింగ్',
   People: 'వ్యక్తులు',
+  'Phone GPS accuracy: about {meters} m': 'ఫోన్ GPS ఖచ్చితత్వం: సుమారు {meters} మీ',
   'Photo from gallery': 'గ్యాలరీ నుండి ఫోటో',
   'Photo from the drone': 'డ్రోన్ తీసిన ఫోటో',
   Photos: 'ఫోటోలు',
@@ -342,6 +345,7 @@ const messages: Messages = {
   'See all my tickets': 'నా అన్ని టికెట్లను చూడండి',
   'See all {count} that need someone': 'ఎవరైనా కావాల్సిన అన్ని {count} చూడండి',
   'See finished tickets': 'పూర్తయిన టికెట్లు చూడండి',
+  'See on the map': 'మ్యాప్‌లో చూడండి',
   'See the finished tickets': 'పూర్తయిన టికెట్లను చూడండి',
   'See the newest tickets': 'కొత్త టికెట్లను చూడండి',
   'See the ones that need someone': 'ఎవరైనా కావాల్సినవి చూడండి',
@@ -507,9 +511,11 @@ const messages: Messages = {
     'మీ ఖాతా అడ్మిన్ ఆమోదం కోసం వేచి ఉంది — ఆమోదం లభించాక మీరు సైన్ ఇన్ చేయగలరు.',
   'Your account request was not approved. Contact an admin for help.':
     'మీ ఖాతా అభ్యర్థన ఆమోదించబడలేదు. సహాయం కోసం అడ్మిన్‌ను సంప్రదించండి.',
+  'Your coordinates': 'మీ కోఆర్డినేట్లు',
   'Your earlier photos': 'మీ ముందటి ఫోటోలు',
   'Your location reading is out of date. Please try again.':
     'మీ లొకేషన్ రీడింగ్ పాతబడింది. దయచేసి మళ్లీ ప్రయత్నించండి.',
+  'Your location was found': 'మీ లొకేషన్ కనుగొనబడింది',
   'Your next tickets': 'మీ తదుపరి టికెట్లు',
   'Your note': 'మీ నోట్',
   "Your phone's location is not accurate enough yet (about {accuracy}). Stand outside in the open for a moment, then try again.":

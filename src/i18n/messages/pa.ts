@@ -141,6 +141,8 @@ const messages: Messages = {
   'Finished up to {date}': '{date} ਤੱਕ ਮੁਕੰਮਲ',
   'Finished {from} – {to}': '{from} – {to} ਦੇ ਵਿਚਕਾਰ ਮੁਕੰਮਲ',
   'Finished?': 'ਕੰਮ ਪੂਰਾ ਹੋਇਆ?',
+  'For a better reading, stand outside in the open and make sure Precise Location is on for Safari (iPhone) or Location is set to High accuracy (Android).':
+    'ਬਿਹਤਰ ਰੀਡਿੰਗ ਲਈ ਖੁੱਲ੍ਹੀ ਥਾਂ ਬਾਹਰ ਖੜ੍ਹੇ ਹੋਵੋ ਅਤੇ ਯਕੀਨੀ ਬਣਾਓ ਕਿ Safari ਲਈ ਸਟੀਕ ਲੋਕੇਸ਼ਨ ਚਾਲੂ ਹੈ (iPhone) ਜਾਂ ਲੋਕੇਸ਼ਨ ਉੱਚ ਸ਼ੁੱਧਤਾ ਤੇ ਹੈ (Android)।',
   'Forgot password?': 'ਪਾਸਵਰਡ ਭੁੱਲ ਗਏ?',
   Foundry: 'ਢਲਾਈ ਦਾ ਕੂੜਾ',
   From: 'ਤੋਂ',
@@ -291,6 +293,7 @@ const messages: Messages = {
   Password: 'ਪਾਸਵਰਡ',
   Pending: 'ਬਕਾਇਆ',
   People: 'ਲੋਕ',
+  'Phone GPS accuracy: about {meters} m': 'ਫ਼ੋਨ GPS ਦੀ ਸ਼ੁੱਧਤਾ: ਲਗਭਗ {meters} ਮੀ',
   'Photo from gallery': 'ਗੈਲਰੀ ਤੋਂ ਫੋਟੋ',
   'Photo from the drone': 'ਡਰੋਨ ਤੋਂ ਲਈ ਫੋਟੋ',
   Photos: 'ਫੋਟੋਆਂ',
@@ -342,6 +345,7 @@ const messages: Messages = {
   'See all my tickets': 'ਮੇਰੀਆਂ ਸਾਰੀਆਂ ਟਿਕਟਾਂ ਦੇਖੋ',
   'See all {count} that need someone': 'ਕਿਸੇ ਦੀ ਲੋੜ ਵਾਲੀਆਂ ਸਾਰੀਆਂ {count} ਵੇਖੋ',
   'See finished tickets': 'ਮੁਕੰਮਲ ਟਿਕਟਾਂ ਵੇਖੋ',
+  'See on the map': 'ਨਕਸ਼ੇ ਤੇ ਵੇਖੋ',
   'See the finished tickets': 'ਮੁਕੰਮਲ ਟਿਕਟਾਂ ਵੇਖੋ',
   'See the newest tickets': 'ਸਭ ਤੋਂ ਨਵੀਆਂ ਟਿਕਟਾਂ ਵੇਖੋ',
   'See the ones that need someone': 'ਜਿਨ੍ਹਾਂ ਨੂੰ ਕਿਸੇ ਦੀ ਲੋੜ ਹੈ ਉਹ ਵੇਖੋ',
@@ -506,9 +510,11 @@ const messages: Messages = {
     'ਤੁਹਾਡਾ ਖਾਤਾ ਐਡਮਿਨ ਦੀ ਮਨਜ਼ੂਰੀ ਦੀ ਉਡੀਕ ਵਿੱਚ ਹੈ — ਮਨਜ਼ੂਰੀ ਮਿਲਣ ਤੇ ਤੁਸੀਂ ਸਾਈਨ ਇਨ ਕਰ ਸਕੋਗੇ।',
   'Your account request was not approved. Contact an admin for help.':
     'ਤੁਹਾਡੇ ਖਾਤੇ ਦੀ ਬੇਨਤੀ ਮਨਜ਼ੂਰ ਨਹੀਂ ਹੋਈ। ਮਦਦ ਲਈ ਐਡਮਿਨ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।',
+  'Your coordinates': 'ਤੁਹਾਡੇ ਕੋਆਰਡੀਨੇਟ',
   'Your earlier photos': 'ਤੁਹਾਡੀਆਂ ਪਹਿਲਾਂ ਦੀਆਂ ਫੋਟੋਆਂ',
   'Your location reading is out of date. Please try again.':
     'ਤੁਹਾਡੀ ਲੋਕੇਸ਼ਨ ਦੀ ਜਾਣਕਾਰੀ ਪੁਰਾਣੀ ਹੋ ਗਈ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।',
+  'Your location was found': 'ਤੁਹਾਡੀ ਲੋਕੇਸ਼ਨ ਮਿਲ ਗਈ',
   'Your next tickets': 'ਤੁਹਾਡੀਆਂ ਅਗਲੀਆਂ ਟਿਕਟਾਂ',
   'Your note': 'ਤੁਹਾਡਾ ਨੋਟ',
   "Your phone's location is not accurate enough yet (about {accuracy}). Stand outside in the open for a moment, then try again.":

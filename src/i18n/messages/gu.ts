@@ -141,6 +141,8 @@ const messages: Messages = {
   'Finished up to {date}': '{date} સુધી પૂર્ણ થયેલા',
   'Finished {from} – {to}': '{from} – {to} વચ્ચે પૂર્ણ થયેલા',
   'Finished?': 'કામ પૂરું થયું?',
+  'For a better reading, stand outside in the open and make sure Precise Location is on for Safari (iPhone) or Location is set to High accuracy (Android).':
+    'સારા રીડિંગ માટે ખુલ્લી જગ્યાએ બહાર ઊભા રહો અને ખાતરી કરો કે Safari માટે ચોક્કસ લોકેશન ચાલુ છે (iPhone) અથવા લોકેશન ઉચ્ચ ચોકસાઈ પર છે (Android).',
   'Forgot password?': 'પાસવર્ડ ભૂલી ગયા?',
   Foundry: 'ફાઉન્ડ્રીનો કચરો',
   From: 'થી',
@@ -290,6 +292,7 @@ const messages: Messages = {
   Password: 'પાસવર્ડ',
   Pending: 'બાકી',
   People: 'લોકો',
+  'Phone GPS accuracy: about {meters} m': 'ફોન GPS ની સચોટતા: લગભગ {meters} મી',
   'Photo from gallery': 'ગેલેરીમાંથી ફોટો',
   'Photo from the drone': 'ડ્રોનથી લીધેલો ફોટો',
   Photos: 'ફોટા',
@@ -341,6 +344,7 @@ const messages: Messages = {
   'See all my tickets': 'મારી બધી ટિકિટો જુઓ',
   'See all {count} that need someone': 'કોઈની જરૂર હોય તેવી બધી {count} જુઓ',
   'See finished tickets': 'પૂર્ણ થયેલી ટિકિટો જુઓ',
+  'See on the map': 'નકશા પર જુઓ',
   'See the finished tickets': 'પૂર્ણ થયેલી ટિકિટો જુઓ',
   'See the newest tickets': 'સૌથી નવી ટિકિટો જુઓ',
   'See the ones that need someone': 'જેમને કોઈની જરૂર છે તે જુઓ',
@@ -504,9 +508,11 @@ const messages: Messages = {
     'તમારું ખાતું એડમિનની મંજૂરીની રાહ જુએ છે — મંજૂરી મળ્યા પછી તમે સાઇન ઇન કરી શકશો.',
   'Your account request was not approved. Contact an admin for help.':
     'તમારા ખાતાની વિનંતી મંજૂર થઈ નથી. મદદ માટે એડમિનનો સંપર્ક કરો.',
+  'Your coordinates': 'તમારા કોઓર્ડિનેટ્સ',
   'Your earlier photos': 'તમારા અગાઉના ફોટા',
   'Your location reading is out of date. Please try again.':
     'તમારા લોકેશનની માહિતી જૂની થઈ ગઈ છે. કૃપા કરીને ફરી પ્રયત્ન કરો.',
+  'Your location was found': 'તમારું લોકેશન મળી ગયું',
   'Your next tickets': 'તમારી આગલી ટિકિટો',
   'Your note': 'તમારી નોંધ',
   "Your phone's location is not accurate enough yet (about {accuracy}). Stand outside in the open for a moment, then try again.":

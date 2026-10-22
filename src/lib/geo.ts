@@ -38,7 +38,7 @@ export type LocationRules = {
 export const MAX_FIX_AGE_MS = 10 * 60 * 1000
 
 export type LocationVerdict =
-  | { ok: true; distanceMeters: number }
+  | { ok: true; distanceMeters: number; accuracyMeters: number }
   | {
       ok: false
       reason: 'no-location' | 'invalid' | 'stale' | 'inaccurate' | 'too-far'
@@ -92,7 +92,7 @@ export function evaluateLocation(
   if (distance > rules.radiusMeters) {
     return { ok: false, reason: 'too-far', distanceMeters: distance, accuracyMeters: accuracy }
   }
-  return { ok: true, distanceMeters: distance }
+  return { ok: true, distanceMeters: distance, accuracyMeters: accuracy }
 }
 
 /**

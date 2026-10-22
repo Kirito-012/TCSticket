@@ -141,6 +141,8 @@ const messages: Messages = {
   'Finished up to {date}': '{date} পর্যন্ত সম্পন্ন',
   'Finished {from} – {to}': '{from} – {to} এর মধ্যে সম্পন্ন',
   'Finished?': 'কাজ শেষ?',
+  'For a better reading, stand outside in the open and make sure Precise Location is on for Safari (iPhone) or Location is set to High accuracy (Android).':
+    'ভালো রিডিংয়ের জন্য খোলা জায়গায় বাইরে দাঁড়ান এবং নিশ্চিত করুন Safari-র জন্য সুনির্দিষ্ট লোকেশন চালু আছে (iPhone) বা লোকেশন হাই অ্যাকিউরেসিতে আছে (Android)।',
   'Forgot password?': 'পাসওয়ার্ড ভুলে গেছেন?',
   Foundry: 'ফাউন্ড্রির বর্জ্য',
   From: 'থেকে',
@@ -290,6 +292,7 @@ const messages: Messages = {
   Password: 'পাসওয়ার্ড',
   Pending: 'মুলতুবি',
   People: 'মানুষজন',
+  'Phone GPS accuracy: about {meters} m': 'ফোনের GPS নির্ভুলতা: প্রায় {meters} মি',
   'Photo from gallery': 'গ্যালারি থেকে ছবি',
   'Photo from the drone': 'ড্রোন থেকে তোলা ছবি',
   Photos: 'ছবি',
@@ -341,6 +344,7 @@ const messages: Messages = {
   'See all my tickets': 'আমার সব টিকিট দেখুন',
   'See all {count} that need someone': 'কাউকে দরকার এমন সব {count}টি দেখুন',
   'See finished tickets': 'সম্পন্ন টিকিট দেখুন',
+  'See on the map': 'মানচিত্রে দেখুন',
   'See the finished tickets': 'সম্পন্ন টিকিটগুলো দেখুন',
   'See the newest tickets': 'নতুন টিকিটগুলো দেখুন',
   'See the ones that need someone': 'যেগুলোতে কাউকে দরকার সেগুলো দেখুন',
@@ -504,9 +508,11 @@ const messages: Messages = {
     'আপনার অ্যাকাউন্ট অ্যাডমিনের অনুমোদনের অপেক্ষায় আছে — অনুমোদন পেলে আপনি সাইন ইন করতে পারবেন।',
   'Your account request was not approved. Contact an admin for help.':
     'আপনার অ্যাকাউন্টের অনুরোধ অনুমোদিত হয়নি। সাহায্যের জন্য অ্যাডমিনের সঙ্গে যোগাযোগ করুন।',
+  'Your coordinates': 'আপনার স্থানাঙ্ক',
   'Your earlier photos': 'আপনার আগের ছবিগুলো',
   'Your location reading is out of date. Please try again.':
     'আপনার লোকেশনের তথ্য পুরনো হয়ে গেছে। অনুগ্রহ করে আবার চেষ্টা করুন।',
+  'Your location was found': 'আপনার লোকেশন পাওয়া গেছে',
   'Your next tickets': 'আপনার পরের টিকিটগুলো',
   'Your note': 'আপনার নোট',
   "Your phone's location is not accurate enough yet (about {accuracy}). Stand outside in the open for a moment, then try again.":

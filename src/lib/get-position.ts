@@ -18,19 +18,29 @@ export type PositionOutcome =
   | { ok: false; reason: 'rough'; accuracy: number }
 
 /**
- * Asks the phone where it is (this is what makes the browser ask "Allow location?") and keeps
- * listening for a few seconds, because the first reading is usually rough and GPS gets better as the
- * phone finds more satellites. It stops as soon as a reading is good enough, or when time runs out,
- * and then returns the best reading it saw. A first GPS lock can take 20-40 seconds outdoors, so it
- * waits up to 40 seconds; if all it ever got was a rough network guess (more than 100 m off) it says
- * so instead of returning that guess, because such a guess can be kilometres from the real place.
+ * Asks the phone for its GPS position (this is what makes the browser ask "Allow location?") and keeps
+ * listening, because the first reading is usually rough and GPS gets better as the phone finds more
+ * satellites. How it picks the answer:
+ *  - readings the phone had cached from before the request are thrown away (they can be old Wi-Fi guesses);
+ *  - it stops at once on an excellent reading (5 m or better);
+ *  - once a reading is good (20 m or better) it keeps listening for a few more seconds, because the next
+ *    readings are usually better, then stops;
+ *  - the answer is the average of the best recent readings, weighted by how sure each one was, which
+ *    smooths out the jitter of a single reading, and it reports the best accuracy seen;
+ *  - a first GPS lock can take 20-40 seconds outdoors, so it waits up to 40 seconds; if all it ever got
+ *    was a rough network guess (more than 100 m off) it says so instead of returning that guess.
  */
 export function getBestPosition({
-  goodEnoughMeters = 8,
+  excellentMeters = 5,
+  goodMeters = 20,
+  settleMs = 6_000,
   timeoutMs = 40_000,
   onProgress,
 }: {
-  goodEnoughMeters?: number
+  excellentMeters?: number
+  goodMeters?: number
+  /** How long to keep listening after the first good reading, for a better one. */
+  settleMs?: number
   timeoutMs?: number
   /** Called with the accuracy (metres) of each reading, so the screen can show progress. */
   onProgress?: (accuracyMeters: number) => void
@@ -44,56 +54,76 @@ export function getBestPosition({
   }
 
   return new Promise((resolve) => {
-    let best: GeolocationPosition | null = null
+    const startedAt = Date.now()
+    type Reading = { latitude: number; longitude: number; accuracy: number; at: number }
+    const readings: Reading[] = []
     let settled = false
     let watchId = -1
+    let settleTimer: ReturnType<typeof setTimeout> | undefined
 
-    function fixFrom(position: GeolocationPosition): PositionOutcome {
+    const bestAccuracy = () => readings.reduce((m, r) => Math.min(m, r.accuracy), Infinity)
+
+    /** Weighted average of the recent readings that are about as good as the best one. */
+    function combined(): LocationFix | null {
+      if (readings.length === 0) return null
+      const best = bestAccuracy()
+      const now = Date.now()
+      const usable = readings.filter(
+        (r) => now - r.at <= 20_000 && r.accuracy <= Math.max(best * 2, goodMeters),
+      )
+      const pool = usable.length > 0 ? usable : readings.filter((r) => r.accuracy === best)
+      let weight = 0
+      let latitude = 0
+      let longitude = 0
+      for (const r of pool) {
+        const w = 1 / Math.max(r.accuracy, 1) ** 2
+        weight += w
+        latitude += r.latitude * w
+        longitude += r.longitude * w
+      }
       return {
-        ok: true,
-        fix: {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          accuracy: position.coords.accuracy,
-          capturedAt: Date.now(),
-        },
+        latitude: latitude / weight,
+        longitude: longitude / weight,
+        accuracy: best,
+        capturedAt: now,
       }
     }
+
+    function finishWithReadings() {
+      const fix = combined()
+      if (!fix) return finish({ ok: false, reason: 'timeout' })
+      if (fix.accuracy > ROUGH_ACCURACY_METERS) {
+        return finish({ ok: false, reason: 'rough', accuracy: fix.accuracy })
+      }
+      finish({ ok: true, fix })
+    }
+
     function finish(outcome: PositionOutcome) {
       if (settled) return
       settled = true
       if (watchId !== -1) navigator.geolocation.clearWatch(watchId)
       clearTimeout(timer)
+      clearTimeout(settleTimer)
       resolve(outcome)
     }
 
-    const timer = setTimeout(
-      () =>
-        finish(
-          !best
-            ? { ok: false, reason: 'timeout' }
-            : best.coords.accuracy > ROUGH_ACCURACY_METERS
-              ? { ok: false, reason: 'rough', accuracy: best.coords.accuracy }
-              : fixFrom(best),
-        ),
-      timeoutMs,
-    )
+    const timer = setTimeout(finishWithReadings, timeoutMs)
 
     watchId = navigator.geolocation.watchPosition(
       (position) => {
-        if (!best || position.coords.accuracy < best.coords.accuracy) best = position
-        onProgress?.(position.coords.accuracy)
-        if (position.coords.accuracy <= goodEnoughMeters) finish(fixFrom(position))
+        // A reading the phone made before we asked is not a measurement of where the person is now.
+        if (position.timestamp < startedAt - 1_500) return
+        const { latitude, longitude, accuracy } = position.coords
+        readings.push({ latitude, longitude, accuracy, at: Date.now() })
+        onProgress?.(accuracy)
+        if (accuracy <= excellentMeters) return finishWithReadings()
+        if (accuracy <= goodMeters && settleTimer === undefined) {
+          settleTimer = setTimeout(finishWithReadings, settleMs)
+        }
       },
       (error) => {
         if (error.code === error.PERMISSION_DENIED) return finish({ ok: false, reason: 'denied' })
-        if (best) {
-          return finish(
-            best.coords.accuracy > ROUGH_ACCURACY_METERS
-              ? { ok: false, reason: 'rough', accuracy: best.coords.accuracy }
-              : fixFrom(best),
-          )
-        }
+        if (readings.length > 0) return finishWithReadings() // a rough reading is better than none
         finish({ ok: false, reason: error.code === error.TIMEOUT ? 'timeout' : 'unavailable' })
       },
       { enableHighAccuracy: true, maximumAge: 0, timeout: timeoutMs },

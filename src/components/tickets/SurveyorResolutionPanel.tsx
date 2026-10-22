@@ -53,7 +53,9 @@ type PlaceState =
   | { kind: 'idle' }
   | { kind: 'finding'; accuracy: number | null }
   | { kind: 'problem'; message: string }
-  | { kind: 'result'; verdict: LocationVerdict; message: string }
+  | { kind: 'result'; verdict: LocationVerdict; message: string; fix: LocationFix }
+  // The location was read, and this ticket has no spot to compare it with.
+  | { kind: 'located'; fix: LocationFix }
 
 export function SurveyorResolutionPanel({
   ticketNumber,
@@ -137,8 +139,8 @@ export function SurveyorResolutionPanel({
     const verdict = target ? evaluateLocation(target, fix, rules) : null
     setPlace(
       verdict
-        ? { kind: 'result', verdict, message: verdictMessage(verdict, rules, t) }
-        : { kind: 'idle' },
+        ? { kind: 'result', verdict, message: verdictMessage(verdict, rules, t), fix }
+        : { kind: 'located', fix },
     )
     return { fix, verdict }
   }
@@ -239,8 +241,9 @@ export function SurveyorResolutionPanel({
               kind: 'result',
               verdict: located.verdict,
               message: verdictMessage(located.verdict, rules, t),
+              fix: located.fix,
             }
-          : { kind: 'idle' },
+          : { kind: 'located', fix: located.fix },
       )
     }
     // The page already tells them they are too far, so no photo is sent that will be refused.
@@ -692,6 +695,13 @@ function PlaceCard({ place }: { place: PlaceState }) {
               })}
             </span>
           )}
+          {place.accuracy !== null && place.accuracy > 50 && (
+            <span className="mt-1 block text-base font-normal text-muted">
+              {t(
+                'For a better reading, stand outside in the open and make sure Precise Location is on for Safari (iPhone) or Location is set to High accuracy (Android).',
+              )}
+            </span>
+          )}
         </span>
       </div>
     )
@@ -705,6 +715,21 @@ function PlaceCard({ place }: { place: PlaceState }) {
       >
         <AlertCircle className="mt-0.5 h-6 w-6 shrink-0" />
         {place.message}
+      </div>
+    )
+  }
+
+  if (place.kind === 'located') {
+    return (
+      <div
+        role="status"
+        className="flex items-start gap-3 rounded-2xl border-2 border-accent bg-accent-soft p-4 text-lg font-bold text-accent-strong"
+      >
+        <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0" strokeWidth={2.25} />
+        <span>
+          {t('Your location was found')}
+          <CoordinateLine fix={place.fix} />
+        </span>
       </div>
     )
   }
@@ -723,6 +748,12 @@ function PlaceCard({ place }: { place: PlaceState }) {
               meters: Math.max(0, Math.round(place.verdict.distanceMeters)),
             })}
           </span>
+          <span className="block text-sm font-medium opacity-80">
+            {t('Phone GPS accuracy: about {meters} m', {
+              meters: Math.max(1, Math.round(place.verdict.accuracyMeters)),
+            })}
+          </span>
+          <CoordinateLine fix={place.fix} />
         </span>
       </div>
     )
@@ -734,8 +765,30 @@ function PlaceCard({ place }: { place: PlaceState }) {
       className="flex items-start gap-3 rounded-2xl border-2 border-warning bg-warning-soft p-4 text-lg font-semibold text-warning"
     >
       <AlertTriangle className="mt-0.5 h-6 w-6 shrink-0" />
-      {place.message}
+      <span>
+        {place.message}
+        <CoordinateLine fix={place.fix} />
+      </span>
     </div>
+  )
+}
+
+/** The phone's own coordinates, so the person can see exactly what was read (and check it on a map). */
+function CoordinateLine({ fix }: { fix: LocationFix }) {
+  const t = useT()
+  const text = `${fix.latitude.toFixed(6)}, ${fix.longitude.toFixed(6)}`
+  return (
+    <span className="mt-2 block text-sm font-medium text-foreground">
+      {t('Your coordinates')}: <span className="font-bold">{text}</span>
+      <a
+        href={`https://www.google.com/maps?q=${fix.latitude.toFixed(6)},${fix.longitude.toFixed(6)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="ml-2 font-semibold text-accent-strong underline"
+      >
+        {t('See on the map')}
+      </a>
+    </span>
   )
 }
 

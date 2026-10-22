@@ -141,6 +141,8 @@ const messages: Messages = {
   'Finished up to {date}': '{date} तक पूरे हुए',
   'Finished {from} – {to}': '{from} – {to} के बीच पूरे हुए',
   'Finished?': 'काम पूरा हुआ?',
+  'For a better reading, stand outside in the open and make sure Precise Location is on for Safari (iPhone) or Location is set to High accuracy (Android).':
+    'बेहतर रीडिंग के लिए खुली जगह में बाहर खड़े हों और सुनिश्चित करें कि Safari (iPhone) के लिए सटीक लोकेशन चालू है या लोकेशन उच्च सटीकता पर है (Android)।',
   'Forgot password?': 'पासवर्ड भूल गए?',
   Foundry: 'ढलाईखाने का कचरा',
   From: 'से',
@@ -290,6 +292,7 @@ const messages: Messages = {
   Password: 'पासवर्ड',
   Pending: 'लंबित',
   People: 'लोग',
+  'Phone GPS accuracy: about {meters} m': 'फ़ोन GPS की सटीकता: लगभग {meters} मी',
   'Photo from gallery': 'गैलरी से फोटो',
   'Photo from the drone': 'ड्रोन से ली गई फोटो',
   Photos: 'फोटो',
@@ -340,6 +343,7 @@ const messages: Messages = {
   'See all my tickets': 'मेरे सभी टिकट देखें',
   'See all {count} that need someone': 'किसी की ज़रूरत वाले सभी {count} देखें',
   'See finished tickets': 'पूरे हुए टिकट देखें',
+  'See on the map': 'नक्शे पर देखें',
   'See the finished tickets': 'पूरे हुए टिकट देखें',
   'See the newest tickets': 'सबसे नए टिकट देखें',
   'See the ones that need someone': 'जिन्हें किसी की ज़रूरत है उन्हें देखें',
@@ -503,9 +507,11 @@ const messages: Messages = {
     'आपका खाता एडमिन की मंज़ूरी का इंतज़ार कर रहा है — मंज़ूरी मिलने पर आप साइन इन कर सकेंगे।',
   'Your account request was not approved. Contact an admin for help.':
     'आपके खाते का अनुरोध मंज़ूर नहीं हुआ। मदद के लिए एडमिन से संपर्क करें।',
+  'Your coordinates': 'आपके निर्देशांक',
   'Your earlier photos': 'आपकी पहले की फोटो',
   'Your location reading is out of date. Please try again.':
     'आपकी लोकेशन की जानकारी पुरानी है। कृपया दोबारा कोशिश करें।',
+  'Your location was found': 'आपकी लोकेशन मिल गई',
   'Your next tickets': 'आपके अगले टिकट',
   'Your note': 'आपका नोट',
   "Your phone's location is not accurate enough yet (about {accuracy}). Stand outside in the open for a moment, then try again.":

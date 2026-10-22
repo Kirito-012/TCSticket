@@ -143,6 +143,8 @@ const messages: Messages = {
   'Finished up to {date}': '{date} வரை முடிந்தவை',
   'Finished {from} – {to}': '{from} – {to} இடையே முடிந்தவை',
   'Finished?': 'முடிந்ததா?',
+  'For a better reading, stand outside in the open and make sure Precise Location is on for Safari (iPhone) or Location is set to High accuracy (Android).':
+    'சிறந்த அளவீட்டுக்கு திறந்தவெளியில் வெளியே நின்று, Safari க்கு துல்லியமான இருப்பிடம் இயக்கப்பட்டுள்ளதா (iPhone) அல்லது இருப்பிடம் உயர் துல்லியத்தில் உள்ளதா (Android) என்பதை உறுதிசெய்யவும்.',
   'Forgot password?': 'கடவுச்சொல்லை மறந்துவிட்டீர்களா?',
   Foundry: 'வார்ப்பட ஆலைக் கழிவு',
   From: 'முதல்',
@@ -295,6 +297,7 @@ const messages: Messages = {
   Password: 'கடவுச்சொல்',
   Pending: 'நிலுவையில்',
   People: 'மக்கள்',
+  'Phone GPS accuracy: about {meters} m': 'தொலைபேசி GPS துல்லியம்: சுமார் {meters} மீ',
   'Photo from gallery': 'கேலரியிலிருந்து புகைப்படம்',
   'Photo from the drone': 'ட்ரோனில் எடுத்த புகைப்படம்',
   Photos: 'புகைப்படங்கள்',
@@ -347,6 +350,7 @@ const messages: Messages = {
   'See all my tickets': 'என் எல்லா டிக்கெட்டுகளையும் பார்',
   'See all {count} that need someone': 'ஒருவர் தேவைப்படும் அனைத்து {count} ஐயும் பார்',
   'See finished tickets': 'முடிந்த டிக்கெட்டுகளைப் பார்',
+  'See on the map': 'வரைபடத்தில் பார்',
   'See the finished tickets': 'முடிந்த டிக்கெட்டுகளைப் பார்',
   'See the newest tickets': 'புதிய டிக்கெட்டுகளைப் பார்',
   'See the ones that need someone': 'ஒருவர் தேவைப்படுபவற்றைப் பார்',
@@ -514,9 +518,11 @@ const messages: Messages = {
     'உங்கள் கணக்கு நிர்வாகியின் அனுமதிக்காகக் காத்திருக்கிறது — அனுமதி கிடைத்ததும் நீங்கள் உள்நுழையலாம்.',
   'Your account request was not approved. Contact an admin for help.':
     'உங்கள் கணக்குக் கோரிக்கை ஏற்கப்படவில்லை. உதவிக்கு நிர்வாகியைத் தொடர்புகொள்ளுங்கள்.',
+  'Your coordinates': 'உங்கள் ஆயத்தொலைவுகள்',
   'Your earlier photos': 'உங்கள் முந்தைய புகைப்படங்கள்',
   'Your location reading is out of date. Please try again.':
     'உங்கள் இருப்பிடத் தகவல் பழையதாகிவிட்டது. மீண்டும் முயற்சிக்கவும்.',
+  'Your location was found': 'உங்கள் இருப்பிடம் கண்டறியப்பட்டது',
   'Your next tickets': 'உங்கள் அடுத்த டிக்கெட்டுகள்',
   'Your note': 'உங்கள் குறிப்பு',
   "Your phone's location is not accurate enough yet (about {accuracy}). Stand outside in the open for a moment, then try again.":

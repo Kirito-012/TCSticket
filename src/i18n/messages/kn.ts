@@ -142,6 +142,8 @@ const messages: Messages = {
   'Finished up to {date}': '{date} ವರೆಗೆ ಮುಗಿದವು',
   'Finished {from} – {to}': '{from} – {to} ನಡುವೆ ಮುಗಿದವು',
   'Finished?': 'ಕೆಲಸ ಮುಗಿಯಿತೇ?',
+  'For a better reading, stand outside in the open and make sure Precise Location is on for Safari (iPhone) or Location is set to High accuracy (Android).':
+    'ಉತ್ತಮ ಓದುವಿಕೆಗಾಗಿ ತೆರೆದ ಸ್ಥಳದಲ್ಲಿ ಹೊರಗೆ ನಿಂತು, Safari ಗೆ ನಿಖರ ಲೊಕೇಶನ್ ಆನ್ ಆಗಿದೆ (iPhone) ಅಥವಾ ಲೊಕೇಶನ್ ಹೆಚ್ಚಿನ ನಿಖರತೆಯಲ್ಲಿದೆ (Android) ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ.',
   'Forgot password?': 'ಪಾಸ್‌ವರ್ಡ್ ಮರೆತಿರಾ?',
   Foundry: 'ಫೌಂಡ್ರಿ ತ್ಯಾಜ್ಯ',
   From: 'ರಿಂದ',
@@ -292,6 +294,7 @@ const messages: Messages = {
   Password: 'ಪಾಸ್‌ವರ್ಡ್',
   Pending: 'ಬಾಕಿ',
   People: 'ಜನರು',
+  'Phone GPS accuracy: about {meters} m': 'ಫೋನ್ GPS ನಿಖರತೆ: ಸುಮಾರು {meters} ಮೀ',
   'Photo from gallery': 'ಗ್ಯಾಲರಿಯಿಂದ ಫೋಟೋ',
   'Photo from the drone': 'ಡ್ರೋನ್‌ನಿಂದ ತೆಗೆದ ಫೋಟೋ',
   Photos: 'ಫೋಟೋಗಳು',
@@ -343,6 +346,7 @@ const messages: Messages = {
   'See all my tickets': 'ನನ್ನ ಎಲ್ಲಾ ಟಿಕೆಟ್‌ಗಳನ್ನು ನೋಡಿ',
   'See all {count} that need someone': 'ಯಾರಾದರೂ ಬೇಕಾದ ಎಲ್ಲಾ {count} ನೋಡಿ',
   'See finished tickets': 'ಮುಗಿದ ಟಿಕೆಟ್‌ಗಳನ್ನು ನೋಡಿ',
+  'See on the map': 'ನಕ್ಷೆಯಲ್ಲಿ ನೋಡಿ',
   'See the finished tickets': 'ಮುಗಿದ ಟಿಕೆಟ್‌ಗಳನ್ನು ನೋಡಿ',
   'See the newest tickets': 'ಹೊಸ ಟಿಕೆಟ್‌ಗಳನ್ನು ನೋಡಿ',
   'See the ones that need someone': 'ಯಾರಾದರೂ ಬೇಕಾದವುಗಳನ್ನು ನೋಡಿ',
@@ -509,9 +513,11 @@ const messages: Messages = {
     'ನಿಮ್ಮ ಖಾತೆ ನಿರ್ವಾಹಕರ ಅನುಮೋದನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ — ಅನುಮೋದನೆ ಸಿಕ್ಕ ನಂತರ ನೀವು ಸೈನ್ ಇನ್ ಮಾಡಬಹುದು.',
   'Your account request was not approved. Contact an admin for help.':
     'ನಿಮ್ಮ ಖಾತೆಯ ವಿನಂತಿಯನ್ನು ಅನುಮೋದಿಸಲಾಗಿಲ್ಲ. ಸಹಾಯಕ್ಕಾಗಿ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ.',
+  'Your coordinates': 'ನಿಮ್ಮ ನಿರ್ದೇಶಾಂಕಗಳು',
   'Your earlier photos': 'ನಿಮ್ಮ ಹಿಂದಿನ ಫೋಟೋಗಳು',
   'Your location reading is out of date. Please try again.':
     'ನಿಮ್ಮ ಸ್ಥಳದ ಮಾಹಿತಿ ಹಳೆಯದಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+  'Your location was found': 'ನಿಮ್ಮ ಲೊಕೇಶನ್ ಪತ್ತೆಯಾಗಿದೆ',
   'Your next tickets': 'ನಿಮ್ಮ ಮುಂದಿನ ಟಿಕೆಟ್‌ಗಳು',
   'Your note': 'ನಿಮ್ಮ ಟಿಪ್ಪಣಿ',
   "Your phone's location is not accurate enough yet (about {accuracy}). Stand outside in the open for a moment, then try again.":

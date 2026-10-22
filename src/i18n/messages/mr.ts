@@ -141,6 +141,8 @@ const messages: Messages = {
   'Finished up to {date}': '{date} पर्यंत पूर्ण झालेले',
   'Finished {from} – {to}': '{from} – {to} दरम्यान पूर्ण झालेले',
   'Finished?': 'काम झाले?',
+  'For a better reading, stand outside in the open and make sure Precise Location is on for Safari (iPhone) or Location is set to High accuracy (Android).':
+    'चांगल्या रीडिंगसाठी मोकळ्या जागी बाहेर उभे राहा आणि Safari साठी अचूक लोकेशन चालू आहे (iPhone) किंवा लोकेशन उच्च अचूकतेवर आहे (Android) याची खात्री करा.',
   'Forgot password?': 'पासवर्ड विसरलात?',
   Foundry: 'ओतशाळेचा कचरा',
   From: 'पासून',
@@ -290,6 +292,7 @@ const messages: Messages = {
   Password: 'पासवर्ड',
   Pending: 'प्रलंबित',
   People: 'लोक',
+  'Phone GPS accuracy: about {meters} m': 'फोन GPS अचूकता: सुमारे {meters} मी',
   'Photo from gallery': 'गॅलरीतून फोटो',
   'Photo from the drone': 'ड्रोनने काढलेला फोटो',
   Photos: 'फोटो',
@@ -340,6 +343,7 @@ const messages: Messages = {
   'See all my tickets': 'माझी सर्व तिकिटे पाहा',
   'See all {count} that need someone': 'कोणाची गरज असलेली सर्व {count} पहा',
   'See finished tickets': 'पूर्ण झालेली तिकिटे पहा',
+  'See on the map': 'नकाशावर पहा',
   'See the finished tickets': 'पूर्ण झालेली तिकिटे पहा',
   'See the newest tickets': 'सर्वात नवीन तिकिटे पहा',
   'See the ones that need someone': 'ज्यांना कोणाची गरज आहे ती पहा',
@@ -503,9 +507,11 @@ const messages: Messages = {
     'तुमचे खाते अ‍ॅडमिनच्या मंजुरीची वाट पाहत आहे — मंजुरी मिळाल्यावर तुम्ही साइन इन करू शकाल.',
   'Your account request was not approved. Contact an admin for help.':
     'तुमच्या खात्याची विनंती मंजूर झाली नाही. मदतीसाठी अ‍ॅडमिनशी संपर्क साधा.',
+  'Your coordinates': 'तुमचे निर्देशांक',
   'Your earlier photos': 'तुमचे आधीचे फोटो',
   'Your location reading is out of date. Please try again.':
     'तुमचे लोकेशन वाचन जुने झाले आहे. कृपया पुन्हा प्रयत्न करा.',
+  'Your location was found': 'तुमचे स्थान सापडले',
   'Your next tickets': 'तुमची पुढील तिकिटे',
   'Your note': 'तुमची टीप',
   "Your phone's location is not accurate enough yet (about {accuracy}). Stand outside in the open for a moment, then try again.":
