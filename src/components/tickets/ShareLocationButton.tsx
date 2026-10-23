@@ -54,7 +54,7 @@ export function ShareLocationButton({
       type="button"
       onClick={() => void share()}
       className={cn(
-        'flex min-h-14 cursor-pointer items-center justify-center gap-3 rounded-2xl border-2 border-accent bg-surface px-5 text-center text-lg font-bold text-accent-strong active:bg-surface-hover',
+        'flex min-h-14 cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-accent bg-surface px-3 text-center text-base font-bold leading-tight text-accent-strong active:bg-surface-hover sm:gap-3 sm:px-5 sm:text-lg',
         className,
       )}
     >

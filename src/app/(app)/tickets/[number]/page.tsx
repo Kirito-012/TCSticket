@@ -152,10 +152,10 @@ export default async function TicketDetailPage({
                       href={`https://www.google.com/maps/dir/?api=1&destination=${ticket.location.latitude},${ticket.location.longitude}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex min-h-14 items-center justify-center gap-3 rounded-2xl bg-accent px-5 text-center text-lg font-bold text-white"
+                      className="flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-accent px-3 text-center text-base font-bold leading-tight text-white sm:gap-3 sm:px-5 sm:text-lg"
                     >
                       <MapPin className="h-6 w-6 shrink-0" strokeWidth={2.5} />
-                      {t('Open in Google Maps')}
+                      {t('Show location')}
                     </a>
                     <ShareLocationButton
                       latitude={ticket.location.latitude}

@@ -354,6 +354,7 @@ const messages: Messages = {
   'Select all tickets on this page': 'ಈ ಪುಟದ ಎಲ್ಲಾ ಟಿಕೆಟ್‌ಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ',
   'Select ticket #{number}': 'ಟಿಕೆಟ್ #{number} ಆಯ್ಕೆಮಾಡಿ',
   'Share location': 'ಲೊಕೇಶನ್ ಹಂಚಿಕೊಳ್ಳಿ',
+  'Show location': 'ಲೊಕೇಶನ್ ತೋರಿಸಿ',
   'Show me the way': 'ದಾರಿ ತೋರಿಸಿ',
   'Show only': 'ಮಾತ್ರ ತೋರಿಸಿ',
   'Show password': 'ಪಾಸ್‌ವರ್ಡ್ ತೋರಿಸಿ',

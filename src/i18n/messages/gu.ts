@@ -352,6 +352,7 @@ const messages: Messages = {
   'Select all tickets on this page': 'આ પૃષ્ઠની બધી ટિકિટો પસંદ કરો',
   'Select ticket #{number}': 'ટિકિટ #{number} પસંદ કરો',
   'Share location': 'લોકેશન શેર કરો',
+  'Show location': 'લોકેશન બતાવો',
   'Show me the way': 'રસ્તો બતાવો',
   'Show only': 'ફક્ત બતાવો',
   'Show password': 'પાસવર્ડ બતાવો',

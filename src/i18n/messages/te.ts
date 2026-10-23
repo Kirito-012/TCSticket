@@ -353,6 +353,7 @@ const messages: Messages = {
   'Select all tickets on this page': 'ఈ పేజీలోని అన్ని టికెట్లను ఎంచుకోండి',
   'Select ticket #{number}': 'టికెట్ #{number} ఎంచుకోండి',
   'Share location': 'లొకేషన్ షేర్ చేయండి',
+  'Show location': 'లొకేషన్ చూపించండి',
   'Show me the way': 'దారి చూపించండి',
   'Show only': 'మాత్రమే చూపించండి',
   'Show password': 'పాస్‌వర్డ్ చూపించండి',

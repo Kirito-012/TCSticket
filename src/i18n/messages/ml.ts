@@ -356,6 +356,7 @@ const messages: Messages = {
   'Select all tickets on this page': 'ഈ പേജിലെ എല്ലാ ടിക്കറ്റുകളും തിരഞ്ഞെടുക്കുക',
   'Select ticket #{number}': 'ടിക്കറ്റ് #{number} തിരഞ്ഞെടുക്കുക',
   'Share location': 'ലൊക്കേഷൻ പങ്കിടുക',
+  'Show location': 'ലൊക്കേഷൻ കാണിക്കുക',
   'Show me the way': 'വഴി കാണിക്കുക',
   'Show only': 'മാത്രം കാണിക്കുക',
   'Show password': 'പാസ്‌വേഡ് കാണിക്കുക',

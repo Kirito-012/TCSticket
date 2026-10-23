@@ -358,6 +358,7 @@ const messages: Messages = {
   'Select all tickets on this page': 'இந்தப் பக்கத்தின் அனைத்து டிக்கெட்டுகளையும் தேர்ந்தெடு',
   'Select ticket #{number}': 'டிக்கெட் #{number} ஐத் தேர்ந்தெடு',
   'Share location': 'இருப்பிடத்தைப் பகிர்',
+  'Show location': 'இருப்பிடத்தைக் காட்டு',
   'Show me the way': 'வழியைக் காட்டு',
   'Show only': 'மட்டும் காட்டு',
   'Show password': 'கடவுச்சொல்லைக் காட்டு',
