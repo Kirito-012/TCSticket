@@ -456,6 +456,7 @@ const messages: Messages = {
   Vehicles: 'వాహనాలు',
   Verification: 'ధృవీకరణ',
   Verified: 'ధృవీకరించబడింది',
+  'Verified via drone': 'డ్రోన్ ద్వారా ధృవీకరించబడింది',
   'View area tickets': 'ప్రాంత టికెట్లు చూడండి',
   'View image {n} of {total}': '{total} లో ఫోటో {n} చూడండి',
   'View in DroneSeva': 'DroneSeva లో చూడండి',

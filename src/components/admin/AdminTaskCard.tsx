@@ -97,6 +97,7 @@ export async function AdminTaskCard({
             <div className="mt-2 flex flex-wrap gap-2">
               <VerificationBadge
                 status={task.verification}
+                source={task.verificationSource}
                 className="max-sm:!px-2.5 max-sm:!py-0.5 max-sm:!text-sm"
               />
             </div>

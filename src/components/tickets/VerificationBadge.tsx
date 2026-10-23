@@ -3,7 +3,7 @@
 import { ShieldCheck, ShieldQuestion } from 'lucide-react'
 import { useT } from '@/i18n/client'
 import { cn } from '@/lib/utils'
-import type { VerificationStatus } from '@/lib/ticket-view'
+import type { VerificationSource, VerificationStatus } from '@/lib/ticket-view'
 
 /**
  * The small tag under "Resolved": "Verified" once the cleanup has been checked, "Not verified"
@@ -11,9 +11,12 @@ import type { VerificationStatus } from '@/lib/ticket-view'
  */
 export function VerificationBadge({
   status,
+  source,
   className,
 }: {
   status: VerificationStatus | null | undefined
+  /** Who verified it: "drone" says "Verified via drone"; anything else is plain "Verified". */
+  source?: VerificationSource | null
   className?: string
 }) {
   const t = useT()
@@ -34,7 +37,11 @@ export function VerificationBadge({
       ) : (
         <ShieldQuestion className="h-4 w-4" strokeWidth={2.5} aria-hidden />
       )}
-      {verified ? t('Verified') : t('Not verified')}
+      {verified
+        ? source === 'drone'
+          ? t('Verified via drone')
+          : t('Verified')
+        : t('Not verified')}
     </span>
   )
 }

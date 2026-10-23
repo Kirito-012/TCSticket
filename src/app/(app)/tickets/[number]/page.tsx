@@ -123,7 +123,12 @@ export default async function TicketDetailPage({
                       {t('Urgent')}
                     </span>
                   )}
-                  {done && <VerificationBadge status={ticket.verification} />}
+                  {done && (
+                    <VerificationBadge
+                      status={ticket.verification}
+                      source={ticket.verificationSource}
+                    />
+                  )}
                 </div>
                 <h1 className="mt-3 text-2xl font-bold leading-snug text-foreground [overflow-wrap:anywhere]">
                   {plainTitle(ticket.subject, t)}
@@ -264,7 +269,12 @@ export default async function TicketDetailPage({
                       {t('Urgent')}
                     </span>
                   )}
-                  {done && <VerificationBadge status={ticket.verification} />}
+                  {done && (
+                    <VerificationBadge
+                      status={ticket.verification}
+                      source={ticket.verificationSource}
+                    />
+                  )}
                 </div>
                 <h1 className="mt-3 text-2xl font-bold leading-snug text-foreground [overflow-wrap:anywhere]">
                   {plainTitle(ticket.subject, t)}

@@ -462,6 +462,7 @@ const messages: Messages = {
   Vehicles: 'வாகனங்கள்',
   Verification: 'சரிபார்ப்பு',
   Verified: 'சரிபார்க்கப்பட்டது',
+  'Verified via drone': 'ட்ரோன் மூலம் சரிபார்க்கப்பட்டது',
   'View area tickets': 'பகுதி டிக்கெட்டுகளைப் பார்',
   'View image {n} of {total}': '{total} இல் படம் {n} ஐப் பார்',
   'View in DroneSeva': 'DroneSeva-இல் பார்',

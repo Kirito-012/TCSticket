@@ -13,6 +13,16 @@ export type RecheckPhotoView = {
 
 export type VerificationStatus = 'verified' | 'not_verified'
 
+/** Who verified a ticket: the DroneSeva re-check, or a lead by hand. */
+export type VerificationSource = 'drone' | 'manual'
+
+export function verificationSourceOf(t: {
+  verification?: { status?: string; source?: string | null } | null
+}): VerificationSource | null {
+  if (t.verification?.status !== 'verified') return null
+  return t.verification?.source === 'drone' ? 'drone' : 'manual'
+}
+
 /** A finished ticket is "verified" once checked, otherwise "not verified"; unfinished has no status. */
 export function verificationOf(t: {
   statusId?: { isResolved?: boolean } | null
@@ -43,6 +53,7 @@ export type TicketListItemView = {
   thumbUrl: string | null
   /** For a finished ticket: whether the cleanup has been checked. Null while it is not finished. */
   verification: VerificationStatus | null
+  verificationSource: VerificationSource | null
   updatedAt: string
   comments: number
 }
@@ -87,6 +98,7 @@ export type TicketDetailView = {
   resolvedAt: string | null
   /** For a finished ticket: whether the cleanup has been checked. Null while it is not finished. */
   verification: VerificationStatus | null
+  verificationSource: VerificationSource | null
   /** Where the ticket came from: 'api' = DroneSeva, 'web' = made by hand. */
   source: string
   resolutionPhotos: CommentAttachmentView[]
@@ -160,6 +172,7 @@ export function toTicketDetailView(t: any): TicketDetailView {
     createdAt: new Date(t.createdAt).toISOString(),
     resolvedAt: t.resolvedAt ? new Date(t.resolvedAt).toISOString() : null,
     verification: verificationOf(t),
+    verificationSource: verificationSourceOf(t),
     source: t.source ?? 'web',
     resolutionNote: t.resolutionNote ?? '',
     report: t.reportPdf?.publicId
@@ -332,6 +345,7 @@ export function toTicketListItem(t: any): TicketListItemView {
     createdAt: new Date(t.createdAt).toISOString(),
     thumbUrl: t.sourcePhotos?.[0]?.url ? cloudinaryThumb(t.sourcePhotos[0].url) : null,
     verification: verificationOf(t),
+    verificationSource: verificationSourceOf(t),
     updatedAt: new Date(t.lastActivityAt).toISOString(),
     comments: t.counts?.comments ?? 0,
   }

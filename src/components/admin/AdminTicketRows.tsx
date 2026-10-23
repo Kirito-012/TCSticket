@@ -201,7 +201,11 @@ export function AdminTicketRows({
                     />
                     {t.verification && (
                       <div className="mt-1.5 flex flex-wrap gap-1.5">
-                        <VerificationBadge status={t.verification} className="!py-0.5 !text-sm" />
+                        <VerificationBadge
+                          status={t.verification}
+                          source={t.verificationSource}
+                          className="!py-0.5 !text-sm"
+                        />
                       </div>
                     )}
                   </div>
