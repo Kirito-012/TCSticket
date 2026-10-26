@@ -615,6 +615,16 @@ export async function softDeleteTicket(number: number, actorId: string) {
   return ticket
 }
 
+/** Soft-deletes many tickets (they leave every list; the data stays and can be restored). Returns how many. */
+export async function bulkDeleteTickets(numbers: number[], actorId: string) {
+  await dbConnect()
+  let deleted = 0
+  for (const number of numbers) {
+    if (await softDeleteTicket(number, actorId)) deleted += 1
+  }
+  return deleted
+}
+
 export async function restoreTicket(number: number, actorId: string) {
   await dbConnect()
   const ticket = await TicketModel.findOneAndUpdate(

@@ -85,6 +85,7 @@ export default async function TicketsPage({
   await dbConnect()
   const canAssign = ability.can('assign', 'ticket')
   const canUpdate = ability.can('update', 'ticket')
+  const canDelete = ability.can('delete', 'ticket')
   const [{ items, total }, counts, people, sectorOptions, statuses] = await Promise.all([
     listTickets({
       scope,
@@ -140,6 +141,7 @@ export default async function TicketsPage({
           sectorNames={sectorNames}
           canAssign={canAssign}
           canUpdate={canUpdate}
+          canDelete={canDelete}
           counts={counts}
           state={state}
           pageSize={pageSize}

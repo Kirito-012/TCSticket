@@ -4,7 +4,7 @@ import { VerificationBadge } from '@/components/tickets/VerificationBadge'
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { CheckCircle2, Loader2, UserCheck, X } from 'lucide-react'
+import { CheckCircle2, Loader2, Trash2, UserCheck, X } from 'lucide-react'
 import { AssigneeDropdown } from '@/components/tickets/AssigneeDropdown'
 import { StatusSelect } from '@/components/tickets/StatusSelect'
 import { Select } from '@/components/ui/Select'
@@ -12,7 +12,7 @@ import { cn, timeAgo } from '@/lib/utils'
 import { useLocale, useT } from '@/i18n/client'
 import { localeTag } from '@/i18n/config'
 import { isDone, isUrgent, plainTitle } from '@/lib/plain-words'
-import { bulkAssignTicketsAction } from '@/server/actions/ticket.actions'
+import { bulkAssignTicketsAction, bulkDeleteTicketsAction } from '@/server/actions/ticket.actions'
 import type { TicketListItemView } from '@/lib/ticket-view'
 
 type UserOption = { id: string; name: string }
@@ -35,6 +35,7 @@ export function AdminTicketRows({
   sectorNames,
   canAssign,
   canUpdate,
+  canDelete,
 }: {
   tickets: TicketListItemView[]
   users: UserOption[]
@@ -42,6 +43,8 @@ export function AdminTicketRows({
   sectorNames: Record<string, string>
   canAssign: boolean
   canUpdate: boolean
+  /** Admins: tick tickets and delete them. */
+  canDelete: boolean
 }) {
   const tr = useT()
   const locale = useLocale()
@@ -50,6 +53,7 @@ export function AdminTicketRows({
   const [person, setPerson] = useState('')
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null)
   const [pending, startTransition] = useTransition()
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   const allSelected = tickets.length > 0 && tickets.every((t) => selected.has(t.number))
 
@@ -66,6 +70,25 @@ export function AdminTicketRows({
   function toggleAll() {
     setMessage(null)
     setSelected(allSelected ? new Set() : new Set(tickets.map((t) => t.number)))
+  }
+
+  function deleteSelected() {
+    const numbers = [...selected]
+    startTransition(async () => {
+      const result = await bulkDeleteTicketsAction(numbers)
+      setConfirmingDelete(false)
+      if (result.error) {
+        setMessage({ ok: false, text: result.error })
+        return
+      }
+      setSelected(new Set())
+      const count = result.deleted ?? 0
+      setMessage({
+        ok: true,
+        text: tr(count === 1 ? 'Deleted {count} ticket.' : 'Deleted {count} tickets.', { count }),
+      })
+      router.refresh()
+    })
   }
 
   function assignSelected() {
@@ -229,13 +252,13 @@ export function AdminTicketRows({
 
       {/* Bulk bar: appears as soon as one ticket is ticked. */}
       {selected.size > 0 && canAssign && (
-        <div className="sticky bottom-24 z-30 rounded-2xl border-2 border-accent bg-surface p-4 shadow-lg lg:bottom-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <p className="flex items-center gap-2 text-lg font-bold text-foreground">
+        <div className="sticky bottom-24 z-30 rounded-2xl border-2 border-accent bg-surface p-3 shadow-lg sm:p-4 lg:bottom-4">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <p className="order-1 flex items-center gap-2 text-lg font-bold text-foreground">
               <UserCheck className="h-6 w-6 text-accent-strong" />
               {tr('{count} selected', { count: selected.size })}
             </p>
-            <div className="w-full sm:w-72">
+            <div className="order-3 w-full sm:order-2 sm:w-72">
               <Select
                 size="lg"
                 value={person}
@@ -251,7 +274,7 @@ export function AdminTicketRows({
               type="button"
               onClick={assignSelected}
               disabled={!person || pending}
-              className="inline-flex h-12 cursor-pointer items-center gap-2 rounded-lg bg-accent px-5 text-base font-bold text-on-accent disabled:cursor-not-allowed disabled:opacity-40"
+              className="order-4 inline-flex h-12 min-w-0 flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg bg-accent px-4 text-base font-bold text-on-accent disabled:cursor-not-allowed disabled:opacity-40 sm:order-3 sm:flex-none sm:px-5"
             >
               {pending ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -260,15 +283,70 @@ export function AdminTicketRows({
               )}
               {tr('Assign')}
             </button>
+            {canDelete && (
+              <button
+                type="button"
+                onClick={() => setConfirmingDelete(true)}
+                disabled={pending}
+                className="order-5 inline-flex h-12 min-w-0 flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-danger px-4 text-base font-bold text-danger hover:bg-danger-soft disabled:cursor-not-allowed disabled:opacity-40 sm:order-4 sm:ml-auto sm:flex-none"
+              >
+                <Trash2 className="h-5 w-5" strokeWidth={2.25} />
+                {tr('Delete')}
+              </button>
+            )}
             <button
               type="button"
-              onClick={() => setSelected(new Set())}
-              className="inline-flex h-12 cursor-pointer items-center gap-2 rounded-lg border border-border-strong px-4 text-base font-semibold text-muted-strong hover:bg-surface-hover sm:ml-auto"
+              onClick={() => {
+                setSelected(new Set())
+                setConfirmingDelete(false)
+              }}
+              aria-label={tr('Clear')}
+              className={cn(
+                'order-2 ml-auto inline-flex h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border-strong px-3 text-base font-semibold text-muted-strong hover:bg-surface-hover sm:order-5 sm:ml-0 sm:h-12 sm:px-4',
+                !canDelete && 'sm:ml-auto',
+              )}
             >
               <X className="h-5 w-5" />
-              {tr('Clear')}
+              <span className="max-sm:sr-only">{tr('Clear')}</span>
             </button>
           </div>
+          {confirmingDelete && canDelete && (
+            <div
+              role="alertdialog"
+              aria-label={tr('Delete these tickets?')}
+              className="mt-3 flex flex-wrap items-center gap-3 rounded-xl border-2 border-danger bg-danger-soft p-3"
+            >
+              <p className="min-w-0 flex-1 text-base font-semibold text-foreground">
+                {tr(selected.size === 1 ? 'Delete {count} ticket?' : 'Delete {count} tickets?', {
+                  count: selected.size,
+                })}{' '}
+                <span className="font-normal text-muted-strong">
+                  {tr('They disappear from every list.')}
+                </span>
+              </p>
+              <button
+                type="button"
+                onClick={deleteSelected}
+                disabled={pending}
+                className="inline-flex h-12 cursor-pointer items-center gap-2 rounded-lg bg-danger px-5 text-base font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {pending ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Trash2 className="h-5 w-5" strokeWidth={2.25} />
+                )}
+                {tr('Yes, delete')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmingDelete(false)}
+                disabled={pending}
+                className="inline-flex h-12 cursor-pointer items-center rounded-lg border border-border-strong px-4 text-base font-semibold text-muted-strong hover:bg-surface-hover"
+              >
+                {tr('Cancel')}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

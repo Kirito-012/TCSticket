@@ -451,6 +451,26 @@ export async function deleteCommentAction(ticketNumber: number, commentId: strin
 
 const MAX_BULK = 100
 
+export type BulkDeleteResult = { error?: string; deleted?: number }
+
+/** Deletes up to 100 tickets in one step. Admins only (the "delete ticket" permission). */
+export async function bulkDeleteTicketsAction(numbers: number[]): Promise<BulkDeleteResult> {
+  const { user, ability } = await requireTicketScope()
+  if (!ability.can('delete', 'ticket')) return { error: 'You do not have permission to do that.' }
+
+  if (!Array.isArray(numbers) || numbers.length === 0)
+    return { error: 'Choose some tickets first.' }
+  if (numbers.length > MAX_BULK)
+    return { error: `Please choose at most ${MAX_BULK} tickets at a time.` }
+  if (!numbers.every((n) => Number.isInteger(n) && n > 0)) return { error: 'Invalid tickets.' }
+
+  const deleted = await ticketService.bulkDeleteTickets(numbers, user.id)
+
+  revalidatePath('/tickets')
+  revalidatePath('/dashboard')
+  return { deleted }
+}
+
 export type BulkAssignResult = { error?: string; changed?: number }
 
 /** Assigns up to 100 tickets to one person (or nobody) in a single step. */

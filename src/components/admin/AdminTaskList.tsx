@@ -4,6 +4,7 @@ import { AdminTaskCard } from '@/components/admin/AdminTaskCard'
 import { AdminTicketRows } from '@/components/admin/AdminTicketRows'
 import { AdminTicketFilters, type SectorOption } from '@/components/admin/AdminTicketFilters'
 import { AdminFilterSheet } from '@/components/admin/AdminFilterSheet'
+import { SectorQuickFilter } from '@/components/admin/SectorQuickFilter'
 import { cn } from '@/lib/utils'
 import { getLocale, getT } from '@/i18n/server'
 import { localeTag } from '@/i18n/config'
@@ -145,6 +146,7 @@ export async function AdminTaskList({
   sectorNames,
   canAssign,
   canUpdate,
+  canDelete,
   counts,
   state,
   pageSize,
@@ -157,6 +159,7 @@ export async function AdminTaskList({
   sectorNames: Record<string, string>
   canAssign: boolean
   canUpdate: boolean
+  canDelete: boolean
   counts: Record<TaskTab, number>
   state: ListState
   pageSize: number
@@ -198,7 +201,7 @@ export async function AdminTaskList({
   return (
     <div className="mx-auto w-full max-w-6xl space-y-5">
       <div
-        className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-3 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4 [&::-webkit-scrollbar]:hidden"
+        className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4"
         role="tablist"
         aria-label={t('Show tickets')}
       >
@@ -211,16 +214,16 @@ export async function AdminTaskList({
               role="tab"
               aria-selected={active}
               className={cn(
-                'flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-2xl border-2 px-4 text-base font-bold sm:min-h-14 sm:px-3 sm:text-lg',
+                'flex min-h-12 min-w-0 items-center justify-center gap-1.5 rounded-2xl border-2 px-2 text-sm font-bold sm:min-h-14 sm:gap-2 sm:px-3 sm:text-lg',
                 active
                   ? 'border-accent bg-accent text-on-accent'
                   : 'border-border-strong bg-surface text-muted-strong hover:bg-surface-hover',
               )}
             >
-              {t(item.label)}
+              <span className="min-w-0 text-center leading-tight">{t(item.label)}</span>
               <span
                 className={cn(
-                  'rounded-full px-2.5 py-0.5 text-base',
+                  'shrink-0 rounded-full px-2 py-0.5 text-sm sm:px-2.5 sm:text-base',
                   active ? 'bg-on-accent/15 text-on-accent' : 'bg-surface-hover text-foreground',
                 )}
               >
@@ -262,6 +265,8 @@ export async function AdminTaskList({
           <span className="max-sm:sr-only">{t('Search')}</span>
         </button>
       </form>
+
+      {sectors.length > 1 && <SectorQuickFilter sectors={sectors} sector={state.sector} />}
 
       {/* Phones: one Filters button that opens a bottom sheet. Wide screens: the inline rows below. */}
       <div className="sm:hidden">
@@ -443,6 +448,7 @@ export async function AdminTaskList({
           sectorNames={sectorNames}
           canAssign={canAssign}
           canUpdate={canUpdate}
+          canDelete={canDelete}
         />
       ) : (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 2xl:grid-cols-3">
