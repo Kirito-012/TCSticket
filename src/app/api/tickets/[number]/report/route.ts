@@ -1,13 +1,15 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { logger } from '@/lib/logger'
-import { defineAbilityFor } from '@/server/auth/ability'
+import { scopeAllows, scopeFor } from '@/lib/ticket-scope'
+import { UserModel } from '@/server/db/models/user.model'
 import { getCurrentUser } from '@/server/auth/session'
 import { dbConnect } from '@/server/db/connect'
 import { TicketModel } from '@/server/db/models/ticket.model'
 
 /**
  * GET /api/tickets/:number/report — the ticket's detection report PDF, for signed-in people who
- * may see that ticket (the same rule as the ticket page: a Surveyor only gets their own).
+ * may see that ticket (the same rule as the ticket page: an Admin sees all, a Zone Inspector the
+ * tickets of their zone, a Nodal Manager those of their sector, a Surveyor only their own).
  * `?download=1` saves the file; without it the PDF is shown inside the page's viewer.
  * The file's real address is never given out.
  */
@@ -22,11 +24,24 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ numb
 
   await dbConnect()
   const ticket = await TicketModel.findOne({ number, deletedAt: null })
-    .select('assigneeId reportPdf')
+    .select('assigneeId sectorKey reportPdf')
     .lean()
-  const ability = defineAbilityFor(user.grants)
+  // The person's own zone / sector decides what they may open (read fresh, like the ticket page does).
+  const placement = await UserModel.findById(user.id).select('sectorKey zoneKey').lean()
+  const scope = scopeFor(
+    {
+      id: String(user.id),
+      sectorKey: placement?.sectorKey ?? null,
+      zoneKey: placement?.zoneKey ?? null,
+    },
+    user.grants,
+  )
   const mayRead =
-    ability.can('read:all', 'ticket') || String(ticket?.assigneeId ?? '') === String(user.id)
+    !!ticket &&
+    scopeAllows(scope, {
+      sectorKey: ticket.sectorKey ?? null,
+      assigneeId: ticket.assigneeId ? String(ticket.assigneeId) : null,
+    })
   // Same answer for "no such ticket", "not yours" and "no report", so nothing is given away.
   if (!ticket || !mayRead || !ticket.reportPdf?.url) {
     return NextResponse.json({ error: 'Report not found' }, { status: 404 })
