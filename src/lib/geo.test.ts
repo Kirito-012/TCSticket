@@ -52,13 +52,14 @@ describe('evaluateLocation', () => {
     expect(!outside.ok && outside.reason).toBe('too-far')
   })
 
-  it('refuses someone far away and says how far', () => {
+  it('refuses someone far away and does not show the distance', () => {
     const v = evaluateLocation(place, fix({ ...north(120) }), rules, NOW)
     expect(v.ok).toBe(false)
     if (!v.ok) {
       expect(v.reason).toBe('too-far')
       expect(v.distanceMeters).toBeCloseTo(120, 0)
-      expect(verdictMessage(v, rules)).toContain('about 120 m')
+      expect(verdictMessage(v, rules)).not.toContain('120')
+      expect(verdictMessage(v, rules)).toContain('within 5 m')
       expect(verdictMessage(v, rules)).toContain('not done yet')
     }
   })

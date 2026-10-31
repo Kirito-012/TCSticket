@@ -510,6 +510,8 @@ const messages: Messages = {
   'You are about {distance} from the place. Go to the marked spot (within {radius} m) and take the photo again. The ticket is not done yet.':
     'ਤੁਸੀਂ ਉਸ ਥਾਂ ਤੋਂ ਲਗਭਗ {distance} ਦੂਰ ਹੋ। ਨਿਸ਼ਾਨ ਵਾਲੀ ਥਾਂ ({radius} ਮੀਟਰ ਦੇ ਅੰਦਰ) ਜਾਓ ਅਤੇ ਦੁਬਾਰਾ ਫੋਟੋ ਲਓ। ਟਿਕਟ ਅਜੇ ਪੂਰੀ ਨਹੀਂ ਹੋਈ।',
   'You are at the place': 'ਤੁਸੀਂ ਉਸ ਥਾਂ ਤੇ ਹੋ',
+  'You are not at the marked spot. Go to the spot (within {radius} m) and take the photo again. The ticket is not done yet.':
+    'ਤੁਸੀਂ ਚਿੰਨ੍ਹਿਤ ਥਾਂ ਤੇ ਨਹੀਂ ਹੋ। ਉਸ ਥਾਂ ਤੇ ਜਾਓ ({radius} ਮੀ ਦੇ ਅੰਦਰ) ਅਤੇ ਫੋਟੋ ਦੁਬਾਰਾ ਲਓ। ਟਿਕਟ ਅਜੇ ਮੁਕੰਮਲ ਨਹੀਂ ਹੋਈ।',
   'You can add up to {n} photos.': 'ਤੁਸੀਂ ਵੱਧ ਤੋਂ ਵੱਧ {n} ਫੋਟੋਆਂ ਜੋੜ ਸਕਦੇ ਹੋ।',
   'You do not have permission to do that.': 'ਤੁਹਾਨੂੰ ਇਹ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਹੈ।',
   'You have no tickets waiting right now.': 'ਹੁਣ ਤੁਹਾਡੀ ਕੋਈ ਟਿਕਟ ਉਡੀਕ ਵਿੱਚ ਨਹੀਂ ਹੈ।',
@@ -524,6 +526,8 @@ const messages: Messages = {
     'ਤੁਹਾਡੇ ਖਾਤੇ ਦੀ ਬੇਨਤੀ ਮਨਜ਼ੂਰ ਨਹੀਂ ਹੋਈ। ਮਦਦ ਲਈ ਐਡਮਿਨ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।',
   'Your coordinates': 'ਤੁਹਾਡੇ ਕੋਆਰਡੀਨੇਟ',
   'Your earlier photos': 'ਤੁਹਾਡੀਆਂ ਪਹਿਲਾਂ ਦੀਆਂ ਫੋਟੋਆਂ',
+  'Your location is only accurate to about {accuracy}, so we cannot tell where you are. Turn on GPS, stand in the open, and try again.':
+    'ਤੁਹਾਡੀ ਲੋਕੇਸ਼ਨ ਸਿਰਫ਼ ਲਗਭਗ {accuracy} ਤੱਕ ਸਹੀ ਹੈ, ਇਸ ਲਈ ਅਸੀਂ ਨਹੀਂ ਦੱਸ ਸਕਦੇ ਕਿ ਤੁਸੀਂ ਕਿੱਥੇ ਹੋ। GPS ਚਾਲੂ ਕਰੋ, ਖੁੱਲ੍ਹੀ ਥਾਂ ਖੜ੍ਹੇ ਹੋਵੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।',
   'Your location reading is out of date. Please try again.':
     'ਤੁਹਾਡੀ ਲੋਕੇਸ਼ਨ ਦੀ ਜਾਣਕਾਰੀ ਪੁਰਾਣੀ ਹੋ ਗਈ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।',
   'Your location was found': 'ਤੁਹਾਡੀ ਲੋਕੇਸ਼ਨ ਮਿਲ ਗਈ',

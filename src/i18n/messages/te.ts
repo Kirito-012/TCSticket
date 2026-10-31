@@ -511,6 +511,8 @@ const messages: Messages = {
   'You are about {distance} from the place. Go to the marked spot (within {radius} m) and take the photo again. The ticket is not done yet.':
     'మీరు ఆ ప్రదేశం నుండి సుమారు {distance} దూరంలో ఉన్నారు. గుర్తించిన ప్రదేశానికి ({radius} మీ లోపల) వెళ్లి మళ్లీ ఫోటో తీయండి. టికెట్ ఇంకా పూర్తి కాలేదు.',
   'You are at the place': 'మీరు ఆ ప్రదేశంలో ఉన్నారు',
+  'You are not at the marked spot. Go to the spot (within {radius} m) and take the photo again. The ticket is not done yet.':
+    'మీరు గుర్తించిన ప్రదేశంలో లేరు. ఆ ప్రదేశానికి వెళ్లండి ({radius} మీ లోపల) మరియు ఫోటో మళ్లీ తీయండి. టికెట్ ఇంకా పూర్తి కాలేదు.',
   'You can add up to {n} photos.': 'మీరు గరిష్టంగా {n} ఫోటోలు జోడించవచ్చు.',
   'You do not have permission to do that.': 'దీన్ని చేయడానికి మీకు అనుమతి లేదు.',
   'You have no tickets waiting right now.': 'ప్రస్తుతం మీకు వేచి ఉన్న టికెట్లు ఏవీ లేవు.',
@@ -525,6 +527,8 @@ const messages: Messages = {
     'మీ ఖాతా అభ్యర్థన ఆమోదించబడలేదు. సహాయం కోసం అడ్మిన్‌ను సంప్రదించండి.',
   'Your coordinates': 'మీ కోఆర్డినేట్లు',
   'Your earlier photos': 'మీ ముందటి ఫోటోలు',
+  'Your location is only accurate to about {accuracy}, so we cannot tell where you are. Turn on GPS, stand in the open, and try again.':
+    'మీ లొకేషన్ సుమారు {accuracy} వరకే ఖచ్చితం, కాబట్టి మీరు ఎక్కడ ఉన్నారో చెప్పలేము. GPS ఆన్ చేసి, బహిరంగ ప్రదేశంలో నిలబడి మళ్లీ ప్రయత్నించండి.',
   'Your location reading is out of date. Please try again.':
     'మీ లొకేషన్ రీడింగ్ పాతబడింది. దయచేసి మళ్లీ ప్రయత్నించండి.',
   'Your location was found': 'మీ లొకేషన్ కనుగొనబడింది',

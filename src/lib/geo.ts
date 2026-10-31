@@ -113,16 +113,17 @@ export function verdictMessage(
         : `${Math.max(1, Math.round(n))} m`
   switch (verdict.reason) {
     case 'too-far':
-      // A reading that is itself kilometres off says little about the distance: say so.
+      // The distance itself is not shown (a number like "23.5 km" only worries people): just where to be.
+      // A reading that is itself kilometres off cannot be trusted, so say that instead.
       if ((verdict.accuracyMeters ?? 0) > 100) {
         return t(
-          'You are about {distance} from the place, but your location is only accurate to about {accuracy}, so this may be wrong. Turn on GPS, stand in the open, and try again.',
-          { distance: m(verdict.distanceMeters), accuracy: m(verdict.accuracyMeters) },
+          'Your location is only accurate to about {accuracy}, so we cannot tell where you are. Turn on GPS, stand in the open, and try again.',
+          { accuracy: m(verdict.accuracyMeters) },
         )
       }
       return t(
-        'You are about {distance} from the place. Go to the marked spot (within {radius} m) and take the photo again. The ticket is not done yet.',
-        { distance: m(verdict.distanceMeters), radius: rules.radiusMeters },
+        'You are not at the marked spot. Go to the spot (within {radius} m) and take the photo again. The ticket is not done yet.',
+        { radius: rules.radiusMeters },
       )
     case 'inaccurate':
       return t(

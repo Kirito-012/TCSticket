@@ -507,6 +507,8 @@ const messages: Messages = {
   'You are about {distance} from the place. Go to the marked spot (within {radius} m) and take the photo again. The ticket is not done yet.':
     'आप उस जगह से लगभग {distance} दूर हैं। निशान वाली जगह ({radius} मीटर के भीतर) जाएँ और दोबारा फोटो लें। टिकट अभी पूरा नहीं हुआ है।',
   'You are at the place': 'आप उस जगह पर हैं',
+  'You are not at the marked spot. Go to the spot (within {radius} m) and take the photo again. The ticket is not done yet.':
+    'आप चिह्नित जगह पर नहीं हैं। उस जगह पर जाएँ ({radius} मी के भीतर) और फोटो दोबारा लें। टिकट अभी पूरा नहीं हुआ है।',
   'You can add up to {n} photos.': 'आप अधिकतम {n} फोटो जोड़ सकते हैं।',
   'You do not have permission to do that.': 'आपको यह करने की अनुमति नहीं है।',
   'You have no tickets waiting right now.': 'अभी आपके कोई टिकट इंतज़ार में नहीं हैं।',
@@ -521,6 +523,8 @@ const messages: Messages = {
     'आपके खाते का अनुरोध मंज़ूर नहीं हुआ। मदद के लिए एडमिन से संपर्क करें।',
   'Your coordinates': 'आपके निर्देशांक',
   'Your earlier photos': 'आपकी पहले की फोटो',
+  'Your location is only accurate to about {accuracy}, so we cannot tell where you are. Turn on GPS, stand in the open, and try again.':
+    'आपकी लोकेशन सिर्फ़ लगभग {accuracy} तक सटीक है, इसलिए हम नहीं बता सकते कि आप कहाँ हैं। GPS चालू करें, खुली जगह में खड़े हों और फिर कोशिश करें।',
   'Your location reading is out of date. Please try again.':
     'आपकी लोकेशन की जानकारी पुरानी है। कृपया दोबारा कोशिश करें।',
   'Your location was found': 'आपकी लोकेशन मिल गई',

@@ -514,6 +514,8 @@ const messages: Messages = {
   'You are about {distance} from the place. Go to the marked spot (within {radius} m) and take the photo again. The ticket is not done yet.':
     'നിങ്ങൾ ആ സ്ഥലത്തു നിന്ന് ഏകദേശം {distance} അകലെയാണ്. അടയാളപ്പെടുത്തിയ സ്ഥലത്തേക്ക് ({radius} മീറ്ററിനുള്ളിൽ) പോയി വീണ്ടും ഫോട്ടോ എടുക്കുക. ടിക്കറ്റ് ഇതുവരെ പൂർത്തിയായിട്ടില്ല.',
   'You are at the place': 'നിങ്ങൾ ആ സ്ഥലത്താണ്',
+  'You are not at the marked spot. Go to the spot (within {radius} m) and take the photo again. The ticket is not done yet.':
+    'നിങ്ങൾ അടയാളപ്പെടുത്തിയ സ്ഥലത്തല്ല. ആ സ്ഥലത്തേക്ക് പോകുക ({radius} മീറ്ററിനുള്ളിൽ) ഫോട്ടോ വീണ്ടും എടുക്കുക. ടിക്കറ്റ് ഇതുവരെ പൂർത്തിയായിട്ടില്ല.',
   'You can add up to {n} photos.': 'നിങ്ങൾക്ക് പരമാവധി {n} ഫോട്ടോകൾ ചേർക്കാം.',
   'You do not have permission to do that.': 'ഇത് ചെയ്യാൻ നിങ്ങൾക്ക് അനുമതിയില്ല.',
   'You have no tickets waiting right now.':
@@ -529,6 +531,8 @@ const messages: Messages = {
     'നിങ്ങളുടെ അക്കൗണ്ട് അഭ്യർത്ഥന അംഗീകരിച്ചില്ല. സഹായത്തിന് അഡ്മിനുമായി ബന്ധപ്പെടുക.',
   'Your coordinates': 'നിങ്ങളുടെ കോർഡിനേറ്റുകൾ',
   'Your earlier photos': 'നിങ്ങളുടെ മുൻ ഫോട്ടോകൾ',
+  'Your location is only accurate to about {accuracy}, so we cannot tell where you are. Turn on GPS, stand in the open, and try again.':
+    'നിങ്ങളുടെ ലൊക്കേഷൻ ഏകദേശം {accuracy} വരെ മാത്രമേ കൃത്യമായുള്ളൂ, അതിനാൽ നിങ്ങൾ എവിടെയാണെന്ന് പറയാനാവില്ല. GPS ഓണാക്കി, തുറന്ന സ്ഥലത്ത് നിന്ന് വീണ്ടും ശ്രമിക്കുക.',
   'Your location reading is out of date. Please try again.':
     'നിങ്ങളുടെ ലൊക്കേഷൻ വിവരം പഴയതാണ്. ദയവായി വീണ്ടും ശ്രമിക്കുക.',
   'Your location was found': 'നിങ്ങളുടെ ലൊക്കേഷൻ കണ്ടെത്തി',

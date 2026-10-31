@@ -517,6 +517,8 @@ const messages: Messages = {
   'You are about {distance} from the place. Go to the marked spot (within {radius} m) and take the photo again. The ticket is not done yet.':
     'நீங்கள் அந்த இடத்திலிருந்து சுமார் {distance} தொலைவில் உள்ளீர்கள். குறிக்கப்பட்ட இடத்துக்கு ({radius} மீ க்குள்) சென்று மீண்டும் புகைப்படம் எடுக்கவும். டிக்கெட் இன்னும் முடியவில்லை.',
   'You are at the place': 'நீங்கள் அந்த இடத்தில் இருக்கிறீர்கள்',
+  'You are not at the marked spot. Go to the spot (within {radius} m) and take the photo again. The ticket is not done yet.':
+    'நீங்கள் குறிக்கப்பட்ட இடத்தில் இல்லை. அந்த இடத்திற்குச் செல்லுங்கள் ({radius} மீ க்குள்) புகைப்படத்தை மீண்டும் எடுக்கவும். டிக்கெட் இன்னும் முடியவில்லை.',
   'You can add up to {n} photos.': 'நீங்கள் அதிகபட்சம் {n} புகைப்படங்கள் சேர்க்கலாம்.',
   'You do not have permission to do that.': 'இதைச் செய்ய உங்களுக்கு அனுமதி இல்லை.',
   'You have no tickets waiting right now.':
@@ -532,6 +534,8 @@ const messages: Messages = {
     'உங்கள் கணக்குக் கோரிக்கை ஏற்கப்படவில்லை. உதவிக்கு நிர்வாகியைத் தொடர்புகொள்ளுங்கள்.',
   'Your coordinates': 'உங்கள் ஆயத்தொலைவுகள்',
   'Your earlier photos': 'உங்கள் முந்தைய புகைப்படங்கள்',
+  'Your location is only accurate to about {accuracy}, so we cannot tell where you are. Turn on GPS, stand in the open, and try again.':
+    'உங்கள் இருப்பிடம் சுமார் {accuracy} வரை மட்டுமே துல்லியம், எனவே நீங்கள் எங்கே இருக்கிறீர்கள் என்று சொல்ல முடியாது. GPS ஐ இயக்கி, திறந்தவெளியில் நின்று மீண்டும் முயற்சிக்கவும்.',
   'Your location reading is out of date. Please try again.':
     'உங்கள் இருப்பிடத் தகவல் பழையதாகிவிட்டது. மீண்டும் முயற்சிக்கவும்.',
   'Your location was found': 'உங்கள் இருப்பிடம் கண்டறியப்பட்டது',
